@@ -1,27 +1,3 @@
-// document.addEventListener('DOMContentLoaded', function () {
-//     // Function to load content dynamically
-//     function loadContent(url) {
-//         fetch(url)
-//             .then(response => response.text())
-//             .then(data => {
-//                 document.getElementById('content').innerHTML = data;
-//             })
-//             .catch(error => console.error('Error:', error));
-//     }
-
-//     // Initial content load
-//     loadContent('/');
-
-//     // Event listener for navigation
-//     document.getElementById('navHome').addEventListener('click', function () {
-//         loadContent('/');
-//     });
-
-//     document.getElementById('navGame').addEventListener('click', function () {
-//         loadContent('/game/');
-//     });
-// });
-
 document.addEventListener('DOMContentLoaded', function () {
     // Function to load content dynamically
     function loadContent(url) {
@@ -33,19 +9,17 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error('Error:', error));
     }
 
-    // Event listener for navigation
-    const navHome = document.getElementById('navHome');
-    const navGame = document.getElementById('navGame');
+	loadContent('/welcome/');
 
-    if (navHome && navGame) {
-        navHome.addEventListener('click', function () {
-            loadContent('/');
-        });
+    document.getElementById('navHome').addEventListener('click', function () {
+        loadContent('/welcome/');
+    });
 
-        navGame.addEventListener('click', function () {
-            loadContent('/game/');
-        });
-    } else {
-        console.error('Navigation buttons not found');
-    }
+    document.getElementById('navGame').addEventListener('click', function () {
+        loadContent('/game/');
+    });
+
+    document.getElementById('navUser').addEventListener('click', function () {
+        loadContent('/user/');
+    });
 });
