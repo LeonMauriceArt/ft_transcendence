@@ -1,18 +1,30 @@
+/* Font faces */
+@font-face {
+    font-family: 'PixelDogica';
+    src: url('./fonts/dogica.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PixelMix';
+    src: url('./fonts/pixelmix.ttf') format('truetype');
+}
+
 /* Reset some default styles */
 body, h1, h2, h3, p, ul, li {
     margin: 0;
     padding: 0;
+    font-family: 'PixelMix', sans-serif;
 }
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: plum;
+    background-color: black;
 }
 
 nav {
-    background-color: purple;
-    color: #fff;
-    padding: 10px 0;
+    color: grey;
+    padding: 20px 10;
+    border: 2px solid grey;
 }
 
 ul {
@@ -20,14 +32,25 @@ ul {
 }
 
 li {
+    border: 2px solid grey;
     display: inline-block;
-    margin-right: 20px;
-	margin-left: 20px;
+    padding: 60px;
+    transition: color 0.3s ease, border-color 0.3s ease; /* Added transition for border color */
+}
+
+li a {
+    color: grey;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+li:hover a {
+    color: white;
 }
 
 a {
     text-decoration: none;
-    color: #fff;
+    color: grey;
     font-weight: bold;
 }
 
@@ -35,6 +58,27 @@ a {
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: grey;
+}
+
+#projectname {
+    margin: 20px;
+    font-size: 60px;
+    text-align: center;
+    font-family: 'PixelDogica', sans-serif;
+    color: grey;
+}
+
+.navbar ul li a {
+    color: grey;
+    transition: color 0.3s ease;
+}
+
+.navbar ul li:hover a {
+    color: white;
+}
+
+.navbar ul li:hover {
+    border-color: white;
+    color: white; /* Added to change the text color on li hover */
 }

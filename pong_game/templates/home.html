@@ -4,21 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 	{% block title %}{% endblock %}
-    <title>Your Pong Game</title>
 	<link rel="stylesheet" href="{% static 'style.css'%}">
 	<script src="{% static 'loader.js' %}"></script>
 </head>
 <body>
+<h1 id="projectname">P.O.N.G</h1>
 
-<nav>
-    <ul>
-        <li><a id="navHome" href="#">Home</a></li>
-        <li><a id="navGame" href="#">Game</a></li>
-        <li><a id="navUser" href="#">User</a></li>
-    </ul>
-</nav>
+<div class="navbar">
+	<nav>
+		<ul>
+			<li id="navHome" href="#"><a>Home</a></li>
+			<li id="navGame" href="#"><a>--PLAY--</a></li>
+			<li id="navUser" href="#"><a>Login</a></li>
+			<li>test</li>
+		</ul>
+
+	</nav>
+</div>
 
 <div id="content">
     {% block content %}{% endblock %}
