@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+	'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,6 +69,14 @@ TEMPLATES = [
         },
     },
 ]
+
+CHANNEL_LAYERS = {
+	"default": {
+		"BACKEND": "channels.layers.InMemoryChannelLayer"
+	}
+}
+
+ASGI_APPLICATION = 'django_project.asgi.application'
 
 WSGI_APPLICATION = 'django_project.wsgi.application'
 
