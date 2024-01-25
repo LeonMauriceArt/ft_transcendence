@@ -21,6 +21,10 @@ body {
     background-color: black;
 }
 
+p {
+	margin-top : 20px;
+}
+
 nav {
     color: grey;
     padding: 10px 0;

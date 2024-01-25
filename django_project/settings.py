@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'bootstrap4',
 	'pong_game',
+	'frontend',
+	'users',
 ]
 
 MIDDLEWARE = [

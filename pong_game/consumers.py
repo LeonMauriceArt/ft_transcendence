@@ -22,7 +22,7 @@ class MultiplayerConsumer(WebsocketConsumer):
 			text_data=json.dumps({"type": "playerId", "playerId": self.player_id})
 		)
 
-	def disconnect(self. close_code):
+	def disconnect(self, close_code):
 		async_to_sync(self.channel_layer.group_discard)(
 			self.game_group_name, self.channel_name
 		)
