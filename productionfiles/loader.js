@@ -5,11 +5,18 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.text())
             .then(data => {
                 document.getElementById('content').innerHTML = data;
+				updateHistory(url);
             })
             .catch(error => console.error('Error:', error));
     }
 
+	function updateHistory(url){
+		window.history.pushState({}, '', url);
+		console.log("hello");
+	}
+
 	loadContent('/welcome/');
+	console.log("init load");
 
     document.getElementById('navHome').addEventListener('click', function () {
         loadContent('/welcome/');
@@ -22,4 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('navUser').addEventListener('click', function () {
         loadContent('/user/');
     });
+
+	window.addEventListener('popstate', function(event){
+		loadContent(window.location.pathname);
+	})
 });
