@@ -1,8 +1,10 @@
+{% load static %}
 {% block title %}
 	<title>User</title>
 {% endblock %}
 
 {% block content %}
+	<script src="{% static 'loader.js' %}"></script>
     <h1>Welcome to the User Page</h1>
 	<p>{{content}}</p>
 {% endblock %}

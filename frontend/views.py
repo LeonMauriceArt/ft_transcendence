@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-def index(request, route=''):
+def index(request):
 	return render(request, 'index.html', {'content': 'This is the home page'})
 
 def user(request):

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-	let indexLoaded = false;
 
     // Function to load content dynamically
     function loadContent(url) {
@@ -7,9 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.text())
             .then(data => {
                 document.getElementById('content').innerHTML = data;
-				if (url == ''){
-					indexLoaded = true;
-				}
             })
             .catch(error => console.error('Error:', error));
     }
@@ -19,9 +15,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.history.pushState({}, '', url);
 	}
 
-    if (!indexLoaded) {
+    if (performance.getEntriesByType('navigation')[0].type === 'reload') {
+        // Page is being refreshed, load the initial content ('')
+		console.log("refreshing...")
+		console.log("loading index...")
         loadContent('');
-        indexLoaded = true;
+    } else {
+        // Page is not being refreshed, load the initial content ('/welcome/')
+        loadContent('/welcome/');
     }
 
     document.getElementById('navHome').addEventListener('click', function () {
@@ -42,4 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	window.addEventListener('popstate', function(event){
 		loadContent(window.location.pathname);
 	})
+
 });
+
