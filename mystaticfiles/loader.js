@@ -1,12 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
-	const indexLoaded = false;
-    // Function to load content dynamically
+	indexLoaded = isIndexLoaded();
+	console.log(window.location.pathname);
+	if (!indexLoaded)
+	{
+		contentToLoad = window.location.pathname;
+		console.log('contentto load = ', contentToLoad);
+		window.location.pathname = '/';
+		loadContent(contentToLoad);
+	}
+
     function loadContent(url) {
         fetch(url)
             .then(response => response.text())
             .then(data => {
-				const contentElement = document.getElementById('content');
-				if (contentElement){
+				contentElement = document.getElementById('content');
+				console.log(contentElement);
+				if (!contentElement){
+					console.log('can laod !!!!!!!');
 					indexLoaded = true;
 					contentElement.innerHTML = data;
 				}
@@ -19,18 +29,16 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.history.pushState({}, '', url);
 	}
 
-    if (performance.getEntriesByType('navigation')[0].type === 'reload') {
-        // Page is being refreshed, load the initial content ('')
-		console.log("refreshing...")
-		console.log("loading index...")
-        loadContent('');
-		console.log("loading content...")
-        loadContent(window.location.pathname);
-
-    } else {
-        // Page is not being refreshed, load the initial content ('/welcome/')
-        loadContent('/welcome/');
-    }
+	function isIndexLoaded(){
+		if (window.location.pathname == '/'){
+			console.log('index is loaded');
+			return true;
+		}
+		else{
+			console.log('index is not loaded');
+			return false;
+		}
+	}
 
 	if (indexLoaded)
 	{
