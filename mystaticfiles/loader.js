@@ -1,11 +1,20 @@
 document.addEventListener('DOMContentLoaded', function () {
 	indexLoaded = isIndexLoaded();
 	console.log(window.location.pathname);
+	console.log(window.document);
 	if (!indexLoaded)
 	{
 		contentToLoad = window.location.pathname;
 		console.log('contentto load = ', contentToLoad);
-		window.location.pathname = '/';
+		// window.location.pathname = '/';
+		fetch('')
+		.then(response => response.text())
+		.then(html => {
+		  // Replace the current document's body with the new content
+		  document.body.innerHTML = html;
+		})
+		.catch(error => console.error("Error fetching new content:", error));
+	  
 		loadContent(contentToLoad);
 	}
 
@@ -15,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
 				contentElement = document.getElementById('content');
 				console.log(contentElement);
-				if (!contentElement){
+				if (contentElement){
 					console.log('can laod !!!!!!!');
 					indexLoaded = true;
 					contentElement.innerHTML = data;
