@@ -1,14 +1,13 @@
-{% load static %}
+{% extends 'navbar.html' %}
+
 {% block title %}
 	<title>Welcome</title>
 {% endblock %}
 
-{% block content %}
-	<script src="{% static 'loader.js' %}"></script>
+{% block page_content %}
     <h1>What is P.O.N.G ?</h1>
 	<p>P.O.N.G stands for Perfect Online Nostalgia Game .</p>
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque sed lacinia tortor, a venenatis quam. </p>
 	<p>Aenean dignissim congue turpis eu iaculis. Pellentesque at tellus elit. Suspendisse felis risus, sollicitudin eu augue sit amet, placerat venenatis lectus. Nunc condimentum, dui ac condimentum tincidunt, nisl nulla dignissim velit, quis scelerisque massa neque nec nisl.  </p>
 	<p>Ut a tellus commodo, sollicitudin justo vel, blandit ex. Sed viverra pharetra rhoncus. Morbi nec elementum leo.</p>
-	<p>{{content}}</p>
 {% endblock %}

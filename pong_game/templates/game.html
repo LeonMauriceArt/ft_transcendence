@@ -1,10 +1,6 @@
-{% load static %}
-{% block title %}
-	<title>Game</title>
-{% endblock %}
+{% extends 'navbar.html' %}
 
-{% block content %}
-	<script src="{% static 'loader.js' %}"></script>
+{% block page_content %}
     <h1>This is the Game : The actual html including the ThreeJS game is loaded here</h1>
 	<p>{{content}}</p>
 {% endblock %}

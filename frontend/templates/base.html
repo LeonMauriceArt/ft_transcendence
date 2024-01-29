@@ -5,27 +5,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	{% block title %}{% endblock %}
 	<link rel="stylesheet" href="{% static 'style.css'%}">
 	<script src="{% static 'loader.js' %}"></script>
+	<title>{% block title %}P.O.N.G{% endblock %}</title>
 </head>
 <body>
-<h1 id="projectname">P.O.N.G</h1>
-
-<div class="navbar">
-	<nav>
-		<ul>
-			<li id="navHome" href="#"><a>Home</a></li>
-			<li id="navGame" href="#"><a>--PLAY--</a></li>
-			<li id="navUser" href="#"><a>Login</a></li>
-		</ul>
-
-	</nav>
-</div>
-
-<div id="content">
-    {% block content %}{% endblock %}
-</div>
-
+	{% block app %}{% endblock %}
 </body>
 </html>

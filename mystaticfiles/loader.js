@@ -1,35 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
-	indexLoaded = isIndexLoaded();
-	console.log(window.location.pathname);
-	console.log(window.document);
-	if (!indexLoaded)
-	{
-		contentToLoad = window.location.pathname;
-		console.log('contentto load = ', contentToLoad);
-		// window.location.pathname = '/';
-		fetch('')
-		.then(response => response.text())
-		.then(html => {
-		  // Replace the current document's body with the new content
-		  document.body.innerHTML = html;
-		})
-		.catch(error => console.error("Error fetching new content:", error));
-	  
-		loadContent(contentToLoad);
-	}
+	navbarLoaded = isnavbarLoaded();
+	console.log(navbarLoaded);
 
     function loadContent(url) {
         fetch(url)
             .then(response => response.text())
             .then(data => {
-				contentElement = document.getElementById('content');
-				console.log(contentElement);
-				if (contentElement){
-					console.log('can laod !!!!!!!');
-					indexLoaded = true;
-					contentElement.innerHTML = data;
-				}
-            })
+					const parser = new DOMParser();
+					const htmlDocument = parser.parseFromString(data, 'text/html');
+					const extractedContent = htmlDocument.getElementById('content').innerHTML;
+					document.getElementById('content').innerHTML = extractedContent;
+				})
             .catch(error => console.error('Error:', error));
     }
 
@@ -38,21 +19,18 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.history.pushState({}, '', url);
 	}
 
-	function isIndexLoaded(){
-		if (window.location.pathname == '/'){
-			console.log('index is loaded');
-			return true;
-		}
-		else{
-			console.log('index is not loaded');
+	function isnavbarLoaded()
+	{
+		if (document.getElementById('content') == null)
 			return false;
-		}
+		else
+			return true;
 	}
 
-	if (indexLoaded)
+	if (navbarLoaded)
 	{
 		document.getElementById('navHome').addEventListener('click', function () {
-			updateHistory('/welcome');
+			updateHistory('/welcome/');
 			loadContent('/welcome/');
 		});
 	
@@ -70,6 +48,4 @@ document.addEventListener('DOMContentLoaded', function () {
 			loadContent(window.location.pathname);
 		})
 	}
-
 });
-

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block app %}
+<h1 id="projectname">P.O.N.G</h1>
+
+<div class="navbar">
+	<nav>
+		<ul>
+			<li id="navHome" href="#"><a>Home</a></li>
+			<li id="navGame" href="#"><a>--PLAY--</a></li>
+			<li id="navUser" href="#"><a>Login</a></li>
+		</ul>
+
+	</nav>
+</div>
+
+<div id="content">
+    {% block page_content %}{% endblock %}
+</div>
+{% endblock %}

@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
-	indexLoaded = isIndexLoaded();
-	console.log(window.location.pathname);
+	navbarLoaded = isnavbarLoaded();
+
+	// function loadApp(appurl) {
+    //     fetch(appurl)
+    //         .then(response => response.text())
+    //         .then(data => {
+	// 				document.getElementById('app').innerHTML = data;
+	// 			})
+    //         .catch(error => console.error('Error:', error));
+    // }
 
     function loadContent(url) {
         fetch(url)
             .then(response => response.text())
             .then(data => {
-				const contentElement = document.getElementById('content');
-				if (contentElement){
-					indexLoaded = true;
-					contentElement.innerHTML = data;
-				}
-            })
+					document.getElementById('content').innerHTML = data;
+				})
             .catch(error => console.error('Error:', error));
     }
 
@@ -20,28 +24,15 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.history.pushState({}, '', url);
 	}
 
-    if (performance.getEntriesByType('navigation')[0].type === 'reload') {
-        // Page is being refreshed, load the initial content ('')
-		console.log("refreshing...")
-		console.log("loading index...")
-        loadContent('');
-		console.log("loading content...")
-        loadContent(window.location.pathname);
-
-    } else {
-        // Page is not being refreshed, load the initial content ('/welcome/')
-        loadContent('/welcome/');
-    }
-
-
-	function isIndexLoaded(){
-		if (window.location.pathname == '')
-			return true;
+	function isnavbarLoaded()
+	{
+		if (document.getElementById('content') == null)
+			navbarLoaded = false;
 		else
-			return false;
+			navbarLoaded = true;
 	}
 
-	if (indexLoaded)
+	if (navbarLoaded)
 	{
 		document.getElementById('navHome').addEventListener('click', function () {
 			updateHistory('/welcome');
@@ -62,6 +53,4 @@ document.addEventListener('DOMContentLoaded', function () {
 			loadContent(window.location.pathname);
 		})
 	}
-
 });
-

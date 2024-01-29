@@ -1,11 +1,21 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import loader
 
-def index(request):
-	return render(request, 'index.html', {'content': 'This is the home page'})
+def navbar(request):
+	template = loader.get_template('navbar.html')
+	context = {
+	}
+	return HttpResponse(template.render(context, request)) 
 
 def user(request):
-	return render(request, 'user.html', {'content': 'This is where the user does stuff'})
+	template = loader.get_template('user.html')
+	context = {
+	}
+	return HttpResponse(template.render(context, request))
 
 def welcome(request):
-	return render(request, 'welcome.html', {'content': 'In this website you can compete at pong with other people'})
+	template = loader.get_template('welcome.html')
+	context = {
+	}
+	return HttpResponse(template.render(context, request)) 
