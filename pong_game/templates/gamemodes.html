@@ -1,10 +1,13 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'navbar.html' %}
 
-{% block app %}
-	<script src="{% static 'loader.js' %}"></script>
+{% block page_content %}
+<div id="gamemodes">
+	<script src="{% static 'gamemodes.js' %}"></script>
     <h1>GameModes : choose what type of game you want to play !</h1>
-	<li id="navHome" href="#"><a>Home</a></li>
-	<li id="navGame" href="#"><a>--PLAY--</a></li>
-	<li id="navUser" href="#"><a>Login</a></li>
+	<li id="navQuickmatch" href="#"><a>QuickMatch</a></li>
+	<li id="navJoingame" href="#"><a>Join Game</a></li>
+	<li id="navCreategame" href="#"><a>CreateGame</a></li>
+	<li id="navPractice" href="#"><a>Practice</a></li>
+</div>
+<div id="modeinfo"></div>
 {% endblock %}
