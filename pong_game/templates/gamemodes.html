@@ -1,5 +1,5 @@
 {% extends 'navbar.html' %}
-
+{% load static %}
 {% block page_content %}
 <div id="gamemodes">
 	<script src="{% static 'gamemodes.js' %}"></script>
@@ -9,5 +9,5 @@
 	<li id="navCreategame" href="#"><a>CreateGame</a></li>
 	<li id="navPractice" href="#"><a>Practice</a></li>
 </div>
-<div id="modeinfo"></div>
+<div id="modeinfo"><p>GAME INFO HERE</p></div>
 {% endblock %}
