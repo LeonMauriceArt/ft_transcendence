@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app %}
+	<script src="{% static 'loader.js' %}"></script>
+    <h1>GameModes : choose what type of game you want to play !</h1>
+	<li id="navHome" href="#"><a>Home</a></li>
+	<li id="navGame" href="#"><a>--PLAY--</a></li>
+	<li id="navUser" href="#"><a>Login</a></li>
+{% endblock %}
