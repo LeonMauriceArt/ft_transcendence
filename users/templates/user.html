@@ -1,0 +1,20 @@
+{% extends 'navbar.html' %}
+
+{% block title %}
+	<title>User</title>
+{% endblock %}
+
+{% block page_content %}
+	<h1>Welcome to the User Page</h1>
+    <br><br>
+	<p>{{content}}</p>
+    <h1>User List</h1>
+    <br><br>
+    <ul>
+        {% for user_profile in user_profiles %}
+            <li>{{user_profile.login}} - {{user_profile.password}}</li>
+        {% endfor %}
+    </ul>
+    <h1>Login</h1>
+    <form id="loginForm">
+{% endblock %}

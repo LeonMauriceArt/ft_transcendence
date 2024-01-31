@@ -6,16 +6,10 @@ def navbar(request):
 	template = loader.get_template('navbar.html')
 	context = {
 	}
-	return HttpResponse(template.render(context, request)) 
-
-def user(request):
-	template = loader.get_template('user.html')
-	context = {
-	}
 	return HttpResponse(template.render(context, request))
 
 def welcome(request):
 	template = loader.get_template('welcome.html')
 	context = {
 	}
-	return HttpResponse(template.render(context, request)) 
+	return HttpResponse(template.render(context, request))
