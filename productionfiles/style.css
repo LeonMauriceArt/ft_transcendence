@@ -22,7 +22,7 @@ body {
 }
 
 p {
-	margin-top : 10px;
+	margin-top : 20px;
 }
 
 nav {
@@ -90,4 +90,11 @@ a {
 .navbar ul li:hover {
     border-color: white;
     color: white; /* Added to change the text color on li hover */
+}
+
+.gamemodes li {
+	border: 2px solid grey;
+    padding: 20px;
+	margin-left: 30px;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }

@@ -1,5 +1,7 @@
 from django.db import models
 
-class Member(models.Model):
-  firstname = models.CharField(max_length=255)
-  lastname = models.CharField(max_length=255)
+
+# class GameLobby(models.Model):
+# 	GameType = CharField()
+# 	PlayerSlots = IntegerField(null=true)
+# 	#everything needed for a game instance config here
