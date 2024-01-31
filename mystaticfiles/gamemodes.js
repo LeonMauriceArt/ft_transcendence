@@ -1,4 +1,4 @@
-import { loadContent, updateHistory } from "./loadcontentSPA";
+import { loadContent, updateHistory } from "./loadcontentSPA.js";
 
 document.addEventListener('DOMContentLoaded', function () {
 
