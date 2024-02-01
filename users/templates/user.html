@@ -1,5 +1,5 @@
 {% extends 'navbar.html' %}
-
+{% load static %}
 {% block title %}
 	<title>User</title>
 {% endblock %}
@@ -15,6 +15,18 @@
             <li>{{user_profile.login}} - {{user_profile.password}}</li>
         {% endfor %}
     </ul>
-    <h1>Login</h1>
-    <form id="loginForm">
+    <div id="loginForm">
+        <h1>Login</h1>
+        <script src="{% static 'login.js' %}"></script>
+        <form id="loginForm">
+            {% csrf_token %}
+            <label for="login">Login:</label>
+            <input type="text" id="login" name="login" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="submitLoginForm()">Submit</button>
+        </form>
+    </div>
 {% endblock %}
