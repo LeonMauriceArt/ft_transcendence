@@ -5,7 +5,7 @@ def gamemodes(request):
 	return render(request, 'gamemodes.html')
 
 def gameoptions(request):
-	return render(request, 'gamemodes.html')
+	return render(request, 'gameoptions.html')
 
 def lobby(request):
 	return render(request, 'lobby.html')

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	document.getElementById('navQuickmatch').addEventListener('click', function () {
 		updateHistory('/lobby/');
-		loadContent('/lobby/', 'app');
+		loadContent('/lobby/', 'content');
 	});
 
 	document.getElementById('navJoingame').addEventListener('click', function () {
