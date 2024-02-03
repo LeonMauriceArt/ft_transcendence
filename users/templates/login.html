@@ -1,6 +1,8 @@
-{%load static}
+{%load static%}
 <h1>Login</h1>
+<br><br>
 <script src="{% static 'login.js' %}"></script>
+<h2>
 <form id="loginForm">
     {% csrf_token %}
     <label for="login">Login:</label>
@@ -9,5 +11,7 @@
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
     <div id="errorMessage" style="color: red;"></div>
+
     <button type="button" onclick="submitLoginForm()">Submit</button>
 </form>
+</h2>

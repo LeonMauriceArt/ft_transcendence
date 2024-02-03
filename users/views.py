@@ -11,6 +11,12 @@ def user(request):
 	}
 	return HttpResponse(template.render(context, request))
 
+def login_form(request):
+     return render(request, 'login.html')
+
+def registration_form(request):
+     return render(request, 'register.html')
+
 def submit_login(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
