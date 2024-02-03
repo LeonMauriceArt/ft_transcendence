@@ -27,14 +27,6 @@
 	<div id="content">
 		{% block navbar_content %}{% endblock %}
 	</div>
-
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-		window.addEventListener('popstate', function(event){
-			loadContent(window.location.pathname, 'content');
-})
-});
-</script>
 </body>
 </html>
 

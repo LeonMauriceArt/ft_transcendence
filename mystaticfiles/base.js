@@ -20,6 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function updateHistory(path){
-	console.log('updating history with url', path);
-	window.history.pushState({}, '', path);
+	console.log('updating history with path', path);
+	history.pushState({}, '', path);
 }
