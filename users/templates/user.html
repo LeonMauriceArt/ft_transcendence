@@ -1,10 +1,9 @@
-{% extends 'navbar.html' %}
-{% load static %}
+{% extends 'base.html' %}
 {% block title %}
 	<title>User</title>
 {% endblock %}
 
-{% block page_content %}
+{% block navbar_content %}
 	<h1>Welcome to the User Page</h1>
     <br><br>
 	<p>{{content}}</p>
@@ -16,7 +15,6 @@
         {% endfor %}
     </ul>
     <br><br>
-    <!-- <script src="{% static 'login.js' %}"></script> -->
     <button type="button" onclick="loadForm('/user/login_form/', 'dynamicContent')">LOGIN</button>
     <button type="button" onclick="loadForm('/user/register_form/', 'dynamicContent')">REGISTER</button>
     <br><br>

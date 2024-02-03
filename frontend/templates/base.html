@@ -6,11 +6,35 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="{% static 'style.css'%}">
+    <script src="{% static 'base.js' %}"></script>
     <script src="{% static 'login.js' %}"></script>
-
 	{% block title %}<title>P.O.N.G</title>{% endblock %}
 </head>
 <body>
-	<div id="app">{% block app %}{% endblock %}</div>
+	<h1 id="projectname">P.O.N.G</h1>
+
+	<div class="navbar">
+		<nav>
+			<ul>
+				<li type="button" onclick="loadContent('/', 'content')"><a>Home</a></li>
+				<li type="button" onclick="loadContent('/play/', 'content')"><a>PLAY</a></li>
+				<li type="button" onclick="loadContent('/user/', 'content')"><a>Login</a></li>
+			</ul>
+
+		</nav>
+	</div>
+
+	<div id="content">
+		{% block navbar_content %}{% endblock %}
+	</div>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		window.addEventListener('popstate', function(event){
+			loadContent(window.location.pathname, 'content');
+})
+});
+</script>
 </body>
 </html>
+
