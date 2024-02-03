@@ -1,0 +1,7 @@
+{% load static %}
+<script src="{% static 'login.js' %}"></script>
+<form id="registrationForm">
+    {% csrf_token %}
+    <h1>REGISTRATION<h1>
+    <button type="button" onclick="submitRegistrationForm()">Submit</button>
+</form>

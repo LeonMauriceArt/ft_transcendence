@@ -14,9 +14,21 @@ function submitLoginForm(){
     xml.send(JSON.stringify(data));
 
     xml.onload = function(){
-        if (xml.status === 200)
-            console.log("BRAVO COAIE");
-        else
-            console.log(xml.status);
-    }
+        if (xml.status === 200){
+            displayErrorMessage();
+            alert("Login succesfull");
+        }
+    else if (xml.status === 401)
+        displayErrorMessage("Incorrect credentials. Please try again.");
+    else
+        displayErrorMessage("An unexpected error occured. Please try again.");
+}
+}
+
+function displayErrorMessage(message){
+    var errorMessage = document.getElementById("errorMessage");
+    if (!message)
+        errorMessage.textContent = "";
+    else
+        errorMessage.textContent = message;
 }

@@ -15,6 +15,7 @@
             <li>{{user_profile.login}} - {{user_profile.password}}</li>
         {% endfor %}
     </ul>
+    <br><br>
     <div id="loginForm">
         <h1>Login</h1>
         <script src="{% static 'login.js' %}"></script>
@@ -26,6 +27,7 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
 
+            <div id="errorMessage" style="color: red;"></div>
             <button type="button" onclick="submitLoginForm()">Submit</button>
         </form>
     </div>
