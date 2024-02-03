@@ -4,6 +4,9 @@ from django.template import loader
 from .models import UserProfile
 import json
 
+def submit_register(request):
+    return
+
 def user(request):
 	user_profiles = UserProfile.objects.all()
 	template = loader.get_template('user.html')
