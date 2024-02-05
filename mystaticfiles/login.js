@@ -31,7 +31,7 @@ function submitLoginForm(){
         displayErrorMessage("Incorrect credentials. Please try again.");
     else
         displayErrorMessage("An unexpected error occured. Please try again.");
-}
+    }
 }
 
 function submitRegistrationForm(){
@@ -40,17 +40,56 @@ function submitRegistrationForm(){
     var lastName = document.getElementById("LastName").value;
     var login = document.getElementById("NickName").value;
     var password = document.getElementById("password").value;
-    data = {
-        firstName: firstName,
-        lastName: lastName,
-        login: login,
-        password: password
+    var repassword = document.getElementById("repassword").value;
+
+    let messages = []
+    if (firstName === '' || firstName == null)
+        messages.push('First name is required');
+    if (lastName === '' || lastName == null)
+        messages.push('Last name is required');
+    if (login.length < 4)
+        messages.push('The nickname(login) has to be longer than 4 characters');
+    if (password.length < 6)
+        messages.push('The password has to be at least 6 characters');
+    if (!hasSpecialorNumber(password))
+        messages.push('The password has to contain at least one number, one special character and a letter');
+    if (password != repassword)
+        messages.push('Passwords do not match');
+    if (messages.length > 0){
+        var message = messages.join(', ');
+        displayErrorMessage(message);
+        return;
     }
-    var xml = new XMLHttpRequest();
-    xml.open("POST", "/user/submit_register/", true);
-    xml.setRequestHeader("Register-Cred", "json;charset=UTF-8");
-    xml.setRequestHeader("X-CSRFToken", csrfToken);
-    xml.send(JSON.stringify(data));
+    check_if_in_db(login, csrfToken, function (result) {
+        if (result) {
+            displayErrorMessage('Login already in use');
+        } else {
+            var data = {
+                firstName: firstName,
+                lastName: lastName,
+                login: login,
+                password: password
+            };
+
+            var xml = new XMLHttpRequest();
+            xml.open("POST", "/user/submit_register/", true);
+            xml.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xml.setRequestHeader("X-CSRFToken", csrfToken);
+
+            xml.onload = function () {
+                if (xml.status === 201) {
+                    displayErrorMessage();
+                    alert("Registration successful");
+                } else if (xml.status === 401) {
+                    displayErrorMessage("Could not create user account.");
+                } else {
+                    displayErrorMessage("An unexpected error has occurred.");
+                }
+            };
+
+            xml.send(JSON.stringify(data));
+        }
+    });
 }
 
 function displayErrorMessage(message){
@@ -59,4 +98,30 @@ function displayErrorMessage(message){
         errorMessage.textContent = "";
     else
         errorMessage.textContent = message;
+}
+
+function hasSpecialorNumber(input){
+    const specialCharRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
+    const numberRegex = /\d/;
+    const letterRegex = /abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/
+
+    const hasSpecialChar = specialCharRegex.test(input);
+    const hasNumber = numberRegex.test(input);
+    const hasLetter = letterRegex.test(input);
+
+    return hasSpecialChar && hasNumber && hasLetter;
+}
+
+function check_if_in_db(login, csrfToken, callback){
+    var xml = new XMLHttpRequest();
+    xml.open("POST", "/user/register_form/check_login/", true);
+    xml.setRequestHeader("Check-login", "json;charset=UTF-8");
+    xml.setRequestHeader("X-CSRFToken", csrfToken);
+    xml.onload = function(){
+        if (xml.status == 409)
+            callback(true);
+        else
+            callback(false);
+        }
+    xml.send(JSON.stringify(login));
 }
