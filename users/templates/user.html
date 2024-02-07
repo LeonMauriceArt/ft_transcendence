@@ -8,13 +8,6 @@
     <br><br>
 	<p>{{content}}</p>
     <h1>User List</h1>
-    <br><br>
-    <ul>
-        {% for user_profile in user_profiles %}
-            <li>{{user_profile.login}} - {{user_profile.password}}</li>
-        {% endfor %}
-    </ul>
-    <br><br>
     <button type="button" onclick="loadForm('/user/login_form/', 'dynamicContent')">LOGIN</button>
     <button type="button" onclick="loadForm('/user/register_form/', 'dynamicContent')">REGISTER</button>
     <br><br>
