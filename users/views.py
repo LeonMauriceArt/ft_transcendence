@@ -36,7 +36,7 @@ def submit_register(request):
 
         try:
             user_profile = UserProfile(login=login, firstName=firstName,lastName=lastName,password=password)
-            #user_profile.save()
+            # user_profile.save()
             return HttpResponse(status=201)
         except IntegrityError as e:
             return HttpResponse(status=400)
