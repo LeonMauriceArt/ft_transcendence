@@ -4,8 +4,8 @@
     <h1>GameModes : choose what type of game you want to play !</h1>
 	<li id="navQuickmatch" href="#"><a>QuickMatch</a></li>
 	<li id="navJoingame" href="#"><a>Join Game</a></li>
-	<li id="navCreategame" href="#"><a>CreateGame</a></li>
-	<li id="navPractice" href="#"><a>Practice</a></li>
+	<li id="navCreategame" onclick="loadForm('/play/create_game/', 'dynamicContent')"><a>CreateGame</a></li>
+	<li id="navPractice" onclick="loadForm('/play/practice/', 'dynamicContent')"><a>Practice</a></li>
 </div>
-<div id="modeinfo"><p>GAME INFO HERE</p></div>
+<div id="dynamicContent"><p>GAME INFO HERE</p></div>
 {% endblock %}

@@ -1,4 +1,28 @@
-{% extends 'base.html' %}
-{% block navbar_content %}
-<div id="modeinfo"><p>CREATE GAME</p></div>
-{% endblock %}
+{% load static %}
+
+<script src="{% static 'play.js' %}"></script>
+<h1>Custom Game</h1>
+<form>
+	<li>
+		<ul>
+			<label for="enable_powerups">Enable powerups :</label>
+			<input type="checkbox" id="enable_powerups" name="enable_powerups">
+		</ul>
+		<ul>
+			<label for="win_score">Winning score :</label>
+			<input type="range" id="win_score" name="win_score" min="1" max="10" value="3" oninput="updateValue(this.value, 'winValue')">
+			<span id="winValue">3</span>
+		</ul>
+		<ul>
+			<label for="vol">Volume (between 0 and 50):</label>
+			<input type="range" id="vol" name="vol" min="0" max="50" oninput="updateValue(this.value)">
+			<span id="volValue">0</span>
+		</ul>
+		<ul>
+			<label for="vol">Volume (between 0 and 50):</label>
+			<input type="range" id="vol" name="vol" min="0" max="50" oninput="updateValue(this.value)">
+			<span id="volValue">0</span>
+		</ul>
+	</li>
+
+  </form>
