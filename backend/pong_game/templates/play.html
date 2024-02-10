@@ -2,10 +2,10 @@
 {% block navbar_content %}
 <div id="gamemodes">
     <h1>GameModes : choose what type of game you want to play !</h1>
-	<li id="navQuickmatch" href="#"><a>QuickMatch</a></li>
-	<li id="navJoingame" href="#"><a>Join Game</a></li>
-	<li id="navCreategame" onclick="loadForm('/play/create_game/', 'dynamicContent')"><a>CreateGame</a></li>
-	<li id="navPractice" onclick="loadForm('/play/practice/', 'dynamicContent')"><a>Practice</a></li>
+	<li id="navQuickmatch" onclick="loadContent('/play/quickmatch/', 'content')"><a>QuickMatch Classic</a></li>
+	<li id="navJoingame" onclick="loadForm('/play/join_game/', 'dynamicContent')"><a>Join Game</a></li>
+	<li id="navCreategame" onclick="loadForm('/play/create_game/', 'dynamicContent')"><a>Create Game</a></li>
+	<li id="navPractice" onclick="loadContent('/play/practice/', 'content')"><a>Practice</a></li>
 </div>
 <div id="dynamicContent"><p>GAME INFO HERE</p></div>
 {% endblock %}

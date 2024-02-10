@@ -1,4 +1,6 @@
 function loadContent(path, elementId){
+    console.log("Url to fetch =", path);
+    console.log("Trying to place it at", elementId);
     fetch(path)
         .then(response => response.text())
         .then(htmlContent => {

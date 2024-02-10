@@ -14,15 +14,14 @@
 			<span id="winValue">3</span>
 		</ul>
 		<ul>
-			<label for="vol">Volume (between 0 and 50):</label>
-			<input type="range" id="vol" name="vol" min="0" max="50" oninput="updateValue(this.value)">
-			<span id="volValue">0</span>
+			<label for="player_speed">Player speed :</label>
+			<input type="range" id="player_speed" name="player_speed" step="0.1" min="0" max="50" value="3" oninput="updateValue(this.value, 'playerValue')">
+			<span id="playerValue">3</span>
 		</ul>
 		<ul>
-			<label for="vol">Volume (between 0 and 50):</label>
-			<input type="range" id="vol" name="vol" min="0" max="50" oninput="updateValue(this.value)">
-			<span id="volValue">0</span>
+			<label for="ball_speed">Ball speed :</label>
+			<input type="range" id="ball_speed" name="ball_speed" step="0.1" min="0" max="50" value="3" oninput="updateValue(this.value, 'ballValue')">
+			<span id="ballValue">3</span>
 		</ul>
 	</li>
-
   </form>
