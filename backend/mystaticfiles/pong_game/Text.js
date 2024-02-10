@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { TextGeometry } from '../node_modules/three/examples/jsm/geometries/TextGeometry.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 export function createTextMesh(font, text, textMesh, x, y, z, fontcolor, fontsize) {
 	// Create TextGeometry
