@@ -32,6 +32,8 @@ function (loadedFont){
 	animate()
 });
 
+// function 
+
 
 function handleKeyDown(event) {
 	keys[event.code] = true;
