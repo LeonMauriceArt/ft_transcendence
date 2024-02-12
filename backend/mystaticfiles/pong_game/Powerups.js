@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
-import { powerWallMaterial, powerCurseMaterial, powerReverseMaterial } from './Materials';
-import * as constants from './Constants';
+import { powerWallMaterial, powerCurseMaterial, powerReverseMaterial } from './Materials.js';
+import * as constants from './Constants.js';
 
 export class Power_Manager
 {

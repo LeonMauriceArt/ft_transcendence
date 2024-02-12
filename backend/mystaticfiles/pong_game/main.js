@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { FontLoader } from '../node_modules/three/examples/jsm/loaders/FontLoader.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { createTextMesh } from './Text.js';
 import {Player} from './Player.js'
 import * as material from './Materials.js'
@@ -23,7 +23,7 @@ var screenShake = ScreenShake()
 gameisover = false
 
 const fontlLoader = new FontLoader();
-fontlLoader.load('node_modules/three/examples/fonts/droid/droid_sans_bold.typeface.json',
+fontlLoader.load(droid,
 function (loadedFont){
 	droidFont = loadedFont;
 	init()
@@ -31,6 +31,8 @@ function (loadedFont){
 	initControls()
 	animate()
 });
+
+// function 
 
 
 function handleKeyDown(event) {
