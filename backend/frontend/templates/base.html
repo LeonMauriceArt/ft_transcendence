@@ -20,6 +20,10 @@
 			}
 		}
 	</script>	
+	<script type="module">
+		import { start } from "{% static 'pong_game/main.js' %}";
+		window.startPong = start;
+	</script>
 	<script type="module" src="{% static 'pong_game/main.js' %}"></script>
 	  {% block title %}<title>P.O.N.G</title>{% endblock %}
 </head>

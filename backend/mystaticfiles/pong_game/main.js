@@ -26,14 +26,7 @@ const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
 function (loadedFont){
 	droidFont = loadedFont;
-	init()
-	initArena()
-	initControls()
-	animate()
 });
-
-// function 
-
 
 function handleKeyDown(event) {
 	keys[event.code] = true;
@@ -43,14 +36,27 @@ function handleKeyUp(event) {
 	keys[event.code] = false;
 }
 
-function init()
+var id = null;
+
+export function start()
+{
+	if (id !==null)
+		cancelAnimationFrame(id);
+	initGame();
+	animate();
+}
+
+function initGame()
 {
 	//Renderer
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-	renderer.setSize(constants.WIN_WIDTH, constants.WIN_HEIGHT);
 	
-	document.body.appendChild(renderer.domElement);
+	var container = document.getElementById('canvas');
+	var w = container.offsetWidth;
+	var h = container.offsetHeight;
+	renderer.setSize(w, h);
+	container.appendChild(renderer.domElement);
 	
 	//Init Scene
 	scene = new THREE.Scene();
@@ -65,6 +71,8 @@ function init()
 		);
 		camera.position.z = constants.CAMERA_STARTPOS_Z
 		
+	initArena()
+	initControls()
 }
 
 function initArena()
@@ -209,7 +217,7 @@ function animate() {
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 	}
 	render();
-	requestAnimationFrame( animate );
+	id = requestAnimationFrame( animate );
 }
 
 function render(){
