@@ -16,9 +16,8 @@ player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
 // powerup_manager
 
-const wssurl = 'wss://' + window.location.host + '/wss/game/';
+const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
-let gameSocket;
 
 const keys = {};
 
@@ -54,7 +53,6 @@ export function start()
 	wss.onclose = () => {
 		console.log('Websocket connection closed.');
 	};
-	gameSocket = new WebSocket(wssurl);
 	if (id !==null){
 		cancelAnimationFrame(id);
 	}
@@ -224,7 +222,7 @@ function handle_input(player_one, player_two)
 //GameLoop
 function animate() {
 	
-	gameSocket.onmessage = function(e){
+	wss.onmessage = function(e){
 		let data = JSON.parse(e.data);
 		console.log('Data:', data);
 	}
