@@ -9,7 +9,6 @@ from asgiref.sync import async_to_sync
 # There is one dedicated GameConsumer per player
 class GameConsumer(AsyncWebsocketConsumer):
 
-	update_lock = asyncio.Lock()
 	game_room = "testroom"
 
 	players= {}
@@ -31,16 +30,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		async with self.update_lock:
 			self.players[self.player_id] = {
-				"id" self.player_id,
+				"id": self.player_id,
 			}
 
 		if len(self.players) == 1:
 			asyncio.create_game(self.game_loop())
 
 	async def disconnect(self, close_code):
-		async with self.update_lock:
-			if self.player_id in self.players:
-				del self.players[self.player_id]
+		if self.player_id in self.players:
+			del self.players[self.player_id]
 
 		await self.channel_layer.group_discard(
 			self.game_room, self.channel_name
@@ -56,11 +54,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if not player:
 			return
 
-		if message_type == "input_up"
+		if message_type == "input_up":
 			player["up"] = True
-		if message_type == "input_down"
+		if message_type == "input_down":
 			player["down"] = True
-		if message_type == "input_power"
+		if message_type == "input_power":
 			player["power"] = True
 
 		game_state_update = {}

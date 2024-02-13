@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="{% static 'style.css'%}">
-    <script src="{% static 'base.js' %}"></script>
-    <script src="{% static 'login.js' %}"></script>
-	<script src="{% static 'play.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+	<script src="{% static 'js/play.js' %}"></script>
 	<script>
 		var droid ="{% static 'fonts/droid_sans_bold.typeface.json' %}";
 		</script> 
@@ -21,14 +21,18 @@
 		}
 	</script>	
 	<script type="module">
-		import { start } from "{% static 'practice/main.js' %}";
-		window.startPongOffline = start;
+		import { start } from "{% static 'js/practice/main.js' %}";
+		window.startPongPractice = start;
 	</script>
 	<script type="module">
-		import { start } from "{% static 'pong_game/main.js' %}";
-		window.startPong = start;
+		import { start } from "{% static 'js/game_local/main.js' %}";
+		window.startPongLocal = start;
 	</script>
-	<script type="module" src="{% static 'practice/main.js' %}"></script>
+	<script type="module">
+		import { start } from "{% static 'js/game_online/main.js' %}";
+		window.startPongOnline = start;
+	</script>
+	<script type="module" src="{% static 'js/practice/main.js' %}"></script>
 	  {% block title %}<title>P.O.N.G</title>{% endblock %}
 </head>
 <body>

@@ -1,6 +1,4 @@
 function loadContent(path, elementId){
-    console.log("Url to fetch =", path);
-    console.log("Trying to place it at", elementId);
     fetch(path)
         .then(response => response.text())
         .then(htmlContent => {
@@ -22,6 +20,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function updateHistory(path){
-	console.log('updating history with path', path);
 	history.pushState({}, '', path);
 }

@@ -14,7 +14,7 @@ function loadPractice()
         const navbarContent = doc.querySelector('#content');
         const navbarContainer = document.getElementById('content');
         navbarContainer.innerHTML = navbarContent.innerHTML;
-        startPongOffline();
+        startPongPractice();
     })
     .catch(error => {
         console.error('Error fetching page content:', error);
@@ -31,7 +31,24 @@ function loadOnline()
         const navbarContent = doc.querySelector('#content');
         const navbarContainer = document.getElementById('content');
         navbarContainer.innerHTML = navbarContent.innerHTML;
-        startPong();
+        startPongOnline();
+    })
+    .catch(error => {
+        console.error('Error fetching page content:', error);
+    });
+}
+
+function loadLocal()
+{
+	fetch('/play/local')
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const navbarContent = doc.querySelector('#content');
+        const navbarContainer = document.getElementById('content');
+        navbarContainer.innerHTML = navbarContent.innerHTML;
+        startPongLocal();
     })
     .catch(error => {
         console.error('Error fetching page content:', error);
