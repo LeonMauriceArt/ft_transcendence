@@ -13,7 +13,7 @@ services:
     image: nginx:latest
     restart: always
     ports:
-     - "1300:1300"
+     - "8443:8443"
     depends_on:
      - web
     volumes:

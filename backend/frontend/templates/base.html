@@ -22,6 +22,10 @@
 	</script>	
 	<script type="module">
 		import { start } from "{% static 'practice/main.js' %}";
+		window.startPongOffline = start;
+	</script>
+	<script type="module">
+		import { start } from "{% static 'pong_game/main.js' %}";
 		window.startPong = start;
 	</script>
 	<script type="module" src="{% static 'practice/main.js' %}"></script>

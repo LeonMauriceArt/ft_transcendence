@@ -14,6 +14,23 @@ function loadPractice()
         const navbarContent = doc.querySelector('#content');
         const navbarContainer = document.getElementById('content');
         navbarContainer.innerHTML = navbarContent.innerHTML;
+        startPongOffline();
+    })
+    .catch(error => {
+        console.error('Error fetching page content:', error);
+    });
+}
+
+function loadOnline()
+{
+	fetch('/play/quickmatch')
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const navbarContent = doc.querySelector('#content');
+        const navbarContainer = document.getElementById('content');
+        navbarContainer.innerHTML = navbarContent.innerHTML;
         startPong();
     })
     .catch(error => {

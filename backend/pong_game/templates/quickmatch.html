@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}<title>QuickMatch</title>{% endblock %}
 {% block navbar_content %}
-    <h1>QUICKMATCH CLASSIC</h1>
+    <h1>QuickMatch</h1>
+	<script>document.addEventListener('DOMContentLoaded', function() {
+		startPongOffline();
+	});</script>
+	<div id="canvas"></div>
 	<button onclick="loadContent('/play/', 'content')"><a>Leave</a></button>
 {% endblock %}
