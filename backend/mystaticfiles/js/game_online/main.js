@@ -250,7 +250,6 @@ function animate() {
 		playerTwo: player_two.to_dict(),
 		ball: ball.to_dict(),
 	}
-	wss.send(JSON.stringify(gameState));
 	wss.addEventListener("add", (ev) => {
 		wss.send(JSON.stringify(gameState));
 	});

@@ -121,11 +121,11 @@ export class Ball
 	}
 	to_dict(){
 		return {
-			x: this.x,
-			y: this.y,
+			x: this.mesh.position.x,
+			y: this.mesh.position.y,
 			x_vel: this.x_vel,
 			y_vel: this.y_vel,
-			radius: this.radius,
+			radius: constants.BALL_RADIUS,
 			color: this.color
 		}
 	}

@@ -10,7 +10,7 @@ from asgiref.sync import async_to_sync
 class GameConsumer(AsyncWebsocketConsumer):
 	game_room = "testroom"
 	players= {}
-	update_lock = asyncio.Lock()
+	update_lock = None
 
 	async def connect(self):
 		print('----USER CONNECTING TO GAME----')
@@ -26,15 +26,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'playerId': self.player_id,
 		}))
 
-		async with self.update_lock:
+		async with await self.get_update_lock():
 			self.players[self.player_id] = {
 				"id": self.player_id,
 		}
-		if len(self.players) == 1:
-			asyncio.create_game(self.game_loop())
+		if len(self.players) == 2:
+			asyncio.create_task(self.game_loop())
 
 	async def disconnect(self, close_code):
-		async with self.update_lock:
+		async with self.get_update_lock():
 			if self.player_id in self.players:
 				del self.players[self.player_id]
 		await self.channel_layer.group_discard(
@@ -47,36 +47,40 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		player_id = text_data_json["playerId"]
 
-		async with self.update_lock:
+		async with self.get_update_lock():
 			player = self.players.get(player_id, None)
 			if not player:
 				return
-
 			if message_type == "input_up":
 				player["up"] = True
 			if message_type == "input_down":
 				player["down"] = True
 			if message_type == "input_power":
 				player["power"] = True
+			if message_type == "game_state":
+				print('---------SALUT----------')
 
 		game_state_update = {}
 		await self.send(text_data=json.dumps({
 			'type':'game_state',
-			'data':game_state_update,	
+			'data':'game_state_update',	
 		}))
-		await self.channel_layer.group_send(
-			self.game_room,
-			{
-				'type':'game_state',
-				'data':game_state_update,
-			}
-		)
+
+	async def game_state(self, event):
+		game_state_data = event.get('data', {})
+
 
 	async def game_loop(self):
-		while True:
-			await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
-			game_state_update = {}  # Calculate your game state update
-			await self.channel_layer.group_send(self.game_room, {
-				'type': 'game_state',
-				'data': game_state_update,
-			})
+		async with await self.get_update_lock():
+			while True:
+				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
+				game_state_update = {}  # Calculate your game state update
+				await self.channel_layer.group_send(self.game_room, {
+					'type': 'game_state',
+					'data': game_state_update,
+				})
+
+	async def get_update_lock(self):
+		if self.update_lock is None:
+			self.update_lock = asyncio.Lock()
+		return self.update_lock
