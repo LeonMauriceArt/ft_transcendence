@@ -30,7 +30,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.players[self.player_id] = {
 				"id": self.player_id,
 		}
-		if len(self.players) == 2:
+		if len(self.players) == 1:
 			asyncio.create_task(self.game_loop())
 
 	async def disconnect(self, close_code):
@@ -61,16 +61,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 				print('---------SALUT----------')
 
 		game_state_update = {}
-		await self.send(text_data=json.dumps({
-			'type':'game_state',
-			'data':'game_state_update',	
-		}))
 
 	async def game_state(self, event):
 		game_state_data = event.get('data', {})
 
 
 	async def game_loop(self):
+		# NEED TO UNDERSTAND HOW TO SEND STUFF TO FRONT
+		# await self.send(text_data=json.dumps({
+		# 	'type':'game_start',
+		# 	'data':'game_state_update',	
+		# }))
 		async with await self.get_update_lock():
 			while True:
 				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state

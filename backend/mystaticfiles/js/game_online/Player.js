@@ -8,10 +8,12 @@ export class Player
 	constructor(side, width, height, color) 
 	{
 		switch (side){
-			case 0 :
-				this.x = (GAME_AREA_WIDTH * -1) + 10;
 			case 1 :
+				this.x = (GAME_AREA_WIDTH * -1) + 10;
+				break;
+			case 2 :
 				this.x = GAME_AREA_WIDTH - 10
+				break;
 		}
 		this.y = 0;
 		this.geometry = new THREE.BoxGeometry(width, height, width, 1, 1, 1);
@@ -69,7 +71,7 @@ export class Player
 	}
 	to_dict(){
 		return {
-			x: this.x,
+			x: this.mesh.position.x,
 			y: this.mesh.position.y,
 			color: this.material.color
 		}

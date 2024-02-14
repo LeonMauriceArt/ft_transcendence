@@ -8,7 +8,7 @@ export class Ball
 	constructor()
 	{
 		this.speed = constants.BALL_SPEED
-		this.x_vel = constants.BALL_SPEED * -1;
+		this.x_vel = 0;
 		this.y_vel = 0;
 		this.color = 0xffffff;
 		this.geometry = new THREE.SphereGeometry(constants.BALL_RADIUS, 10, 10);
@@ -21,7 +21,7 @@ export class Ball
 	}
 	setcolor(color)
 	{
-		this.color = color
+		this.color = color;
 		this.material.emissive.setHex(color);
 		this.material.color.setHex(color);
 		this.light.color.setHex(color);

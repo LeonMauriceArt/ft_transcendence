@@ -36,36 +36,44 @@ var id = null;
 
 export function start()
 {
+	initDisplay();
 	wss = new WebSocket(wssurl);
 	wss.onopen = () => {
 		console.log('Websocket connection established.');
 	}
-	wss.onmessage = (event) => {
+	wss.onmessage = (event) => 
+	{
 		const data = JSON.parse(event.data);
-		switch (data.type) {
+		switch (data.type) 
+		{
 			case 'game_start':
 				console.log('Game starting');
+				ball.launch()
 				break;
 			default:
 				console.error('Unknown message type:', data.type);
 		}
 	};
-	wss.onclose = () => {
+	wss.onclose = () => 
+	{
 		console.log('Websocket connection closed.');
 	};
-	if (id !==null){
-		cancelAnimationFrame(id);
-	}
-	initGame();
+	if (id !==null)
+	cancelAnimationFrame(id);
 	animate();
 }
 
 function initGame()
 {
-	//Renderer
+	initArena();
+	initControls();
+}
+
+function initDisplay()
+{
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-	
+
 	var container = document.getElementById('canvas');
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
@@ -82,27 +90,27 @@ function initGame()
 		constants.WIN_WIDTH / constants.WIN_HEIGHT,
 		0.1,
 		1000
-		);
-		camera.position.z = constants.CAMERA_STARTPOS_Z
-		
-		initArena()
-		initControls()
-	}
+	);
+	camera.position.z = constants.CAMERA_STARTPOS_Z
 	
-function initArena()
-{
 	//Adding players
-	player_one = new Player(0, 0, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT,constants.PLAYER_1_COLOR)
-	player_two = new Player(1, 0, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
+	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
+	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
 	scene.add(player_one.mesh, player_two.mesh)
 	
 	//Adding the ball
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
 	
+	orbitcontrols = new OrbitControls( camera, renderer.domElement );
+	orbitcontrols.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+	orbitcontrols.dampingFactor = 0.05;
+	orbitcontrols.enabled = false
+	orbitcontrols.screenSpacePanning = true;
+	
 	//Adding the powerup_manager
 	// powerup_manager = new Power_Manager()
-	
+
 	//Adding the floor and roof
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
 	var lower_wall = new Wall(constants.GAME_AREA_HEIGHT * -1, 300, material.wallMaterial)
@@ -137,11 +145,6 @@ function handleKeyUp(event) {
 
 function initControls(){
 	//Controls
-	orbitcontrols = new OrbitControls( camera, renderer.domElement );
-	orbitcontrols.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-	orbitcontrols.dampingFactor = 0.05;
-	orbitcontrols.enabled = false
-	orbitcontrols.screenSpacePanning = true;
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
 }
