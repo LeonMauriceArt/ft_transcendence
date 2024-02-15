@@ -1,4 +1,4 @@
-function loadContent(path, elementId){
+const loadContent = (path, elementId) => {
     console.log("Url to fetch =", path);
     console.log("Trying to place it at", elementId);
     fetch(path)
@@ -14,14 +14,32 @@ function loadContent(path, elementId){
         .catch(error => console.error('Error:', error));
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-	window.addEventListener('popstate', function(event){
-		loadContent(window.location.pathname, 'content');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM CONTENT LOADED !' + document.location.href);
+
+    const buttons = document.getElementById('btnContainer');
+
+    for (let i = 0; i < buttons.children.length; i++)
+    {
+        const btn = buttons.children[i];
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadContent(btn.getAttribute('url'), 'content');
+        });
+    }
+
+    history.replaceState('/', "", document.location.href);
+	window.addEventListener('popstate', (event) => {
+        console.log('POPSTATE EVENT FIRED: ', event);
+        if (event.state)
+        {
+		    loadContent(event.state, 'content');
+        }
 	})
 
 });
 
-function updateHistory(path){
+const updateHistory = (path) => {
 	console.log('updating history with path', path);
-	history.pushState({}, '', path);
+	history.pushState(path, '', 'http://0.0.0.0:8000' + path);
 }
