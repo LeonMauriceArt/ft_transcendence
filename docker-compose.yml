@@ -41,23 +41,11 @@ services:
       - vault
 
   vault:
-    image: vault
+    image: hashicorp/vault:latest
     ports:
       - "8200:8200"
     environment:
       - VAULT_DEV_ROOT_TOKEN_ID=root
-  
-  nginx:
-    image: nginx:latest
-    restart: always
-    ports:
-     - "1300:1300"
-    depends_on:
-     - web
-    volumes:
-     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-     - ./nginx/startup.sh:/startup.sh
-    command: /bin/bash /startup.sh
 
 volumes:
   postgres-data:
