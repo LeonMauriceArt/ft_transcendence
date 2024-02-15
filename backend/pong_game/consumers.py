@@ -22,7 +22,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 		await self.send(
 			text_data=json.dumps({
-			'type': 'playerId',
+			'type': 'game_start',
 			'playerId': self.player_id,
 		}))
 
@@ -43,22 +43,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 	
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
-		message_type = text_data_json.get("type", "")
-
-		player_id = text_data_json["playerId"]
-
-		async with self.get_update_lock():
-			player = self.players.get(player_id, None)
-			if not player:
-				return
-			if message_type == "input_up":
-				player["up"] = True
-			if message_type == "input_down":
-				player["down"] = True
-			if message_type == "input_power":
-				player["power"] = True
-			if message_type == "game_state":
-				print('---------SALUT----------')
+		data_type = text_data_json.get("type", "")
+		data_value = text_data_json.get("value", "")
+		print('RECEIVING DATA TYPE:', data_type, '| VALUE:', data_value)
+		# async with self.get_update_lock():
+		# 	player = self.players.get(player_id, None)
+		# 	if not player:
+		# 		return
+		# 	if data_type == "input_up":
+		# 		player["up"] = True
+		# 	if data_type == "input_down":
+		# 		player["down"] = True
+		# 	if data_type == "input_power":
+		# 		player["power"] = True
+		# 	if data_type == "game_state":
+		# 		print('---------SALUT----------')
 
 		game_state_update = {}
 

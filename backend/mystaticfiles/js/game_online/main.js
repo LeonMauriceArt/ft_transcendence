@@ -10,11 +10,11 @@ import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
 import { Power_Manager } from './Powerups.js';
 
-var gameisover, camera, orbitcontrols, renderer, player_one, 
+var game_running, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
-player_one_goal, player_two_goal
-// powerup_manager
+player_one_goal, player_two_goal, someone_won
+// powerup_manage
 
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
@@ -23,7 +23,8 @@ const keys = {};
 
 var screenShake = ScreenShake()
 
-gameisover = false
+game_running = false
+someone_won = false
 
 const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
@@ -33,6 +34,11 @@ fontlLoader.load(droid,
 	
 	
 var id = null;
+
+function sendMessageToServer(message)
+{
+	wss.send(JSON.stringify(message));
+}
 
 export function start()
 {
@@ -44,14 +50,13 @@ export function start()
 	wss.onmessage = (event) => 
 	{
 		const data = JSON.parse(event.data);
-		switch (data.type) 
+		console.log('data type:', data.type)
+		if (data.type === 'game_start')
 		{
-			case 'game_start':
-				console.log('Game starting');
-				ball.launch()
-				break;
-			default:
-				console.error('Unknown message type:', data.type);
+			console.log('Starting game . . .');
+			game_running = true;
+			ball.launch();
+			initControls();
 		}
 	};
 	wss.onclose = () => 
@@ -61,12 +66,6 @@ export function start()
 	if (id !==null)
 	cancelAnimationFrame(id);
 	animate();
-}
-
-function initGame()
-{
-	initArena();
-	initControls();
 }
 
 function initDisplay()
@@ -137,10 +136,12 @@ function initDisplay()
 
 function handleKeyDown(event) {
 	keys[event.code] = true;
+	sendMessageToServer({type: 'player_key_down', value: event.code})
 }
 
 function handleKeyUp(event) {
 	keys[event.code] = false;
+	sendMessageToServer({type: 'player_key_up', value: event.code})
 }
 
 function initControls(){
@@ -203,7 +204,7 @@ function winning()
 		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
 	}
 	scene.add(winning_text, light1, light2)
-	gameisover = true
+	game_running = true
 }
 
 function handle_input(player_one, player_two)
@@ -224,17 +225,11 @@ function handle_input(player_one, player_two)
 
 //GameLoop
 function animate() {
-	
-	wss.onmessage = function(e){
-		let data = JSON.parse(e.data);
-		console.log('Data:', data);
-	}
 
-	screenShake.update(camera);
-	orbitcontrols.update();
-	
-	if (!gameisover)
+	if (game_running)
 	{
+		screenShake.update(camera);
+		orbitcontrols.update();
 		// powerup_manager.update(player_one, player_two, ball, scene)
 		ball.update(player_one, player_two);
 		if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
@@ -243,19 +238,13 @@ function animate() {
 	}
 	else
 	{
-		winning_text.lookAt(camera.position)
-		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+		if(someone_won)
+		{
+			winning_text.lookAt(camera.position)
+			scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+		}
 	}
 	render();
-	const gameState = {
-		type: "game_state",
-		playerOne: player_one.to_dict(),
-		playerTwo: player_two.to_dict(),
-		ball: ball.to_dict(),
-	}
-	wss.addEventListener("add", (ev) => {
-		wss.send(JSON.stringify(gameState));
-	});
 	id = requestAnimationFrame( animate );
 }
 

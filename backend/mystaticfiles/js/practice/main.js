@@ -10,7 +10,7 @@ import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
 import { Power_Manager } from './Powerups.js';
 
-var gameisover, camera, orbitcontrols, renderer, player_one, 
+var game_running, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
@@ -20,7 +20,7 @@ const keys = {};
 
 var screenShake = ScreenShake()
 
-gameisover = false
+game_running = false
 
 const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
@@ -178,7 +178,7 @@ function winning()
 		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
 	}
 	scene.add(winning_text, light1, light2)
-	gameisover = true
+	game_running = true
 }
 
 function handle_input(player_one, player_two)
@@ -203,7 +203,7 @@ function animate() {
 	screenShake.update(camera);
 	orbitcontrols.update();
 	
-	if (!gameisover)
+	if (!game_running)
 	{
 		// powerup_manager.update(player_one, player_two, ball, scene)
 		ball.update(player_one, player_two);
