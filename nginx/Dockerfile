@@ -22,12 +22,12 @@ RUN cd /usr/src/modsecurity \
     && make \
     && make install
 
-RUN apt-get update && apt-get install -y wget && wget http://nginx.org/download/nginx-1.25.3.tar.gz && tar -xzf nginx-1.25.3.tar.gz && rm nginx-1.25.3.tar.gz
+RUN apt-get update && apt-get install -y wget && wget http://nginx.org/download/nginx-1.25.4.tar.gz && tar -xzf nginx-1.25.4.tar.gz && rm nginx-1.25.4.tar.gz
 
 RUN git clone https://github.com/SpiderLabs/ModSecurity-nginx /usr/src/ModSecurity-nginx
 
-RUN cd /nginx-1.25.3 \
-    && ./configure --with-compat --with-openssl=/usr/include/openssl/ --add-dynamic-module=/usr/src/ModSecurity-nginx \
+RUN cd /nginx-1.25.4 \
+    && ./configure --with-compat --with-ld-opt='-lpcre' --with-openssl=/usr/include/openssl/ --add-dynamic-module=/usr/src/ModSecurity-nginx \
     && make && make install \
     && make modules \
     && cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
