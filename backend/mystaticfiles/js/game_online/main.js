@@ -21,6 +21,8 @@ let wss;
 
 const keys = {};
 
+var position = null;
+
 var screenShake = ScreenShake()
 
 game_running = false
@@ -51,6 +53,11 @@ export function start()
 	{
 		const data = JSON.parse(event.data);
 		console.log('data type:', data.type)
+		if (data.type === 'set_position')
+		{
+			position = data.value;
+			console.log('I am at position', position);
+		}
 		if (data.type === 'game_start')
 		{
 			console.log('Starting game . . .');
@@ -135,13 +142,16 @@ function initDisplay()
 }
 
 function handleKeyDown(event) {
-	keys[event.code] = true;
-	sendMessageToServer({type: 'player_key_down', value: event.code})
+	if (!keys[event.code])
+	{
+		keys[event.code] = true;
+		sendMessageToServer({playerpos: position, type: 'player_key_down', value: event.code})
+	}
 }
 
 function handleKeyUp(event) {
 	keys[event.code] = false;
-	sendMessageToServer({type: 'player_key_up', value: event.code})
+	sendMessageToServer({playerpos: position, type: 'player_key_up', value: event.code})
 }
 
 function initControls(){
@@ -209,14 +219,21 @@ function winning()
 
 function handle_input(player_one, player_two)
 {
-	if (keys['ArrowUp'])
-		player_two.move(true);
-	if (keys['ArrowDown'])
-		player_two.move(false);
 	if (keys['KeyW'])
-		player_one.move(true);
+	{
+		if (position == 1)
+			player_one.move(true);
+		else if (position == 2)
+			player_two.move(true);
+	}
 	if (keys['KeyS'])
-		player_one.move(false);
+	{
+		if (position == 1)
+			player_one.move(false);
+		else if (position == 2)
+			player_two.move(false);
+	}
+
 	// if (keys['KeyD'])
 	// 	player_one.use_power(powerup_manager);
 	// if (keys['ArrowLeft'])
