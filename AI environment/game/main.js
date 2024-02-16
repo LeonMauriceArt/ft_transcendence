@@ -6,36 +6,14 @@ import {Ball} from './Ball.js'
 import * as constants from './Constants.js';
 import PongAI from './PongAI.js';
 
-window.onload = async () => {
-    const pongAI = new PongAI();
-    console.log("L'IA Pong a été initialisée.");
-    // Utiliser await pour attendre le résumé du modèle
-    await pongAI.model.summary();
-};
-
-class GameState {
-    constructor(ballPosition, playerOnePosition, playerTwoPosition, playerOneScore, playerTwoScore) {
-        this.ballPosition = ballPosition;
-        this.playerOnePosition = playerOnePosition;
-        this.playerTwoPosition = playerTwoPosition;
-        this.playerOneScore = playerOneScore;
-        this.playerTwoScore = playerTwoScore;
-    }
-    update(ballPosition, playerOnePosition, playerTwoPosition, playerOneScore, playerTwoScore) {
-        this.ballPosition = ballPosition;
-        this.playerOnePosition = playerOnePosition;
-        this.playerTwoPosition = playerTwoPosition;
-        this.playerOneScore = playerOneScore;
-        this.playerTwoScore = playerTwoScore;
-    }
-}
-
 var camera, renderer, player_one, 
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont;
 
-const keys = {};
+let currentStateForAI = [];
 
+const keys = {};
+const pongAI = new PongAI();
 const fontlLoader = new FontLoader();
 fontlLoader.load('../node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
 function (loadedFont){
@@ -43,9 +21,10 @@ function (loadedFont){
 	init()
 	initArena()
 	initControls()
+	getCurrentStatePeriodically()
+	updateCurrentStateForAI()
 	animate()
 });
-
 
 function handleKeyDown(event) {
 	keys[event.code] = true;
@@ -76,7 +55,6 @@ function init()
 		1000
 		);
 		camera.position.z = constants.CAMERA_STARTPOS_Z
-		
 }
 
 function initArena()
@@ -148,6 +126,48 @@ function winning()
 	player_two.reset()
 }
 
+function getCurrentStatePeriodically() {
+    setInterval(() => {
+        const currentState = getCurrentState(ball, player_one, player_two);
+        console.log(currentState);
+    }, 2000);
+}
+
+function getCurrentState(ball, playerPaddle, AiPaddle) {
+    // Extrait les informations de la balle
+    const ballPositionX = ball.mesh.position.x;
+    const ballPositionY = ball.mesh.position.y;
+    const ballVelocityX = ball.x_vel;
+    const ballVelocityY = ball.y_vel;
+    const playerPaddlePositionX = playerPaddle.mesh.position.x;
+    const playerPaddlePositionY = playerPaddle.mesh.position.y;
+	const AiPaddlePositionX = AiPaddle.mesh.position.x;
+	const AiPaddlePositionY = AiPaddle.mesh.position.y;
+
+    const currentState = [
+        ballPositionX, ballPositionY, 
+        ballVelocityX, ballVelocityY, 
+        playerPaddlePositionX, playerPaddlePositionY,
+		AiPaddlePositionX, AiPaddlePositionY
+    ];
+    return currentState;
+}
+
+function updateCurrentStateForAI() {
+    setInterval(() => {
+        currentStateForAI = getCurrentState(ball, player_one, player_two);
+    }, 1000);
+}
+
+async function decideAndApplyAction() {
+    if (currentStateForAI.length > 0) {
+        pongAI.decideAction(currentStateForAI).then(action => {
+            console.log("Action décidée par l'IA:", action);
+        }).catch(error => {
+            console.error("Erreur lors de la décision de l'action:", error);
+        });
+    }
+}
 //GameLoop
 function animate() {
 	
@@ -168,6 +188,7 @@ function animate() {
 	if (keys['KeyS']) {
 		player_one.move(false);
 	}
+	decideAndApplyAction();
 	render();
 }
 
