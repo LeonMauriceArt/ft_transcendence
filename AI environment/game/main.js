@@ -5,6 +5,7 @@ import {Player} from './Player.js'
 import {Ball} from './Ball.js'
 import * as constants from './Constants.js';
 import PongAI from './PongAI.js';
+import { train } from '@tensorflow/tfjs';
 
 var camera, renderer, player_one, 
 player_two, ball, scene, 
@@ -13,7 +14,8 @@ player_one_score_text, player_two_score_text, droidFont;
 let currentStateForAI = [];
 
 const keys = {};
-const pongAI = new PongAI();
+const pongAI1 = new PongAI();
+const pongAI2 = new PongAI();
 const fontlLoader = new FontLoader();
 fontlLoader.load('../node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
 function (loadedFont){
@@ -21,7 +23,6 @@ function (loadedFont){
 	init()
 	initArena()
 	initControls()
-	getCurrentStatePeriodically()
 	updateCurrentStateForAI()
 	animate()
 });
@@ -93,6 +94,8 @@ function handle_scores()
 	if (ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 	{
 		player_one.score_point()
+		pongAI1.reward(-200);
+		pongAI2.reward(200);
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_one_score_text)
@@ -100,6 +103,8 @@ function handle_scores()
 	else
 	{
 		player_two.score_point()
+		pongAI1.reward(-200);
+		pongAI2.reward(200);
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_two_score_text)
@@ -109,6 +114,35 @@ function handle_scores()
 	player_two.reset()
 	if (player_one.score == constants.WINNING_SCORE || player_two.score == constants.WINNING_SCORE)
 		winning()
+}
+
+async function trainModel(aiPong) {
+    if (aiPong.memory.length === 0) {
+        return;
+    }
+	aiPong.displayMemory()
+    const statesTensor = tf.tensor2d(aiPong.memory.map(item => item.state));
+	const actionsTensor = tf.tensor1d(aiPong.memory.map(item => item.action), 'int32');
+	const actionsOneHot = tf.oneHot(actionsTensor, 3);
+    const rewardsTensor = tf.tensor1d(aiPong.memory.map(item => item.reward));
+	const currentQValues = aiPong.model.predict(statesTensor);
+	const qTargets = currentQValues.clone();
+	actionsOneHot.arraySync().forEach((actionIndex, i) => {
+    const reward = rewardsTensor.arraySync()[i];
+    qTargets.bufferSync().set(reward, i, actionIndex);
+	});
+	await aiPong.model.fit(statesTensor, qTargets, {
+		epochs: 10,
+		callbacks: {
+			onEpochEnd: (epoch, logs) => {
+				console.log(`Époque ${epoch}: perte = ${logs.loss}`);
+			}
+		}
+	});
+	aiPong.dis
+    statesTensor.dispose();
+    actionsTensor.dispose();
+    rewardsTensor.dispose();
 }
 
 function winning()
@@ -124,14 +158,10 @@ function winning()
 	scene.add(player_one_score_text)
 	player_one.reset()
 	player_two.reset()
+	trainModel(pongAI1);
+	trainModel(pongAI2);
 }
 
-function getCurrentStatePeriodically() {
-    setInterval(() => {
-        const currentState = getCurrentState(ball, player_one, player_two);
-        console.log(currentState);
-    }, 2000);
-}
 
 function getCurrentState(ball, playerPaddle, AiPaddle) {
     // Extrait les informations de la balle
@@ -173,32 +203,58 @@ function applyAction(action, aiPaddle) {
     }
 }
 
-async function decideAndApplyAction(aiPaddle) {
+async function decideAndApplyAction(aiPaddle ,aiPong) {
     if (currentStateForAI.length > 0) {
-        pongAI.decideAction(currentStateForAI).then(action => {
-            console.log("Action décidée par l'IA:", action);
-            applyAction(action, aiPaddle); // Applique l'action décidée à l'IA paddle
+        aiPong.decideAction(currentStateForAI).then(action => {
+            applyAction(action, aiPaddle);
+			aiPong.remember(currentStateForAI, action)
+			checkForRewards(aiPong);
         }).catch(error => {
             console.error("Erreur lors de la décision de l'action:", error);
         });
     }
 }
+
+function checkForRewards(aiPong) {
+    // Assurez-vous qu'il y a au moins deux états enregistrés pour la comparaison
+    if (aiPong.memory.length >= 2) {
+        const lastIndex = aiPong.memory.length - 1;
+        const lastState = aiPong.memory[lastIndex].state;
+        const secondLastState = aiPong.memory[lastIndex - 1].state;
+
+		if (lastState != secondLastState) {
+        	// Utiliser les indices basés sur la structure fournie
+        	const ballYPosLast = lastState[1];
+        	const aiPaddleYPosLast = lastState[7];
+        	const ballYPosSecondLast = secondLastState[1];
+        	const aiPaddleYPosSecondLast = secondLastState[7];
+
+        	// Calculer la distance à la balle pour les deux états
+        	const distanceLast = Math.abs(ballYPosLast - aiPaddleYPosLast);
+        	const distanceSecondLast = Math.abs(ballYPosSecondLast - aiPaddleYPosSecondLast);
+
+        	// Vérifier si le paddle de l'IA s'est rapproché de la balle
+        	if (distanceLast < distanceSecondLast) {
+        	    aiPong.reward(500);
+        	}
+			else if (distanceLast > distanceSecondLast)
+				aiPong.reward(-500);
+			else
+				aiPong.reward(500);
+		}
+    }
+}
+
 //GameLoop
 function animate() {
 	
 	requestAnimationFrame( animate );
 
-	ball.update(player_one, player_two);
+	ball.update(player_one, player_two, pongAI1, pongAI2);
 	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
-	handle_scores()
-	decideAndApplyAction(player_two);
-	pongAI.remember()
-	if (keys['KeyW']) {
-		player_one.move(true);
-	}
-	if (keys['KeyS']) {
-		player_one.move(false);
-	}
+		handle_scores()
+	decideAndApplyAction(player_two, pongAI1);
+	decideAndApplyAction(player_one, pongAI2);
 	render();
 }
 

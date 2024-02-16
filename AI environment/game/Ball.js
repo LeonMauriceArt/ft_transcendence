@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-
+import PongAI from './PongAI.js';
 import * as constants from './Constants.js';
 
 export class Ball
@@ -10,6 +10,7 @@ export class Ball
 		this.x_vel = constants.BALL_SPEED * -1;
 		this.y_vel = 0;
 		this.color = 0xffffff;
+		this.collision = 0
 		this.geometry = new THREE.SphereGeometry(constants.BALL_RADIUS, 10, 10);
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 		this.mesh.position.set(0, 0, 0);
@@ -46,7 +47,7 @@ export class Ball
 		this.x_vel = constants.BALL_SPEED
 		this.timer.stop()
 	}
-	update(player_one, player_two)
+	update(player_one, player_two, ai1, ai2)
 	{
 		if(this.timer.running)
 		{
@@ -56,14 +57,14 @@ export class Ball
 		}
 		else
 		{
-			this.handle_ball_collision(player_one, player_two)
+			this.handle_ball_collision(player_one, player_two, ai1, ai2)
 			this.mesh.position.x += this.x_vel
 			this.mesh.position.y += this.y_vel
 			this.light.position.set(this.mesh.position.x, this.mesh.position.y)
 		}
 	}
 
-	handle_ball_collision(player_one, player_two)
+	handle_ball_collision(player_one, player_two, ai1, ai2)
 	{
 		if (this.mesh.position.y + constants.BALL_RADIUS > constants.GAME_AREA_HEIGHT)
 		{
@@ -87,6 +88,8 @@ export class Ball
 					var reduction_factor = (constants.PADDLE_HEIGHT / 2) / this.speed
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
+					this.collision = 1;
+					ai2.reward(200);
 				}
 			}
 		}
@@ -102,6 +105,8 @@ export class Ball
 					var reduction_factor = (constants.PADDLE_HEIGHT / 2) / this.speed
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
+					this.collision = -1;
+					ai1.reward(200);
 				}
 			}
 		}
