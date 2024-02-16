@@ -158,11 +158,26 @@ function updateCurrentStateForAI() {
         currentStateForAI = getCurrentState(ball, player_one, player_two);
     }, 1000);
 }
+function applyAction(action, aiPaddle) {
+    switch(action) {
+        case 0:
+            aiPaddle.move(true);
+            break;
+        case 1:
+            aiPaddle.move(false);
+            break;
+        case 2:
+            break;
+        default:
+            console.log("Action inconnue:", action);
+    }
+}
 
-async function decideAndApplyAction() {
+async function decideAndApplyAction(aiPaddle) {
     if (currentStateForAI.length > 0) {
         pongAI.decideAction(currentStateForAI).then(action => {
             console.log("Action décidée par l'IA:", action);
+            applyAction(action, aiPaddle); // Applique l'action décidée à l'IA paddle
         }).catch(error => {
             console.error("Erreur lors de la décision de l'action:", error);
         });
@@ -175,20 +190,15 @@ function animate() {
 
 	ball.update(player_one, player_two);
 	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
-		handle_scores()
-	if (keys['ArrowUp']) {
-		player_two.move(true);
-	}
-	if (keys['ArrowDown']) {
-		player_two.move(false);
-	}
+	handle_scores()
+	decideAndApplyAction(player_two);
+	pongAI.remember()
 	if (keys['KeyW']) {
 		player_one.move(true);
 	}
 	if (keys['KeyS']) {
 		player_one.move(false);
 	}
-	decideAndApplyAction();
 	render();
 }
 

@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 class PongAI {
     constructor() {
         this.model = this.createModel();
+        this.memory = [];
     }
 
     createModel() {
@@ -16,6 +17,10 @@ class PongAI {
             metrics: ['accuracy']
         });
         return model;
+    }
+
+    remember(state, action, reward, nextState) {
+        this.memory.push({ state, action, reward, nextState });
     }
 
     async train() {
