@@ -89,7 +89,8 @@ export class Ball
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
 					this.collision = 1;
-					ai2.reward(200);
+					ai1.reward(500);
+					console.log("Player 1 hit the ball");
 				}
 			}
 		}
@@ -106,7 +107,8 @@ export class Ball
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
 					this.collision = -1;
-					ai1.reward(200);
+					console.log("Player 2 hit the ball");
+					ai2.reward(500);
 				}
 			}
 		}

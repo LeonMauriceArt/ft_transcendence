@@ -5,7 +5,6 @@ import {Player} from './Player.js'
 import {Ball} from './Ball.js'
 import * as constants from './Constants.js';
 import PongAI from './PongAI.js';
-import { train } from '@tensorflow/tfjs';
 
 var camera, renderer, player_one, 
 player_two, ball, scene, 
@@ -94,8 +93,9 @@ function handle_scores()
 	if (ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 	{
 		player_one.score_point()
-		pongAI1.reward(-200);
-		pongAI2.reward(200);
+		pongAI1.reward(200);
+		pongAI2.reward(-500);
+		console.log("Player 1 scored")
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_one_score_text)
@@ -103,8 +103,9 @@ function handle_scores()
 	else
 	{
 		player_two.score_point()
-		pongAI1.reward(-200);
+		pongAI1.reward(-500);
 		pongAI2.reward(200);
+		console.log("Player 2 scored")
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_two_score_text)
@@ -123,11 +124,10 @@ async function trainModel(aiPong) {
 	aiPong.displayMemory()
     const statesTensor = tf.tensor2d(aiPong.memory.map(item => item.state));
 	const actionsTensor = tf.tensor1d(aiPong.memory.map(item => item.action), 'int32');
-	const actionsOneHot = tf.oneHot(actionsTensor, 3);
     const rewardsTensor = tf.tensor1d(aiPong.memory.map(item => item.reward));
 	const currentQValues = aiPong.model.predict(statesTensor);
 	const qTargets = currentQValues.clone();
-	actionsOneHot.arraySync().forEach((actionIndex, i) => {
+	actionsTensor.arraySync().forEach((actionIndex, i) => {
     const reward = rewardsTensor.arraySync()[i];
     qTargets.bufferSync().set(reward, i, actionIndex);
 	});
@@ -139,7 +139,6 @@ async function trainModel(aiPong) {
 			}
 		}
 	});
-	aiPong.dis
     statesTensor.dispose();
     actionsTensor.dispose();
     rewardsTensor.dispose();
@@ -161,7 +160,6 @@ function winning()
 	trainModel(pongAI1);
 	trainModel(pongAI2);
 }
-
 
 function getCurrentState(ball, playerPaddle, AiPaddle) {
     // Extrait les informations de la balle
@@ -221,6 +219,14 @@ function checkForRewards(aiPong) {
         const lastIndex = aiPong.memory.length - 1;
         const lastState = aiPong.memory[lastIndex].state;
         const secondLastState = aiPong.memory[lastIndex - 1].state;
+		const lastAction = aiPong.memory[lastIndex].action; // Supposons que l'action est stockée ici
+
+        // Utiliser les indices basés sur la structure de lastState
+        const aiPaddleYPosLast = lastState[7];
+
+		if ((aiPaddleYPosLast >= 40 && lastAction === 0) || (aiPaddleYPosLast <= -39 && lastAction === 1)) {
+            aiPong.reward(-500);
+        }
 
 		if (lastState != secondLastState) {
         	// Utiliser les indices basés sur la structure fournie
@@ -234,14 +240,14 @@ function checkForRewards(aiPong) {
         	const distanceSecondLast = Math.abs(ballYPosSecondLast - aiPaddleYPosSecondLast);
 
         	// Vérifier si le paddle de l'IA s'est rapproché de la balle
-        	if (distanceLast < distanceSecondLast) {
+        	if (distanceLast < distanceSecondLast || (distanceLast == distanceSecondLast && distanceLast <= 10)) {
         	    aiPong.reward(500);
         	}
-			else if (distanceLast > distanceSecondLast)
+			else if (distanceLast >= distanceSecondLast && distanceLast > 10){
 				aiPong.reward(-500);
-			else
-				aiPong.reward(500);
+			}
 		}
+
     }
 }
 
@@ -253,8 +259,8 @@ function animate() {
 	ball.update(player_one, player_two, pongAI1, pongAI2);
 	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 		handle_scores()
-	decideAndApplyAction(player_two, pongAI1);
-	decideAndApplyAction(player_one, pongAI2);
+	decideAndApplyAction(player_one, pongAI1);
+	decideAndApplyAction(player_two, pongAI2);
 	render();
 }
 
