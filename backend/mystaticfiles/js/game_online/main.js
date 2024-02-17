@@ -52,7 +52,6 @@ export function start()
 	wss.onmessage = (event) => 
 	{
 		const data = JSON.parse(event.data);
-		console.log('data type:', data.type)
 		if (data.type === 'set_position')
 		{
 			position = data.value;
@@ -65,6 +64,11 @@ export function start()
 			ball.launch();
 			initControls();
 		}
+		if (data.type === 'player_key_up' || data.type === 'player_key_down')
+		{
+			console.log('player', data.position, 'movement gonna change')
+				player_move_handler(data.type, data.position, data.key);
+		}
 	};
 	wss.onclose = () => 
 	{
@@ -73,6 +77,40 @@ export function start()
 	if (id !==null)
 	cancelAnimationFrame(id);
 	animate();
+}
+
+function player_move_handler(type, dataposition, key)
+{
+	if (dataposition == 1)
+	{
+		if (type == 'player_key_down')
+		{
+			player_one.is_moving = true;
+			if (key == 'KeyW')
+				player_one.moving_dir = true;
+			else
+				player_one.moving_dir = false;		
+		}
+		else if (type == 'player_key_up')
+		{
+			player_one.is_moving = false;
+		}
+	}
+	else if (dataposition == 2)
+	{
+		if (type == 'player_key_down')
+		{
+			player_two.is_moving = true;
+			if (key == 'KeyW')
+				player_two.moving_dir = true;
+			else
+				player_two.moving_dir = false;
+		}
+		else if (type == 'player_key_up')
+		{
+			player_two.is_moving = false;
+		}
+	}
 }
 
 function initDisplay()
@@ -142,7 +180,7 @@ function initDisplay()
 }
 
 function handleKeyDown(event) {
-	if (!keys[event.code])
+	if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
 	{
 		keys[event.code] = true;
 		sendMessageToServer({playerpos: position, type: 'player_key_down', value: event.code})
@@ -150,8 +188,11 @@ function handleKeyDown(event) {
 }
 
 function handleKeyUp(event) {
-	keys[event.code] = false;
-	sendMessageToServer({playerpos: position, type: 'player_key_up', value: event.code})
+	if (event.code == 'KeyW' || event.code == 'KeyS')
+	{
+		keys[event.code] = false;
+		sendMessageToServer({playerpos: position, type: 'player_key_up', value: event.code})
+	}
 }
 
 function initControls(){
@@ -217,27 +258,22 @@ function winning()
 	game_running = true
 }
 
-function handle_input(player_one, player_two)
+function move_players()
 {
-	if (keys['KeyW'])
+	if (player_one.is_moving)
 	{
-		if (position == 1)
-			player_one.move(true);
-		else if (position == 2)
-			player_two.move(true);
+		if (player_one.moving_dir)
+			player_one.move(true)
+		else
+			player_one.move(false)
 	}
-	if (keys['KeyS'])
+	if (player_two.is_moving)
 	{
-		if (position == 1)
-			player_one.move(false);
-		else if (position == 2)
-			player_two.move(false);
+		if (player_two.moving_dir)
+			player_two.move(true)
+		else
+			player_two.move(false)
 	}
-
-	// if (keys['KeyD'])
-	// 	player_one.use_power(powerup_manager);
-	// if (keys['ArrowLeft'])
-	// 	player_two.use_power(powerup_manager);
 }
 
 //GameLoop
@@ -251,7 +287,7 @@ function animate() {
 		ball.update(player_one, player_two);
 		if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 		handle_scores()
-		handle_input(player_one, player_two);
+		move_players();
 	}
 	else
 	{

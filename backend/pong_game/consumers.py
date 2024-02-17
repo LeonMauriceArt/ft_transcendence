@@ -33,6 +33,9 @@ class GameManager:
 			if player_id in self.game_rooms[room_name]:
 				print('#GAMEMANAGER# Removing player', player_id, 'from room', room_name)
 				self.game_rooms[room_name].remove(player_id)
+				if (self.room_len(room_len) == 0):
+					print('#GAMEMANAGER# Removing room', room_name)
+					self.game_rooms.remove(room_name)
 
 	def players_in_room(self, room_name):
 		print('#GAMEMANAGER# Number of players in', room_name, '=', len(self.game_rooms[room_name]))
@@ -41,7 +44,11 @@ class GameManager:
 	def room_len(self, room_name):
 		return(len(self.game_rooms[room_name]))
 
-# There is one dedicated GameConsumer per player
+	def display_all_rooms(self):
+		for room, players in self.game_rooms.items():
+			print('-----GAME MANAGER------', f"Room: {room}, Players: {', '.join(players)}")
+
+
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
 	update_lock = None
@@ -55,11 +62,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.game_manager.add_player_to_room(self.game_room, self.player_id)
 		print('ROOM LEN FOR POSITION', self.game_manager.room_len(self.game_room))
 		if self.game_manager.room_len(self.game_room) == 1:
+			self.position = 1
 			await self.send(text_data=json.dumps({
 				'type':'set_position',
 				'value':'1'
 			}))
 		else:
+			self.position = 2
 			await self.send(text_data=json.dumps({
 				'type':'set_position',
 				'value':'2'
@@ -76,6 +85,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				'player_id': self.player_id,
 			}
 		)
+
+		self.game_manager.display_all_rooms()
 
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
 			await self.channel_layer.group_send(
@@ -99,27 +110,54 @@ class GameConsumer(AsyncWebsocketConsumer):
 		data_type = text_data_json.get("type", "")
 		data_value = text_data_json.get("value", "")
 		print('RECEIVING DATA TYPE:', data_type, '| VALUE:', data_value)
-
-	async def game_state(self, event):
-		game_state_data = event.get('data', {})
+		if data_type == 'player_key_down':
+			await self.channel_layer.group_send(
+				self.game_room,
+				{
+					'type': data_type,
+					'position': self.position,
+					'value': data_value
+				}
+			)
+		if data_type == 'player_key_up':
+			await self.channel_layer.group_send(
+				self.game_room,
+				{
+					'type': data_type,
+					'position': self.position,
+					'value': data_value
+				}
+			)
 
 	async def player_join(self, event):
-		print('HANDLING')
+		print(event.get('type'))
+
+	async def player_left(self, event):
+		print('PLAYER LEFT')
 
 	async def game_start(self, event):
 		await self.send(text_data=json.dumps({
 			'type':'game_start'
 		}))
 
+	async def player_key_down(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('type'),
+			'position': event.get('position'),
+			'key': event.get('value')
+		}))
+
+	async def player_key_up(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('type'),
+			'position': event.get('position'),
+			'key': event.get('value')
+		}))
+
 	async def game_loop(self):
 		async with await self.get_update_lock():
 			while True:
 				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
-				game_state_update = {}  # Calculate your game state update
-				await self.channel_layer.group_send(self.game_room, {
-					'type': 'game_state',
-					'data': game_state_update,
-				})
 
 	async def get_update_lock(self):
 		if self.update_lock is None:
