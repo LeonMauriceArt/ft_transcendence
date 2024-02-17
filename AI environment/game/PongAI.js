@@ -13,7 +13,7 @@ class PongAI {
     
         model.add(tf.layers.dense({units: 128, activation: 'relu', inputShape: [9]}));
         model.add(tf.layers.dense({units: 256, activation: 'relu'}));
-        model.add(tf.layers.dense({units: 64, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 256, activation: 'relu'}));
         model.add(tf.layers.dense({units: 3, activation: 'softmax'}));
     
         model.compile({

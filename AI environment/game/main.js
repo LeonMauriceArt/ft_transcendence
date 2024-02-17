@@ -96,7 +96,6 @@ function handle_scores()
 		player_one.score_point()
 		pongAI1.reward(200);
 		pongAI2.reward(-500);
-		console.log("Player 1 scored")
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_one_score_text)
@@ -106,7 +105,6 @@ function handle_scores()
 		player_two.score_point()
 		pongAI1.reward(-500);
 		pongAI2.reward(200);
-		console.log("Player 2 scored")
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_two_score_text)
@@ -118,32 +116,45 @@ function handle_scores()
 		winning()
 }
 
-async function trainModel(aiPong) {
+async function trainModel(aiPong, discountRate = 0.95) {
     if (aiPong.memory.length === 0) {
         return;
     }
-	aiPong.displayMemory()
     const statesTensor = tf.tensor2d(aiPong.memory.map(item => item.state));
-	const actionsTensor = tf.tensor1d(aiPong.memory.map(item => item.action), 'int32');
+    const actionsTensor = tf.tensor1d(aiPong.memory.map(item => item.action), 'int32');
     const rewardsTensor = tf.tensor1d(aiPong.memory.map(item => item.reward));
+    const nextStatesTensor = tf.tensor2d(aiPong.memory.map(item => item.nextState));
+
+
 	const currentQValues = aiPong.model.predict(statesTensor);
-	const qTargets = currentQValues.clone();
-	actionsTensor.arraySync().forEach((actionIndex, i) => {
-    const reward = rewardsTensor.arraySync()[i];
-    qTargets.bufferSync().set(reward, i, actionIndex);
-	});
-	await aiPong.model.fit(statesTensor, qTargets, {
-		epochs: 10,
-		callbacks: {
-			onEpochEnd: (epoch, logs) => {
-				console.log(`Époque ${epoch}: perte = ${logs.loss}`);
-			}
-		}
-	});
+    const nextQValues = aiPong.model.predict(nextStatesTensor);
+    const maxNextQValues = nextQValues.max(1).arraySync();
+    const qTargets = currentQValues.clone();
+    for (let i = 0; i < actionsTensor.shape[0]; i++) {
+        const actionIndex = actionsTensor.arraySync()[i];
+        const reward = rewardsTensor.arraySync()[i];
+        const maxNextQValue = maxNextQValues[i];
+        const updatedQValue = reward + discountRate * maxNextQValue;
+        qTargets.bufferSync().set(updatedQValue, i, actionIndex);
+    }
+
+    await aiPong.model.fit(statesTensor, qTargets, {
+        epochs: 50,
+        callbacks: {
+            onEpochEnd: (epoch, logs) => {
+                console.log(`Époque ${epoch}: perte = ${logs.loss}`);
+            }
+        }
+    });
+
     statesTensor.dispose();
     actionsTensor.dispose();
     rewardsTensor.dispose();
+    nextStatesTensor.dispose();
+    nextQValues.dispose();
+    qTargets.dispose();
 }
+
 
 function winning()
 {
@@ -191,18 +202,6 @@ function updateCurrentStateForAI() {
     }, 1000);
 }
 
-// async function decideAndApplyAction(aiPaddle ,aiPong) {
-//     if (currentStateForAI.length > 0) {
-//         aiPong.decideAction(currentStateForAI).then(action => {
-//             applyAction(action, aiPaddle);
-// 			aiPong.remember(currentStateForAI, action)
-// 			checkForRewards(aiPong);
-//         }).catch(error => {
-//             console.error("Erreur lors de la décision de l'action:", error);
-//         });
-//     }
-// }
-
 let lastDecisionTime = Date.now();
 
 async function decideAndApplyAction(aiPaddle, aiPong) {
@@ -242,17 +241,14 @@ function checkForRewards(aiPong) {
         }
 
 		if (lastState != secondLastState) {
-        	// Utiliser les indices basés sur la structure fournie
         	const ballYPosLast = lastState[1];
         	const aiPaddleYPosLast = lastState[7];
         	const ballYPosSecondLast = secondLastState[1];
         	const aiPaddleYPosSecondLast = secondLastState[7];
 
-        	// Calculer la distance à la balle pour les deux états
         	const distanceLast = Math.abs(ballYPosLast - aiPaddleYPosLast);
         	const distanceSecondLast = Math.abs(ballYPosSecondLast - aiPaddleYPosSecondLast);
 
-        	// Vérifier si le paddle de l'IA s'est rapproché de la balle
         	if (distanceLast < distanceSecondLast || (distanceLast == distanceSecondLast && distanceLast <= 10)) {
         	    aiPong.reward(500);
         	}
