@@ -5,6 +5,7 @@ import {Player} from './Player.js'
 import {Ball} from './Ball.js'
 import * as constants from './Constants.js';
 import PongAI from './PongAI.js';
+import { getNextState } from './NextState.js';
 
 var camera, renderer, player_one, 
 player_two, ball, scene, 
@@ -171,42 +172,54 @@ function getCurrentState(ball, playerPaddle, AiPaddle) {
     const playerPaddlePositionY = playerPaddle.mesh.position.y;
 	const AiPaddlePositionX = AiPaddle.mesh.position.x;
 	const AiPaddlePositionY = AiPaddle.mesh.position.y;
+	const nextState = [];
 
     const currentState = [
         ballPositionX, ballPositionY, 
         ballVelocityX, ballVelocityY, 
         playerPaddlePositionX, playerPaddlePositionY,
-		AiPaddlePositionX, AiPaddlePositionY
+		AiPaddlePositionX, AiPaddlePositionY,
+		nextState
     ];
     return currentState;
 }
+
 
 function updateCurrentStateForAI() {
     setInterval(() => {
         currentStateForAI = getCurrentState(ball, player_one, player_two);
     }, 1000);
 }
-function applyAction(action, aiPaddle) {
-    switch(action) {
-        case 0:
-            aiPaddle.move(true);
-            break;
-        case 1:
-            aiPaddle.move(false);
-            break;
-        case 2:
-            break;
-        default:
-            console.log("Action inconnue:", action);
-    }
-}
 
-async function decideAndApplyAction(aiPaddle ,aiPong) {
-    if (currentStateForAI.length > 0) {
+// async function decideAndApplyAction(aiPaddle ,aiPong) {
+//     if (currentStateForAI.length > 0) {
+//         aiPong.decideAction(currentStateForAI).then(action => {
+//             applyAction(action, aiPaddle);
+// 			aiPong.remember(currentStateForAI, action)
+// 			checkForRewards(aiPong);
+//         }).catch(error => {
+//             console.error("Erreur lors de la décision de l'action:", error);
+//         });
+//     }
+// }
+
+let lastDecisionTime = Date.now();
+
+async function decideAndApplyAction(aiPaddle, aiPong) {
+    const now = Date.now();
+
+    // Utilisez la propriété lastDecisionTime de l'instance de PongAI
+    if (now - aiPong.lastDecisionTime >= 1000 && currentStateForAI.length > 0) {
+        aiPong.lastDecisionTime = now; // Mise à jour du temps pour la dernière décision de cette IA spécifique
         aiPong.decideAction(currentStateForAI).then(action => {
-            applyAction(action, aiPaddle);
-			aiPong.remember(currentStateForAI, action)
-			checkForRewards(aiPong);
+			aiPong.currentAction = action;
+			var nextState = [];
+			if(aiPong === pongAI1)
+				nextState = getNextState(currentStateForAI, action, pongAI2.currentAction, constants.PLAYER_SPEED);
+			else if (aiPong === pongAI2)
+				nextState = getNextState(currentStateForAI, action,  pongAI1.currentAction, constants.PLAYER_SPEED);
+            aiPong.remember(currentStateForAI, action, 0, nextState);
+            checkForRewards(aiPong);
         }).catch(error => {
             console.error("Erreur lors de la décision de l'action:", error);
         });
@@ -255,12 +268,35 @@ function checkForRewards(aiPong) {
 function animate() {
 	
 	requestAnimationFrame( animate );
-
+	switch(pongAI1.currentAction) {
+		case 0:
+			player_one.move(true);
+			break;
+		case 1:
+			player_one.move(false);
+			break;
+		case 2:
+			break;
+		default:
+			console.error("Action non reconnue pour le joueur 1");
+	}
+	switch(pongAI2.currentAction) {
+		case 0:
+			player_two.move(true);
+			break;
+		case 1:
+			player_two.move(false);
+			break;
+		case 2:
+			break;
+		default:
+			console.error("Action non reconnue pour le joueur 2");
+	}
 	ball.update(player_one, player_two, pongAI1, pongAI2);
 	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 		handle_scores()
-	decideAndApplyAction(player_one, pongAI1);
 	decideAndApplyAction(player_two, pongAI2);
+	decideAndApplyAction(player_one, pongAI1);
 	render();
 }
 

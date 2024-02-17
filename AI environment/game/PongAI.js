@@ -4,12 +4,14 @@ class PongAI {
     constructor() {
         this.model = this.createModel();
         this.memory = [];
+        this.currentAction = 2;
+        this.lastDecisionTime = Date.now();
     }
 
     createModel() {
         const model = tf.sequential();
     
-        model.add(tf.layers.dense({units: 128, activation: 'relu', inputShape: [8]}));
+        model.add(tf.layers.dense({units: 128, activation: 'relu', inputShape: [9]}));
         model.add(tf.layers.dense({units: 256, activation: 'relu'}));
         model.add(tf.layers.dense({units: 64, activation: 'relu'}));
         model.add(tf.layers.dense({units: 3, activation: 'softmax'}));
@@ -27,11 +29,12 @@ class PongAI {
         console.log(this.memory);
     }
 
-    remember(state, action, reward) {
+    remember(state, action, reward, nextState) {
         this.memory.push({
             state: state,
             action: action,
             reward: reward,
+            nextState: nextState
         });
         const maxSize = 1000;
         if (this.memory.length > maxSize) {
