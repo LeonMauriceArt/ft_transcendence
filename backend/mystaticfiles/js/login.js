@@ -103,7 +103,7 @@ function displayErrorMessage(message){
 function hasSpecialorNumber(input){
     const specialCharRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
     const numberRegex = /\d/;
-    const letterRegex = /abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/
+    const letterRegex = /[a-zA-Z]/;
 
     const hasSpecialChar = specialCharRegex.test(input);
     const hasNumber = numberRegex.test(input);

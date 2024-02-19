@@ -83,10 +83,10 @@ export function start()
 	animate();
 }
 
-function updateGameState():
-{
+// function updateGameState():
+// {
 	
-}
+// }
 
 function player_move_handler(type, dataposition, key)
 {
