@@ -9,7 +9,7 @@ const ballVelocityXIndex = 2;
 const ballPositionYIndex = 1;
 const ballPositionXIndex = 0;
 
-function handle_ball_collision_for_nextState(nextState)
+export function handle_ball_collision_for_nextState(nextState)
 {
     if (nextState[ballPositionYIndex] + constants.BALL_RADIUS > constants.GAME_AREA_HEIGHT)
     {

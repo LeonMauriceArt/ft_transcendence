@@ -6,6 +6,7 @@ import {Ball} from './Ball.js'
 import * as constants from './Constants.js';
 import PongAI from './PongAI.js';
 import { getNextState } from './NextState.js';
+import { simulateEpisode } from './train_model.js';
 
 var camera, renderer, player_one, 
 player_two, ball, scene, 
@@ -16,6 +17,7 @@ let currentStateForAI = [];
 const keys = {};
 const pongAI1 = new PongAI();
 const pongAI2 = new PongAI();
+const pongAI3 = new PongAI();
 
 const fontlLoader = new FontLoader();
 fontlLoader.load('../node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
@@ -25,6 +27,7 @@ function (loadedFont){
 	initArena()
 	initControls()
 	updateCurrentStateForAI()
+	runTrainingSessions(pongAI2);
 	animate()
 });
 
@@ -224,7 +227,31 @@ function sample(memory, batchSize) {
     }
 }
 
-async function trainModel(aiPong, discountRate = 0.95) {
+async function runTrainingSessions(aiPong, sessionsCount = 200, displayInterval = 5) {
+    for (let i = 1; i <= sessionsCount; i++) {
+        console.log(`Début de la session d'entraînement ${i}`);
+
+        // Simuler un épisode
+        let ballPosition = { x: 0, y: 0 };
+        let ballVelocity = { x: constants.BALL_SPEED, y: constants.BALL_SPEED }; // Assurez-vous que ces valeurs sont définies correctement
+        let player1Position = { x: -constants.GAME_AREA_WIDTH / 2 + constants.PADDLE_WIDTH, y: 0 };
+        let player2Position = { x: constants.GAME_AREA_WIDTH / 2 - constants.PADDLE_WIDTH, y: 0 };
+
+        await simulateEpisode(aiPong, ballPosition, ballVelocity, player1Position, player2Position, 200); // Assurez-vous que cette fonction simule correctement un épisode
+
+        // Entraîner le modèle après chaque épisode de simulation
+		await trainModel(aiPong);
+	
+        // Afficher les informations sur l'évolution du modèle tous les 'displayInterval' entraînements
+        if (i % displayInterval === 0) {
+            console.log(`Informations après ${i} sessions d'entraînement :`);
+            console.log(`Epsilon actuel: ${aiPong.epsilon}`);
+        }
+    }
+    console.log('Entraînement terminé.');
+}
+
+export async function trainModel(aiPong, discountRate = 0.95) {
     if (aiPong.memory.length === 0) {
         return;
     }
@@ -252,11 +279,6 @@ async function trainModel(aiPong, discountRate = 0.95) {
 
     await aiPong.model.fit(statesTensor, qTargets, {
         epochs: 25,
-        callbacks: {
-            onEpochEnd: (epoch, logs) => {
-                console.log(`Époque ${epoch}: perte = ${logs.loss}`);
-            }
-        }
     });
 
     statesTensor.dispose();
@@ -265,8 +287,6 @@ async function trainModel(aiPong, discountRate = 0.95) {
     nextStatesTensor.dispose();
     nextQValues.dispose();
     qTargets.dispose();
-//	saveMemory(aiPong.memory);
-//	saveModel(aiPong.model);
 }
 
 
@@ -283,12 +303,9 @@ function winning()
 	scene.add(player_one_score_text)
 	player_one.reset()
 	player_two.reset()
-	trainModel(pongAI1);
-	trainModel(pongAI2);
 }
 
 function getCurrentState(ball, playerPaddle, AiPaddle) {
-    // Extrait les informations de la balle
     const ballPositionX = ball.mesh.position.x;
     const ballPositionY = ball.mesh.position.y;
     const ballVelocityX = ball.x_vel;
@@ -316,25 +333,34 @@ function updateCurrentStateForAI() {
     }, 1000);
 }
 
-async function decideAndApplyAction(aiPaddle, aiPong) {
-    const now = Date.now();
+// async function decideAndApplyAction(aiPaddle, aiPong) {
+//     const now = Date.now();
 
-    // Utilisez la propriété lastDecisionTime de l'instance de PongAI
-    if (now - aiPong.lastDecisionTime >= 1000 && currentStateForAI.length > 0) {
-        aiPong.lastDecisionTime = now;	
-        aiPong.decideAction(currentStateForAI).then(action => {
-			aiPong.currentAction = action;
-			var nextState = [];
-			if(aiPong === pongAI1)
-				nextState = getNextState(currentStateForAI, action, pongAI2.currentAction, constants.PLAYER_SPEED);
-			else if (aiPong === pongAI2)
-				nextState = getNextState(currentStateForAI, action,  pongAI1.currentAction, constants.PLAYER_SPEED);
-            aiPong.remember(currentStateForAI, action, 0, nextState);
-            checkForRewards(aiPong);
-        }).catch(error => {
-            console.error("Erreur lors de la décision de l'action:", error);
-        });
-    }
+//     // Utilisez la propriété lastDecisionTime de l'instance de PongAI
+//     if (now - aiPong.lastDecisionTime >= 1000 && currentStateForAI.length > 0) {
+//         aiPong.lastDecisionTime = now;	
+//         aiPong.decideAction(currentStateForAI).then(action => {
+// 			aiPong.currentAction = action;
+//         }).catch(error => {
+//             console.error("Erreur lors de la décision de l'action:", error);
+//         });
+//     }
+// }
+
+async function decideAction(aiPong, currentState) {
+    // Convertir l'état actuel en un tenseur approprié pour le modèle.
+    // Notez que `tf.tensor2d` attend un tableau de tableaux, d'où le double crochet.
+    const stateTensor = tf.tensor2d([currentState]);
+
+    // Utiliser le modèle pour prédire l'action à partir de l'état actuel.
+    const prediction = await aiPong.model.predict(stateTensor);
+
+    // Obtenir l'indice de l'action avec la plus haute probabilité.
+    aiPong.currentAction = prediction.argMax(1).dataSync()[0];
+
+    // N'oubliez pas de nettoyer les ressources pour éviter les fuites de mémoire.
+    stateTensor.dispose();
+    prediction.dispose();
 }
 
 function checkForRewards(aiPong) {
@@ -403,8 +429,8 @@ function animate() {
 	ball.update(player_one, player_two, pongAI1, pongAI2);
 	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 		handle_scores()
-	decideAndApplyAction(player_two, pongAI2);
-	decideAndApplyAction(player_one, pongAI1);
+	decideAction(pongAI2, getCurrentState(ball, player_two, player_one));
+	decideAction(pongAI1, getCurrentState(ball, player_one, player_two));
 	render();
 }
 

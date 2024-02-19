@@ -6,7 +6,7 @@ export class Ball
 	constructor()
 	{
 		this.speed = constants.BALL_SPEED
-		this.x_vel = constants.BALL_SPEED * -1;
+		this.x_vel = constants.BALL_SPEED * (Math.random() < 0.5 ? 1 : -1);
 		this.y_vel = 0;
 		this.color = 0xffffff;
 		this.collision = 0
