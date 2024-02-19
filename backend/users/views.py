@@ -14,7 +14,7 @@ def check_login(request):
             return HttpResponse(status=200)
 
 def user(request):
-	user_profiles = UserProfile.objects.all()
+	user_profiles = UserProfile.objects.all().values
 	template = loader.get_template('user.html')
 	context = { 'user_profiles': user_profiles
 	}
@@ -36,7 +36,7 @@ def submit_register(request):
 
         try:
             user_profile = UserProfile(login=login, firstName=firstName,lastName=lastName,password=password)
-            # user_profile.save()
+            user_profile.save()
             return HttpResponse(status=201)
         except IntegrityError as e:
             return HttpResponse(status=400)
