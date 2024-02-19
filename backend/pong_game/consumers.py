@@ -57,7 +57,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 		print('----USER CONNECTING TO GAME----')
 		self.player_id = str(uuid.uuid4())
 		await self.accept()
+		await self.join_game()
 
+
+	async def disconnect(self, close_code):
+		self.game_manager.remove_player_from_room(self.game_room, self.player_id)
+		await self.channel_layer.group_discard(
+			self.game_room, self.channel_name
+		)
+	
+	async def join_game():
 		self.game_room = self.game_manager.find_or_create_game_room()
 		self.game_manager.add_player_to_room(self.game_room, self.player_id)
 		print('ROOM LEN FOR POSITION', self.game_manager.room_len(self.game_room))
@@ -86,8 +95,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			}
 		)
 
-		self.game_manager.display_all_rooms()
-
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
 			await self.channel_layer.group_send(
 				self.game_room,
@@ -99,12 +106,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			print('#GAMECONSUMER# Room', self.game_room, 'full, can start game')
 			asyncio.create_task(self.game_loop())
 
-	async def disconnect(self, close_code):
-		self.game_manager.remove_player_from_room(self.game_room, self.player_id)
-		await self.channel_layer.group_discard(
-			self.game_room, self.channel_name
-		)
-	
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
 		data_type = text_data_json.get("type", "")
@@ -128,7 +129,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 					'value': data_value
 				}
 			)
+		if data_type == 'ball_update':
+			await self.channel_layer.group_send(
+				self.game_room,
+				{
+					'type': data_type,
+					'position': self.position,
+					'value': data_value
+				}
+			)
 
+#HANDLING MESSAGES
 	async def player_join(self, event):
 		print(event.get('type'))
 
@@ -153,6 +164,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'position': event.get('position'),
 			'key': event.get('value')
 		}))
+	async def ball_update(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('ball_update'),
+			'position': event.get('position'),
+			'key': event.get('value')
+		}))
+#END HANDLERS
 
 	async def game_loop(self):
 		async with await self.get_update_lock():

@@ -35,10 +35,6 @@ export class Ball
 		this.mesh.position.set(0,0,0)
 		this.light.position.set(0,0,0)
 	}
-	reverse()
-	{
-		this.x_vel *= -1
-	}
 	stop()
 	{
 		this.timer.stop();
@@ -47,11 +43,7 @@ export class Ball
 		this.light.intensity = 0
 		this.mesh.visible = false;
 	}
-	launch()
-	{
-		this.x_vel = constants.BALL_SPEED
-		this.timer.stop()
-	}
+
 	update(player_one, player_two)
 	{
 		if(this.timer.running)
@@ -69,9 +61,13 @@ export class Ball
 		}
 	}
 	
-	handle_powerup_collision(player_one, player_two, powerups)
+	get_update(x, y, x_vel, y_vel, color)
 	{
-
+		this.mesh.position.x = x
+		this.mesh.position.y = y
+		this.x_vel = x_vel
+		this.y_vel = y_vel
+		this.color = color
 	}
 
 	handle_ball_collision(player_one, player_two)
@@ -125,7 +121,6 @@ export class Ball
 			y: this.mesh.position.y,
 			x_vel: this.x_vel,
 			y_vel: this.y_vel,
-			radius: constants.BALL_RADIUS,
 			color: this.color
 		}
 	}

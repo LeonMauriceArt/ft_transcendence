@@ -69,6 +69,10 @@ export function start()
 			console.log('player', data.position, 'movement gonna change')
 				player_move_handler(data.type, data.position, data.key);
 		}
+		if (data.type === 'ball_update')
+		{
+			ball.get_update(data.x, data.y, data.x_vel, data.y_vel, data.color)
+		}
 	};
 	wss.onclose = () => 
 	{
@@ -77,6 +81,11 @@ export function start()
 	if (id !==null)
 	cancelAnimationFrame(id);
 	animate();
+}
+
+function updateGameState():
+{
+	
 }
 
 function player_move_handler(type, dataposition, key)
