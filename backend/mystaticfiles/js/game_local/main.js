@@ -10,7 +10,7 @@ import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
 import { Power_Manager } from './Powerups.js';
 
-var gameisover, camera, orbitcontrols, renderer, player_one, 
+var game_running, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
@@ -20,20 +20,13 @@ const keys = {};
 
 var screenShake = ScreenShake()
 
-gameisover = false
+game_running = false
 
 const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
 function (loadedFont){
 	droidFont = loadedFont;
-	init()
-	initArena()
-	initControls()
-	animate()
 });
-
-// function 
-
 
 function handleKeyDown(event) {
 	keys[event.code] = true;
@@ -43,14 +36,27 @@ function handleKeyUp(event) {
 	keys[event.code] = false;
 }
 
-function init()
+var id = null;
+
+export function start()
+{
+	if (id !==null)
+		cancelAnimationFrame(id);
+	initGame();
+	animate();
+}
+
+function initGame()
 {
 	//Renderer
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-	renderer.setSize(constants.WIN_WIDTH, constants.WIN_HEIGHT);
 	
-	document.body.appendChild(renderer.domElement);
+	var container = document.getElementById('canvas');
+	var w = container.offsetWidth;
+	var h = container.offsetHeight;
+	renderer.setSize(w, h);
+	container.appendChild(renderer.domElement);
 	
 	//Init Scene
 	scene = new THREE.Scene();
@@ -65,6 +71,8 @@ function init()
 		);
 		camera.position.z = constants.CAMERA_STARTPOS_Z
 		
+	initArena()
+	initControls()
 }
 
 function initArena()
@@ -170,7 +178,7 @@ function winning()
 		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
 	}
 	scene.add(winning_text, light1, light2)
-	gameisover = true
+	game_running = true
 }
 
 function handle_input(player_one, player_two)
@@ -195,7 +203,7 @@ function animate() {
 	screenShake.update(camera);
 	orbitcontrols.update();
 	
-	if (!gameisover)
+	if (!game_running)
 	{
 		// powerup_manager.update(player_one, player_two, ball, scene)
 		ball.update(player_one, player_two);
@@ -209,7 +217,7 @@ function animate() {
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 	}
 	render();
-	requestAnimationFrame( animate );
+	id = requestAnimationFrame( animate );
 }
 
 function render(){

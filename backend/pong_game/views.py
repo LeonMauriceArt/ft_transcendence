@@ -14,4 +14,7 @@ def create_game(request):
 	return render(request, 'create_game.html')
 
 def practice(request):
-	return render(request, 'practice.html')
+	return render(request, 'game_practice.html')
+
+def local(request):
+	return render(request, 'game_local.html')

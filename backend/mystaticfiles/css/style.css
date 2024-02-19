@@ -1,12 +1,12 @@
 /* Font faces */
 @font-face {
     font-family: 'PixelDogica';
-    src: url('./fonts/dogica.otf') format('opentype');
+    src: url('../fonts/dogica.otf') format('opentype');
 }
 
 @font-face {
     font-family: 'PixelMix';
-    src: url('./fonts/pixelmix.ttf') format('truetype');
+    src: url('../fonts/pixelmix.ttf') format('truetype');
 }
 
 /* Reset some default styles */
@@ -97,4 +97,12 @@ a {
     padding: 20px;
 	margin-left: 30px;
     transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+#canvas {
+    width: 800px;
+    height: 600px;
+    image-rendering: crisp-edges;
+    box-sizing: border-box;
+    border: 2px solid grey;
 }

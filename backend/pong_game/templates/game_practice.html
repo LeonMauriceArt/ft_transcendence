@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}<title>QuickMatch</title>{% endblock %}
+{% block title %}<title>Practice</title>{% endblock %}
 {% block navbar_content %}
-    <h1>QuickMatch</h1>
-	<div id="game_info_text">WAITING FOR PLAYER</div>
+    <h1>Practice</h1>
 	<script>document.addEventListener('DOMContentLoaded', function() {
-		startPongOnline();
+		startPongPractice();
 	});</script>
 	<div id="canvas"></div>
 	<button onclick="loadContent('/play/', 'content')"><a>Leave</a></button>
