@@ -6,19 +6,32 @@ function loadContent(path, elementId){
             tempElement.innerHTML = htmlContent;
 
             const newContent = tempElement.querySelector('#content').innerHTML;
-			updateHistory(path);
             document.getElementById(elementId).innerHTML = newContent;
         })
         .catch(error => console.error('Error:', error));
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-	window.addEventListener('popstate', function(event){
-		loadContent(window.location.pathname, 'content');
-	})
+document.addEventListener('DOMContentLoaded', () => {
+    const baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+    const buttons = document.getElementById('btnContainer');
 
+    for (let i = 0; i < buttons.children.length; i++)
+    {
+        const btn = buttons.children[i];
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateHistory(baseUrl + btn.getAttribute('page'));
+            loadContent(btn.getAttribute('page'), 'content');
+        });
+    }
+
+    window.addEventListener('popstate', (event) => {
+        const page = window.location.pathname.split('/').pop();
+
+        loadContent(page, 'content');
+	})
 });
 
-function updateHistory(path){
-	history.pushState({}, '', path);
+const updateHistory = (url) => {
+	history.pushState(null, null, url);
 }
