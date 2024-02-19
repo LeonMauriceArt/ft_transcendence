@@ -16,6 +16,7 @@ let currentStateForAI = [];
 const keys = {};
 const pongAI1 = new PongAI();
 const pongAI2 = new PongAI();
+
 const fontlLoader = new FontLoader();
 fontlLoader.load('../node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
 function (loadedFont){
@@ -25,6 +26,98 @@ function (loadedFont){
 	initControls()
 	updateCurrentStateForAI()
 	animate()
+});
+
+async function saveModel(model) {
+    await model.save('downloads://pong-model');
+    console.log('Modèle sauvegardé localement.');
+}
+
+function saveMemory(memory) {
+    const memoryString = JSON.stringify(memory);
+    const blob = new Blob([memoryString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'memory.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    console.log('Mémoire sauvegardée localement.');
+}
+
+async function loadModelFromFile(event, aiInstance) {
+    const file = event.target.files[0];
+    if (file) {
+        const model = await tf.loadLayersModel(URL.createObjectURL(file));
+        aiInstance.model = model;
+        console.log("Modèle chargé avec succès.");
+    }
+	else
+		console.log("Aucun fichier")
+}
+
+function loadMemoryFromFile(event, aiInstance) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const memory = JSON.parse(e.target.result);
+            aiInstance.memory = memory;
+            console.log("Mémoire chargée avec succès.");
+        };
+        reader.readAsText(file);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("saveModelButton1").addEventListener("click", function() {
+        saveModel(pongAI1.model);
+    });
+
+    document.getElementById("saveModelButton2").addEventListener("click", function() {
+        saveModel(pongAI2.model);
+    });
+
+	document.getElementById("saveMemory1").addEventListener("click", function() {
+        saveMemory(pongAI1.memory);
+    });
+
+	document.getElementById("saveMemory2").addEventListener("click", function() {
+        saveMemory(pongAI2.memory);
+    });
+
+	document.getElementById("loadModelButton1").addEventListener("click", function() {
+        document.getElementById("loadModel1").click();
+    });
+
+    document.getElementById("loadModelButton2").addEventListener("click", function() {
+        document.getElementById("loadModel2").click();
+    });
+
+    document.getElementById("loadMemoryButton1").addEventListener("click", function() {
+        document.getElementById("loadMemory1").click();
+    });
+
+    document.getElementById("loadMemoryButton2").addEventListener("click", function() {
+        document.getElementById("loadMemory2").click();
+    });
+
+    document.getElementById("loadModel1").addEventListener("change", function(event) {
+        loadModelFromFile(event, pongAI1);
+    });
+
+    document.getElementById("loadModel2").addEventListener("change", function(event) {
+        loadModelFromFile(event, pongAI2);
+    });
+
+    document.getElementById("loadMemory1").addEventListener("change", function(event) {
+        loadMemoryFromFile(event, pongAI1);
+    });
+
+    document.getElementById("loadMemory2").addEventListener("change", function(event) {
+        loadMemoryFromFile(event, pongAI2);
+    });
 });
 
 function handleKeyDown(event) {
@@ -94,7 +187,6 @@ function handle_scores()
 	if (ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 	{
 		player_one.score_point()
-		pongAI1.reward(200);
 		pongAI2.reward(-500);
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, 0xf0f0f0, 10);
@@ -104,7 +196,6 @@ function handle_scores()
 	{
 		player_two.score_point()
 		pongAI1.reward(-500);
-		pongAI2.reward(200);
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_two_score_text)
@@ -116,14 +207,35 @@ function handle_scores()
 		winning()
 }
 
+function sample(memory, batchSize) {
+    const sampled = [];
+    if (memory.length <= batchSize) {
+        return memory; // Retourne toute la mémoire si elle est plus petite que la taille de batch désirée
+    } else {
+        const indices = new Set(); // Utiliser un Set pour éviter les doublons
+        while (indices.size < batchSize) {
+            const randomIndex = Math.floor(Math.random() * memory.length);
+            indices.add(randomIndex);
+        }
+        indices.forEach(index => {
+            sampled.push(memory[index]);
+        });
+        return sampled;
+    }
+}
+
 async function trainModel(aiPong, discountRate = 0.95) {
     if (aiPong.memory.length === 0) {
         return;
     }
-    const statesTensor = tf.tensor2d(aiPong.memory.map(item => item.state));
-    const actionsTensor = tf.tensor1d(aiPong.memory.map(item => item.action), 'int32');
-    const rewardsTensor = tf.tensor1d(aiPong.memory.map(item => item.reward));
-    const nextStatesTensor = tf.tensor2d(aiPong.memory.map(item => item.nextState));
+	aiPong.updateEpsilon();
+	aiPong.displayMemory();
+	const miniBatch = sample(aiPong.memory, 64);
+	console.log(miniBatch.length);
+    const statesTensor = tf.tensor2d(miniBatch.map(item => item.state));
+    const actionsTensor = tf.tensor1d(miniBatch.map(item => item.action), 'int32');
+    const rewardsTensor = tf.tensor1d(miniBatch.map(item => item.reward));
+    const nextStatesTensor = tf.tensor2d(miniBatch.map(item => item.nextState));
 
 
 	const currentQValues = aiPong.model.predict(statesTensor);
@@ -139,7 +251,7 @@ async function trainModel(aiPong, discountRate = 0.95) {
     }
 
     await aiPong.model.fit(statesTensor, qTargets, {
-        epochs: 50,
+        epochs: 25,
         callbacks: {
             onEpochEnd: (epoch, logs) => {
                 console.log(`Époque ${epoch}: perte = ${logs.loss}`);
@@ -153,6 +265,8 @@ async function trainModel(aiPong, discountRate = 0.95) {
     nextStatesTensor.dispose();
     nextQValues.dispose();
     qTargets.dispose();
+//	saveMemory(aiPong.memory);
+//	saveModel(aiPong.model);
 }
 
 
@@ -202,14 +316,12 @@ function updateCurrentStateForAI() {
     }, 1000);
 }
 
-let lastDecisionTime = Date.now();
-
 async function decideAndApplyAction(aiPaddle, aiPong) {
     const now = Date.now();
 
     // Utilisez la propriété lastDecisionTime de l'instance de PongAI
     if (now - aiPong.lastDecisionTime >= 1000 && currentStateForAI.length > 0) {
-        aiPong.lastDecisionTime = now; // Mise à jour du temps pour la dernière décision de cette IA spécifique
+        aiPong.lastDecisionTime = now;	
         aiPong.decideAction(currentStateForAI).then(action => {
 			aiPong.currentAction = action;
 			var nextState = [];

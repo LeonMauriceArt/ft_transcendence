@@ -6,6 +6,9 @@ class PongAI {
         this.memory = [];
         this.currentAction = 2;
         this.lastDecisionTime = Date.now();
+        this.epsilon = 1;
+        this.epsilonMin = 0.01;
+        this.epsilonDecay = 0.995;
     }
 
     createModel() {
@@ -36,7 +39,7 @@ class PongAI {
             reward: reward,
             nextState: nextState
         });
-        const maxSize = 1000;
+        const maxSize = 10000;
         if (this.memory.length > maxSize) {
             this.memory.shift();
         }
@@ -46,29 +49,29 @@ class PongAI {
         return Array.from({length: actionsCount}, (_, i) => i === action ? 1 : 0);
     }
 
-    async decideAction(currentState) {
-        const stateTensor = tf.tensor2d([currentState]);
-        const predictions = await this.model.predict(stateTensor).data();
-        stateTensor.dispose();
-    
-        let maxPredictionIndex = 0;
-        let maxPredictionValue = predictions[0];
-    
-        for (let i = 1; i < predictions.length; i++) {
-            if (predictions[i] > maxPredictionValue) {
-                maxPredictionValue = predictions[i];
-                maxPredictionIndex = i;
-            }
+    updateEpsilon() {
+        if (this.epsilon > this.epsilonMin) {
+            this.epsilon *= this.epsilonDecay;
         }
-    
-        return maxPredictionIndex;
+    }
+
+    async decideAction(currentState) {
+        if (Math.random() < this.epsilon) {
+            const randomAction = Math.floor(Math.random() * 3);
+            return randomAction;
+        } else {
+            const stateTensor = tf.tensor2d([currentState]);
+            const predictions = await this.model.predict(stateTensor).data();
+            stateTensor.dispose();
+            return predictions.indexOf(Math.max(...predictions));
+        }
     }
 
     reward(rewardValue) {
         if (this.memory.length > 0) {
             let lastExperience = this.memory[this.memory.length - 1];
             if (lastExperience.reward != null) {
-                lastExperience.reward += rewardValue; // Accumule la récompense
+                lastExperience.reward += rewardValue;
             } else {
                 lastExperience.reward = rewardValue;
             }

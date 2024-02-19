@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import PongAI from './PongAI.js';
 import * as constants from './Constants.js';
 
 export class Ball

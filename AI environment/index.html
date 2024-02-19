@@ -20,6 +20,21 @@
   </head>
   <body>
     <canvas class="webgl"></canvas>
+    <!-- Ajouter des boutons et des inputs pour la sauvegarde et le chargement -->
+    <button id="saveModelButton1">Sauvegarder le modèle 1</button>
+    <button id="saveModelButton2">Sauvegarder le modèle 2</button>
+    <button id="saveMemory1">Sauvegarder la mémoire modele 1</button>
+    <button id="saveMemory2">Sauvegarder la mémoire modele 2</button>
+    <input type="file" id="loadModel1" accept=".json" style="display:none;">
+    <input type="file" id="loadModel2" accept=".json" style="display:none;">
+    <input type="file" id="loadMemory1" accept=".json" style="display:none;">
+    <input type="file" id="loadMemory2" accept=".json" style="display:none;">
+    <button id="loadModelButton1">Charger le modèle 1</button>
+    <button id="loadModelButton2">Charger le modèle 2</button>
+    <button id="loadMemoryButton1">Charger la mémoire 1</button>
+    <button id="loadMemoryButton2">Charger la mémoire 2</button>
+    <input type="file" id="loadModel" accept=".json" style="display: none;">
+    <input type="file" id="loadMemory" accept=".json" style="display: none;">
     <script type="module" src="./game/main.js" ></script>
     <div id="canvas"></div>
   </body>
