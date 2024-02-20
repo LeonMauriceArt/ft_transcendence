@@ -50,7 +50,7 @@ function handle_ball_collision_for_train(player1Position, player2Position, ballP
                 var reduction_factor = (constants.PADDLE_HEIGHT / 2) / constants.BALL_SPEED
                 var new_y_vel = difference_in_y / reduction_factor
                 ballVelocity.y = -1 * new_y_vel
-                aiPong.reward(1);
+                aiPong.reward(2);
             }
         }
     }
@@ -128,14 +128,6 @@ function checkForRewards(aiPong) {
         const lastIndex = aiPong.memory.length - 1;
         const lastState = aiPong.memory[lastIndex].state;
         const secondLastState = aiPong.memory[lastIndex - 1].state;
-		const lastAction = aiPong.memory[lastIndex].action; // Supposons que l'action est stockée ici
-
-        // Utiliser les indices basés sur la structure de lastState
-        const aiPaddleYPosLast = lastState[7];
-
-		if ((aiPaddleYPosLast >= 40 && lastAction === 0) || (aiPaddleYPosLast <= -39 && lastAction === 1)) {
-            aiPong.reward(-0.5);
-        }
 
 		if (lastState != secondLastState) {
         	const ballYPosLast = lastState[1];
@@ -171,7 +163,7 @@ function move(up, player)
     }
 }
 
-export async function simulateEpisode(aiPong, ballPosition, ballVelocity, player1Position, player2Position, numberOfActions = 10000) {
+export async function simulateEpisode(aiPong, ballPosition, ballVelocity, player1Position, player2Position, numberOfActions = 1000) {
     for (let i = 0; i < numberOfActions; i++) {
         // Générez un état aléatoire ou suivez une logique spécifique pour simuler un état de jeu
         const currentState = getCurrentStateTrain(ballPosition, ballVelocity, player1Position, player2Position);
@@ -210,5 +202,4 @@ export async function simulateEpisode(aiPong, ballPosition, ballVelocity, player
         if (ballPosition.x < constants.GAME_AREA_WIDTH * -1 || ballPosition.x > constants.GAME_AREA_WIDTH)
 		    handle_scores_for_train(aiPong, ballPosition, player1Position, player2Position);
     }
-    aiPong.displayMemory();
 }

@@ -88,7 +88,6 @@ export class Ball
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
 					this.collision = 1;
-					ai1.reward(500);
 				}
 			}
 		}
@@ -105,7 +104,6 @@ export class Ball
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
 					this.collision = -1;
-					ai2.reward(500);
 				}
 			}
 		}

@@ -8,7 +8,7 @@ class PongAI {
         this.lastDecisionTime = Date.now();
         this.epsilon = 1;
         this.epsilonMin = 0.01;
-        this.epsilonDecay = 0.995;
+        this.epsilonDecay = 0.005;
     }
 
     createModel() {
@@ -51,7 +51,7 @@ class PongAI {
 
     updateEpsilon() {
         if (this.epsilon > this.epsilonMin) {
-            this.epsilon *= this.epsilonDecay;
+            this.epsilon -= this.epsilonDecay;
         }
     }
 

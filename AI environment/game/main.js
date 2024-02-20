@@ -10,14 +10,14 @@ import { simulateEpisode } from './train_model.js';
 
 var camera, renderer, player_one, 
 player_two, ball, scene, 
-player_one_score_text, player_two_score_text, droidFont;
+player_one_score_text, player_two_score_text, droidFont, pause = false;
 
 let currentStateForAI = [];
 
 const keys = {};
 const pongAI1 = new PongAI();
-const pongAI2 = new PongAI();
-const pongAI3 = new PongAI();
+var pongAI2 = new PongAI();
+var pongAI3 = new PongAI();
 
 const fontlLoader = new FontLoader();
 fontlLoader.load('../node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
@@ -27,7 +27,6 @@ function (loadedFont){
 	initArena()
 	initControls()
 	updateCurrentStateForAI()
-	runTrainingSessions(pongAI2);
 	animate()
 });
 
@@ -73,7 +72,19 @@ function loadMemoryFromFile(event, aiInstance) {
     }
 }
 
+async function switchAI() {
+    pause = true;
+    await runTrainingSessions(pongAI3);
+    pongAI2 = pongAI3;
+    console.log("L'IA entraînée est maintenant active.");
+    pause = false;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("trainAndPauseButton").addEventListener("click", function() {
+        switchAI();
+    });
+
     document.getElementById("saveModelButton1").addEventListener("click", function() {
         saveModel(pongAI1.model);
     });
@@ -190,7 +201,6 @@ function handle_scores()
 	if (ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 	{
 		player_one.score_point()
-		pongAI2.reward(-500);
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_one_score_text)
@@ -198,7 +208,6 @@ function handle_scores()
 	else
 	{
 		player_two.score_point()
-		pongAI1.reward(-500);
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, 0xf0f0f0, 10);
 		scene.add(player_two_score_text)
@@ -227,25 +236,22 @@ function sample(memory, batchSize) {
     }
 }
 
-async function runTrainingSessions(aiPong, sessionsCount = 200, displayInterval = 5) {
+async function runTrainingSessions(aiPong, sessionsCount = 150, displayInterval = 5) {
     for (let i = 1; i <= sessionsCount; i++) {
-        console.log(`Début de la session d'entraînement ${i}`);
-
-        // Simuler un épisode
         let ballPosition = { x: 0, y: 0 };
-        let ballVelocity = { x: constants.BALL_SPEED, y: constants.BALL_SPEED }; // Assurez-vous que ces valeurs sont définies correctement
-        let player1Position = { x: -constants.GAME_AREA_WIDTH / 2 + constants.PADDLE_WIDTH, y: 0 };
-        let player2Position = { x: constants.GAME_AREA_WIDTH / 2 - constants.PADDLE_WIDTH, y: 0 };
+        let ballVelocity = { x: constants.BALL_SPEED, y: 0 }; 
+        let player1Position = { x: (constants.GAME_AREA_WIDTH * -1) + 10, y: 0 };
+        let player2Position = { x: constants.GAME_AREA_WIDTH - 10, y: 0 };
 
-        await simulateEpisode(aiPong, ballPosition, ballVelocity, player1Position, player2Position, 200); // Assurez-vous que cette fonction simule correctement un épisode
+        await simulateEpisode(aiPong, ballPosition, ballVelocity, player1Position, player2Position); 
 
-        // Entraîner le modèle après chaque épisode de simulation
 		await trainModel(aiPong);
 	
-        // Afficher les informations sur l'évolution du modèle tous les 'displayInterval' entraînements
+
         if (i % displayInterval === 0) {
             console.log(`Informations après ${i} sessions d'entraînement :`);
             console.log(`Epsilon actuel: ${aiPong.epsilon}`);
+            aiPong.displayMemory();
         }
     }
     console.log('Entraînement terminé.');
@@ -256,9 +262,7 @@ export async function trainModel(aiPong, discountRate = 0.95) {
         return;
     }
 	aiPong.updateEpsilon();
-	aiPong.displayMemory();
 	const miniBatch = sample(aiPong.memory, 64);
-	console.log(miniBatch.length);
     const statesTensor = tf.tensor2d(miniBatch.map(item => item.state));
     const actionsTensor = tf.tensor1d(miniBatch.map(item => item.action), 'int32');
     const rewardsTensor = tf.tensor1d(miniBatch.map(item => item.reward));
@@ -363,74 +367,41 @@ async function decideAction(aiPong, currentState) {
     prediction.dispose();
 }
 
-function checkForRewards(aiPong) {
-    // Assurez-vous qu'il y a au moins deux états enregistrés pour la comparaison
-    if (aiPong.memory.length >= 2) {
-        const lastIndex = aiPong.memory.length - 1;
-        const lastState = aiPong.memory[lastIndex].state;
-        const secondLastState = aiPong.memory[lastIndex - 1].state;
-		const lastAction = aiPong.memory[lastIndex].action; // Supposons que l'action est stockée ici
-
-        // Utiliser les indices basés sur la structure de lastState
-        const aiPaddleYPosLast = lastState[7];
-
-		if ((aiPaddleYPosLast >= 40 && lastAction === 0) || (aiPaddleYPosLast <= -39 && lastAction === 1)) {
-            aiPong.reward(-500);
-        }
-
-		if (lastState != secondLastState) {
-        	const ballYPosLast = lastState[1];
-        	const aiPaddleYPosLast = lastState[7];
-        	const ballYPosSecondLast = secondLastState[1];
-        	const aiPaddleYPosSecondLast = secondLastState[7];
-
-        	const distanceLast = Math.abs(ballYPosLast - aiPaddleYPosLast);
-        	const distanceSecondLast = Math.abs(ballYPosSecondLast - aiPaddleYPosSecondLast);
-
-        	if (distanceLast < distanceSecondLast || (distanceLast == distanceSecondLast && distanceLast <= 10)) {
-        	    aiPong.reward(500);
-        	}
-			else if (distanceLast >= distanceSecondLast && distanceLast > 10){
-				aiPong.reward(-500);
-			}
-		}
-
-    }
-}
-
 //GameLoop
 function animate() {
 	
 	requestAnimationFrame( animate );
-	switch(pongAI1.currentAction) {
-		case 0:
-			player_one.move(true);
-			break;
-		case 1:
-			player_one.move(false);
-			break;
-		case 2:
-			break;
-		default:
-			console.error("Action non reconnue pour le joueur 1");
-	}
-	switch(pongAI2.currentAction) {
-		case 0:
-			player_two.move(true);
-			break;
-		case 1:
-			player_two.move(false);
-			break;
-		case 2:
-			break;
-		default:
-			console.error("Action non reconnue pour le joueur 2");
-	}
-	ball.update(player_one, player_two, pongAI1, pongAI2);
-	if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
-		handle_scores()
-	decideAction(pongAI2, getCurrentState(ball, player_two, player_one));
-	decideAction(pongAI1, getCurrentState(ball, player_one, player_two));
+    if (pause == false) {
+	    switch(Math.floor(Math.random() * 3)) {
+	    	case 0:
+	    		player_one.move(true);
+	    		break;
+	    	case 1:
+	    		player_one.move(false);
+	    		break;
+	    	case 2:
+	    		break;
+	    	default:
+	    		console.error("Action non reconnue pour le joueur 1");
+	    }
+        console.log(pongAI2.currentAction);
+	    switch(pongAI2.currentAction) {
+	    	case 0:
+	    		player_two.move(true);
+	    		break;
+	    	case 1:
+	    		player_two.move(false);
+	    		break;
+	    	case 2:
+	    		break;
+	    	default:
+	    		console.error("Action non reconnue pour le joueur 2");
+	    }
+	    ball.update(player_one, player_two, pongAI1, pongAI2);
+	    if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
+	    	handle_scores()
+	    decideAction(pongAI2, getCurrentState(ball, player_two, player_one));
+    }
 	render();
 }
 
