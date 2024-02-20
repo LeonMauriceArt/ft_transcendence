@@ -1,6 +1,6 @@
 FROM nginx:latest
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y -f \
     build-essential \
     libpcre3-dev \
     libssl-dev \
@@ -9,32 +9,30 @@ RUN apt-get update && apt-get install -y \
     g++ \
     gcc \
     automake \
-    libtool autoconf automake autotools-dev zlib1g-dev\
+    libtool autoconf automake autotools-dev zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /usr/src/modsecurity
+RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity/modsecurity
 
-# RUN cd /usr/src/modsecurity \
-#     && git submodule init \
-#     && git submodule update \
-#     && ./build.sh \
-#     && ./configure \
-#     && make \
-#     && make install
+RUN cd /etc/modsecurity/modsecurity \
+    && git submodule init \
+    && git submodule update \
+    && ./build.sh \
+    && ./configure \
+    && make \
+    && make install
 
 RUN apt-get update && apt-get install -y wget && wget http://nginx.org/download/nginx-1.25.4.tar.gz && tar -xzf nginx-1.25.4.tar.gz && rm nginx-1.25.4.tar.gz
 
-RUN git clone https://github.com/SpiderLabs/ModSecurity-nginx /usr/src/ModSecurity-nginx
+RUN git clone https://github.com/SpiderLabs/ModSecurity-nginx /etc/modsecurity/ModSecurity-nginx
 
 RUN cd /nginx-1.25.4 \
-    && ./configure --with-compat --with-ld-opt='-lpcre' --with-openssl=/usr/include/openssl/ --add-dynamic-module=/usr/src/ModSecurity-nginx \
+    && ./configure --with-compat --with-ld-opt='-lpcre' --with-openssl=/usr/include/openssl/ --add-dynamic-module=/etc/modsecurity/ModSecurity-nginx \
     && make && make install \
     && make modules \
     && cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
-RUN git clone --depth 1 -b v4.0/dev --single-branch https://github.com/coreruleset/coreruleset /usr/src/modsecurity-crs
+RUN git init && git submodule add https://github.com/SpiderLabs/owasp-modsecurity-crs.git /etc/modsecurity/crs \
+    && cd /etc/modsecurity/crs && git submodule update --init
 
-RUN cp -R /usr/src/modsecurity-crs/rules /etc/nginx/modsec
-
-EXPOSE 80
-EXPOSE 443
+RUN cp -rf /etc/modsecurity/modsecurity/unicode.mapping /etc/nginx
