@@ -12,15 +12,15 @@ RUN apt-get update && apt-get install -y \
     libtool autoconf automake autotools-dev zlib1g-dev\
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /usr/src/modsecurity
+# RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /usr/src/modsecurity
 
-RUN cd /usr/src/modsecurity \
-    && git submodule init \
-    && git submodule update \
-    && ./build.sh \
-    && ./configure \
-    && make \
-    && make install
+# RUN cd /usr/src/modsecurity \
+#     && git submodule init \
+#     && git submodule update \
+#     && ./build.sh \
+#     && ./configure \
+#     && make \
+#     && make install
 
 RUN apt-get update && apt-get install -y wget && wget http://nginx.org/download/nginx-1.25.4.tar.gz && tar -xzf nginx-1.25.4.tar.gz && rm nginx-1.25.4.tar.gz
 
