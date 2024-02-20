@@ -43,8 +43,6 @@ def submit_register(request):
     else:
          return HttpResponse(status=500)
 
-
-
 def submit_login(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))

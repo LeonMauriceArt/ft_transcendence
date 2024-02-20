@@ -43,7 +43,11 @@
 			<ul id="btnContainer">
 				<li type="button" page="/"><a>Home</a></li>
 				<li type="button" page="/play/"><a>PLAY</a></li>
-				<li type="button" page="/user/"><a>Login</a></li>
+				{% if user.is_authenticated %}
+					<li type="button" page="/user/"><a>Logout</a></li>
+				{% else %}
+					<li type="button" page="/user/"><a>Login</a></li>
+				{% endif %}
 			</ul>
 
 		</nav>

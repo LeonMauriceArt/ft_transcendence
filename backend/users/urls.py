@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import user,login_form,submit_login,registration_form,submit_register,check_login
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', user, name='user'),
