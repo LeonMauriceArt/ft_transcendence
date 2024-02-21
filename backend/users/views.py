@@ -1,60 +1,38 @@
-from django.shortcuts import render
-from django.db import IntegrityError
-from django.http import HttpResponse
-from django.template import loader
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
+from .forms import RegistrationForm
 from .models import UserProfile
-import json
-
-def check_login(request):
-     if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        if UserProfile.objects.filter(login=data).exists():
-             return HttpResponse(status=409)
-        else:
-            return HttpResponse(status=200)
+from django.template import loader
+from django.http import HttpResponse
 
 def user(request):
-	user_profiles = UserProfile.objects.all().values
-	template = loader.get_template('user.html')
-	context = { 'user_profiles': user_profiles
-	}
-	return HttpResponse(template.render(context, request))
+     user_profiles = UserProfile.objects.all().values
+     print('user request')
+     template = loader.get_template('user.html')
+     context = { 'user_profiles': user_profiles
+     }
+     return HttpResponse(template.render(context, request))
 
-def login_form(request):
-     return render(request, 'login.html')
+def registration_view(request):
+     context = {}
+     if request.method == 'POST':
+          form = RegistrationForm(request.POST)
+          if form.is_valid():
+               form.save()
+               raw_password = form.cleaned_data.get('password1')
+               user_name = form.cleaned_data.get('username')
+               user = authenticate(username=user_name, password=raw_password)
+               print('Authenticate_working')
+               if user is not None:
+                    login(request, user)
+                    return redirect ('welcome')
+          else:
+               context['registration_form'] = form
+     else:
+          form = RegistrationForm()
+          context['registration_form'] = form
+     return render(request, 'register.html', context)
 
-def registration_form(request):
-     return render(request, 'register.html')
-
-def submit_register(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        login = data.get('login')
-        password = data.get('password')
-        firstName = data.get('firstName')
-        lastName = data.get('lastName')
-
-        try:
-            user_profile = UserProfile(login=login, firstName=firstName,lastName=lastName,password=password)
-            user_profile.save()
-            return HttpResponse(status=201)
-        except IntegrityError as e:
-            return HttpResponse(status=400)
-    else:
-         return HttpResponse(status=500)
-
-def submit_login(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        login = data.get('login')
-        password = data.get('password')
-
-        try:
-             user_profile = UserProfile.objects.get(login=login, password=password)
-             return HttpResponse(status=200)
-        except UserProfile.DoesNotExist:
-             return HttpResponse(status=401)
-    else:
-         return HttpResponse(status=400)
-
-
+def logout_view(request):
+     logout(request)
+     return redirect('welcome')

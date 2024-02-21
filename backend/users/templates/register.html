@@ -1,24 +1,27 @@
-{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Register</title>
+{% endblock %}
+
+{% block navbar_content %}
 <h1>Register</h1>
-<br><br>
-<script src="{% static 'login.js' %}"></script>
 <h2>
-<form id="registrationForm">
-        {% csrf_token %}
-        <label for="FirstName">First name:</label>
-        <input type="text" id="FirstName" name="FirstName" required></form>
-
-        <label for="LastName">Last name:</label>
-        <input type="text" id="LastName" name="LastName" required></form><br>
-
-        <label for="NickName">NickName:</label>
-        <input type="text" id="NickName" name="NickName" required></form><br>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-
-        <label for="password">Retype password:</label>
-        <input type="password" id="repassword" name="repassword" required></h2>
-        <div id="errorMessage" style="color: red;"></div>
-    <button type="submit" onclick="submitRegistrationForm()">Submit</button>
+<form id="registration-form" onsubmit="submitRegisterForm(event)">
+    {% csrf_token %}
+    {% for field in registration_form %}
+        <p>
+            {{field.label_tag}}
+            {{field}}
+            {% if field.help_text %}
+            <small style="color:yellow;">{{field.help_text}}</small>
+            {% endif %}
+            
+            {% for error in field.errors %}
+            <p style="color: red;">{{error}}</p>
+            {% endfor %}
+        </p>
+    {% endfor %}
+    <button type="submit" name="register" value="register" id="submit_button">REGISTER</button>
 </form>
+{% endblock %}

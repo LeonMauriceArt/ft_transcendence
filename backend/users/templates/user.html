@@ -8,8 +8,16 @@
     <br><br>
 	<p>{{user_profiles}}</p> <!--Only for display debug-->
     <h1>User List</h1>
-    <button type="button" onclick="loadForm('/user/login_form/', 'dynamicContent')">LOGIN</button>
-    <button type="button" onclick="loadForm('/user/register_form/', 'dynamicContent')">REGISTER</button>
+    <ol>
+        <li>
+            <p>Have an account ? Log in :</p>
+        </li>
+        <button type="button" onclick="loadForm('/user/login_form/', 'dynamicContent')">LOGIN</button>
+        <li>
+            <p>Or register if you don't have an account :</p>
+        </li>
+        <button type="button" onclick="loadContent('/user/register/', 'content')">REGISTER</button>
+    </ol>
     <br><br>
     <div id="dynamicContent"></div>
 {% endblock %}
