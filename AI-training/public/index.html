@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pong Game Visualization</title>
+    <style>
+        /* Styles basiques pour le canvas et le conteneur */
+        #gameContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #pongCanvas {
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="pongCanvas" width="700" height="500"></canvas>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="gameClient.js"></script>
+</body>
+</html>
