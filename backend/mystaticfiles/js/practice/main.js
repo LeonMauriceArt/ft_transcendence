@@ -9,6 +9,8 @@ import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
 import { Power_Manager } from './Powerups.js';
+import { train } from './train.js';
+import { Player as AI} from './NeatJS/player.js';
 
 var gameisover, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
@@ -17,7 +19,7 @@ player_one_goal, player_two_goal
 // powerup_manager
 
 const keys = {};
-
+var PongAI = new AI();
 var screenShake = ScreenShake()
 
 gameisover = false
@@ -38,12 +40,23 @@ function handleKeyUp(event) {
 
 var id = null;
 
+var aiPong;
+
+async function initAI() {
+    aiPong = await train(); // Attendre et obtenir le meilleur joueur
+    // À ce stade, aiPong est assigné au bestPlayer retourné par trainAI
+    // Vous pouvez maintenant utiliser aiPong et ses méthodes
+}
+
+
 export function start()
 {
 	if (id !==null)
 		cancelAnimationFrame(id);
-	initGame();
-	animate();
+	initAI().then(() => {
+		initGame();
+		animate();
+	});
 }
 
 function initGame()
@@ -181,8 +194,47 @@ function winning()
 	gameisover = true
 }
 
+function getCurrentState() {
+	const ballPositionY = ball.mesh.position.y;
+	const AiPaddlePositionY = player_two.mesh.position.y;
+	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
+
+	const currentState = [
+		ballPositionY, 
+		AiPaddlePositionY, distanceFromAiPaddle
+	];
+	return currentState;
+}
+
+let lastDecisionTime = 0;
+let lastDecision = null;
+
 function handle_input(player_one, player_two)
 {
+    const now = Date.now();
+	const currentState = getCurrentState();
+	aiPong.setInputs(currentState);
+	aiPong.think();
+    if (now - lastDecisionTime > 0) { // Plus d'une seconde depuis la dernière décision
+        let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
+        lastDecision = decisionIndex; // Mise à jour de la dernière décision
+        lastDecisionTime = now; // Mise à jour du temps
+    }
+    
+    // Appliquer la dernière décision
+    switch(lastDecision) {
+        case 0:
+            player_two.move(true);
+            break;
+        case 1:
+            player_two.move(false);
+            break;
+		case 2:
+			break;
+        default:
+            // Vous pouvez choisir de ne rien faire si aucune décision valide n'a été prise
+            // ou appliquer une action par défaut
+	}
 	if (keys['ArrowUp'])
 		player_two.move(true);
 	if (keys['ArrowDown'])

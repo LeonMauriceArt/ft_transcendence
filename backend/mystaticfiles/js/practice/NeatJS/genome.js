@@ -1,5 +1,5 @@
-import { Node } from './node.mjs';
-import { Connection } from './connection.mjs';
+import { Node } from './node.js';
+import { Connection } from './connection.js';
 
 //The Genome Class
 //Well.. this is the main class

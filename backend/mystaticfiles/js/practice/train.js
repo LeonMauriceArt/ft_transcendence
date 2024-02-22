@@ -1,5 +1,5 @@
-import * as constants from './Constants.mjs';
-import { Population } from './NeatJS/src/population.mjs';
+import * as constants from './Constants.js';
+import { Population } from './NeatJS/population.js';
 
 export class Game {
     constructor() {
@@ -10,6 +10,7 @@ export class Game {
         this.hits = 0;
         this.score = 0;
         this.malus = 0;
+        this.frameCount = 0;
     }
 
     handleBallCollision() {
@@ -85,7 +86,7 @@ export class Game {
         }
     }
 
-    simulateEpisode(playerMove, fitness) {
+    simulateEpisode(playerMove = 0, fitness) {
             if (Math.random() < 0.5){
                 this.player1Position.y = this.ballPosition.y + 10;
             } else {
@@ -97,8 +98,6 @@ export class Game {
                     break;
                 case 1:
                     this.movePlayer(false, this.player2Position, fitness);
-                    break;
-                case 2:
                     break;
                 default:
                     console.error("Action non reconnue pour le joueur 2");
@@ -115,95 +114,28 @@ export class Game {
                 }
                 this.ballPosition.x = 0
                 this.ballPosition.y = 0
-                let angle = Math.random() * 90 - 45; // Cela crée un angle entre -45 et +45 degrés
-
-                // Convertir l'angle en radians pour l'utilisation dans Math.sin() et Math.cos()
+                let angle = Math.random() * 90 - 45;
                 angle = angle * Math.PI / 180;
-
-                // Utiliser Math.cos() et Math.sin() pour générer des vélocités x et y basées sur l'angle
-                // Vous pouvez ajuster la vitesse de la balle en multipliant par un facteur de vitesse
                 this.ballVelocity.x = Math.cos(angle) * constants.BALL_SPEED;
                 this.ballVelocity.y = Math.sin(angle) * constants.BALL_SPEED;
-
-                // Inverser aléatoirement la direction horizontale pour permettre à la balle de partir vers la gauche ou la droite
                 if (Math.random() < 0.5) {
                     this.ballVelocity.x *= -1;
                 }
                 
             }
+            this.frameCount++;
         }
     }
 
+export var population = new Population(200);
 
-import express from 'express';
-import http from 'http';
-import { Server as socketIo } from 'socket.io';
-
-const app = express();
-const server = http.createServer(app);
-const io = new socketIo(server);
-
-app.use(express.static('public')); // Servir les fichiers statiques depuis le dossier 'public'
-
-function sendGameState() {
-    // Extrait les informations depuis l'objet game de bestPlayer
-    const { ballPosition, ballVelocity, player1Position, player2Position } = population.bestPlayer.game;
-    
-    // Crée l'objet gameState
-    const gameState = {
-        ballPosition: { x: ballPosition.x, y: ballPosition.y },
-        ballVelocity: { x: ballVelocity.x, y: ballVelocity.y },
-        playerPositions: [
-            { x: player1Position.x, y: player1Position.y }, // Position du Joueur 1
-            { x: player2Position.x, y: player2Position.y }  // Position du Joueur 2 (IA dans votre cas)
-        ]
-    };
-    
-    // Envoie l'état du jeu aux clients connectés
-    io.emit('gameState', gameState);
-}
-
-function simulateGameStep() {
-    if (population.bestPlayer.game.score < 20 && population.bestPlayer.game.score > -20) {
-        population.bestPlayer.look();
-        population.bestPlayer.think();
-        let decisionIndex = population.bestPlayer.decisions.indexOf(Math.max(...population.bestPlayer.decisions));
-        population.bestPlayer.game.simulateEpisode(decisionIndex, population.bestPlayer.fitness);
-        population.bestPlayer.calculateFitness();
-        console.log(population.bestPlayer.fitness);
-        sendGameState(); // Assurez-vous que cette fonction envoie l'état actuel aux clients
-
-        setTimeout(simulateGameStep, 25);
-    } else {
-        // Réinitialiser le score si nécessaire ou effectuer d'autres actions de fin
-        population.bestPlayer.game.score = 0;
-        console.log("Fin de la simulation");
-        // Envoyer un message ou effectuer une action indiquant la fin de la simulation
-    }
-}
-
-io.on('connection', (socket) => {
-    console.log('Un client est connecté');
-    console.log('Envoi de l\'état initial du jeu');
-    simulateGameStep();
-});
-
-server.listen(3000, () => {
-    console.log('Serveur écoutant sur port 3000');
-});
-
-var population = new Population(150);
-
-async function main() {
+export async function train() {
     console.log("Début de l'entraînement...");
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < constants.TRAINING_SESSIONS; i++) {
         while (!population.done()){
-            population.updateAlive();
+            population.updateAI();
         }
         population.naturalSelection();
     }
-    //test the best player
-    console.log(population.bestPlayer.game.hits);
+    return population.bestPlayer;
 }
-
-main().catch(console.error);

@@ -1,6 +1,4 @@
-import { Player } from './player.mjs';
-
-let showBest = true;
+import { Player } from './player.js';
 
 //The Population Class
 //Here is where the power of all the classes
@@ -21,7 +19,7 @@ export class Population{
 		}
 	}
 
-	updateAlive(){
+	updateAI(){
 		for(let i = 0; i < this.population.length; i++){
 			if(!this.population[i].done()){
 				this.population[i].look();
@@ -29,11 +27,6 @@ export class Population{
 				let decisionIndex = this.population[i].decisions.indexOf(Math.max(...this.population[i].decisions));
 				this.population[i].game.simulateEpisode(decisionIndex, this.population[i].fitness);
 			}
-		}
-
-		if(showBest && this.bestPlayer && !this.bestPlayer.dead) {
-			this.bestPlayer.look();
-			this.bestPlayer.think();
 		}
 	}
 	

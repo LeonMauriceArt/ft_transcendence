@@ -1,5 +1,5 @@
-import {Genome} from './genome.mjs';
-import { Game } from '../../train.mjs';
+import {Genome} from './genome.js';
+import { Game } from '../train.js';
 
 let genomeInputsN = 3;
 let genomeOutputN = 2;
@@ -11,7 +11,9 @@ export class Player{
 		this.fitness = 0;
 		this.startTime = Date.now();
 		this.survivalTime = 0;
-		this.maxHits = 100;
+		this.maxHits = 150;
+		this.lastDecisionTime = 0;
+		this.lastDesicion = 0;
 
 		this.decisions = []; //Current Output values
 		this.vision = []; //Current input values
@@ -35,7 +37,7 @@ export class Player{
 	}
 
 	done(){
-		if (this.game.score > 3 || this.game.score < -3 || this.game.hits > this.maxHits) {
+		if (this.game.score > 5 || this.game.score < -5 || this.game.hits > this.maxHits) {
 			let endTime = Date.now();
 			this.survivalTime = (endTime - this.startTime);
 			return true;
@@ -57,5 +59,9 @@ export class Player{
 		this.fitness = this.game.hits;
 		this.fitness += this.survivalTime;
 		this.fitness -= this.game.malus;
+	}
+
+	setInputs(currentState){
+		this.vision = currentState;
 	}
 }

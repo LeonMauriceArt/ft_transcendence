@@ -1,4 +1,4 @@
-var activationsNames = ["Sigmoid", "Identity", "Step", "Tanh", "ReLu"]; //Used in the svg drawing
+
 
 //The Node Class
 //This is where math appends
