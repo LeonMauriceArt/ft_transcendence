@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  web:
+    container_name: web
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
+    volumes:
+      - daphne-sock:/usr/src/daphne_sock
+      - static_volume:/code/mystaticfiles
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_TOKEN=root
+    depends_on:
+      - db
+      - vault
+
   db:
     container_name: postgres
     image: postgres
@@ -22,33 +43,12 @@ services:
      - db
     volumes:
      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-     - ./nginx/modsecurity.conf:/etc/nginx/modsecurity.conf
+     - ./nginx/modsecurity.conf:/etc/nginx/modsec/modsecurity.conf
      - ./nginx/startup.sh:/startup.sh
+     - ./nginx/main.conf:/etc/nginx/modsec/main.conf
      - daphne-sock:/usr/src/daphne_sock
-     - django:/code
+     - static_volume:/code/mystaticfiles:ro
     command: /bin/bash /startup.sh
-
-  web:
-    container_name: django
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
-    volumes:
-      - ./backend:/code
-      - daphne-sock:/usr/src/daphne_sock
-      - django:/code
-    ports:
-      - "8000:8000"
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_TOKEN=root
-    depends_on:
-      - db
-      - vault
 
   vault:
     container_name: vault
@@ -63,4 +63,4 @@ services:
 volumes:
   postgres-data:
   daphne-sock:
-  django:
+  static_volume:

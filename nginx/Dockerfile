@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y -f \
     libtool autoconf automake autotools-dev zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity/modsecurity
+RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity
 
-RUN cd /etc/modsecurity/modsecurity \
+RUN cd /etc/modsecurity \
     && git submodule init \
     && git submodule update \
     && ./build.sh \
@@ -35,4 +35,9 @@ RUN cd /nginx-1.25.4 \
 RUN git init && git submodule add https://github.com/SpiderLabs/owasp-modsecurity-crs.git /etc/modsecurity/crs \
     && cd /etc/modsecurity/crs && git submodule update --init
 
-RUN cp -rf /etc/modsecurity/modsecurity/unicode.mapping /etc/nginx
+COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
+
+RUN cp /etc/modsecurity/crs/crs-setup.conf.example /etc/modsecurity/crs/crs-setup.conf \
+    && cp /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+
+RUN mkdir /etc/nginx/modsec && cp /etc/modsecurity/unicode.mapping /etc/nginx/modsec
