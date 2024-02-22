@@ -6,7 +6,8 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
-    command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
+    # command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - daphne-sock:/usr/src/daphne_sock
       - static_volume:/code/mystaticfiles
