@@ -2,14 +2,12 @@ function submitRegisterForm(event){
     event.preventDefault();
     
     const formData= new FormData(document.getElementById('registration-form'), document.getElementById('submit_button'));
-    console.log('form constructed:', formData);
     const elementId = 'content';
     
     registerUser(elementId, formData);
 }
 
 function registerUser(elementId, formData) {
-    console.log('form sent:', formData);
     const path = '/user/register/'
     fetch(path, {
         method: 'POST',
@@ -20,6 +18,7 @@ function registerUser(elementId, formData) {
     })
     .then(response => {
         if (response.ok) {
+            updateNavbar();
             return response.text();
         } else {
             throw new Error('Registration failed');
@@ -34,6 +33,7 @@ function registerUser(elementId, formData) {
     })
     .catch(error => console.error('Error:', error));
 }
+    
 
 // Function to get CSRF token from cookie
 function getCookie(name) {

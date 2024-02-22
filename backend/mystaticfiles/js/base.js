@@ -27,11 +27,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('popstate', (event) => {
         const page = window.location.pathname.split('/').pop();
-
         loadContent(page, 'content');
 	})
 });
 
 const updateHistory = (url) => {
 	history.pushState(null, null, url);
+}
+
+function updateNavbar()
+{
+    fetch('/navbar/')
+        .then(response => response.json())
+        .then(data => {
+                document.getElementById('navbar').innerHTML = data.navbar_html
+        })
+        .catch(error => console.error('Error:', error));
 }

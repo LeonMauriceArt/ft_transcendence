@@ -3,11 +3,10 @@ from django.shortcuts import render, redirect
 from .forms import RegistrationForm
 from .models import UserProfile
 from django.template import loader
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 def user(request):
      user_profiles = UserProfile.objects.all().values
-     print('user request')
      template = loader.get_template('user.html')
      context = { 'user_profiles': user_profiles
      }
@@ -22,7 +21,6 @@ def registration_view(request):
                raw_password = form.cleaned_data.get('password1')
                user_name = form.cleaned_data.get('username')
                user = authenticate(username=user_name, password=raw_password)
-               print('Authenticate_working')
                if user is not None:
                     login(request, user)
                     return redirect ('welcome')
@@ -36,3 +34,15 @@ def registration_view(request):
 def logout_view(request):
      logout(request)
      return redirect('welcome')
+
+def auth_status(request):
+     if (request.user.is_authenticated):
+          return JsonResponse({'authenticated':True, 'username':request.user.username})
+     else:
+        return JsonResponse({'authenticated': False})
+
+def delete_users(request):
+     if (request.user.is_authenticated):
+          logout(request.user)
+     UserProfile.objects.all().delete()
+     return user(request)
