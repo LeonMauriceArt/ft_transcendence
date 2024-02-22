@@ -17,7 +17,6 @@ export class Ball
 		this.mesh.position.set(0, 0, 0);
 		this.light = new THREE.PointLight(0xffffff, 15000 ,150)
 		this.light.castShadow = false
-		this.timer = new THREE.Clock()
 	}
 	setcolor(color)
 	{
@@ -29,7 +28,6 @@ export class Ball
 	reset()
 	{
 		this.setcolor(0xffffff)
-		this.timer.start()
 		this.x_vel = 0
 		this.y_vel = 0
 		this.mesh.position.set(0,0,0)
@@ -37,7 +35,6 @@ export class Ball
 	}
 	stop()
 	{
-		this.timer.stop();
 		this.x_vel = 0
 		this.y_vel = 0
 		this.light.intensity = 0
@@ -46,19 +43,10 @@ export class Ball
 
 	update(player_one, player_two)
 	{
-		if(this.timer.running)
-		{
-			this.timer.getElapsedTime()
-			if (this.timer.elapsedTime >= constants.BALL_RESPAWN_TIME)
-				this.launch()
-		}
-		else
-		{
-			this.handle_ball_collision(player_one, player_two)
-			this.mesh.position.x += this.x_vel
-			this.mesh.position.y += this.y_vel
-			this.light.position.set(this.mesh.position.x, this.mesh.position.y)
-		}
+		this.handle_ball_collision(player_one, player_two)
+		this.mesh.position.x += this.x_vel
+		this.mesh.position.y += this.y_vel
+		this.light.position.set(this.mesh.position.x, this.mesh.position.y)
 	}
 	
 	get_update(x, y, x_vel, y_vel, color)
@@ -115,7 +103,7 @@ export class Ball
 			}
 		}
 	}
-	to_dict(){
+	current_state(){
 		return {
 			x: this.mesh.position.x,
 			y: this.mesh.position.y,

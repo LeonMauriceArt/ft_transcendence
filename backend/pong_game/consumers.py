@@ -6,6 +6,55 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+game_area_width = 70
+game_area_height = 50
+
+class GameState:
+
+	class Ball:
+		def __init__(self):
+			self.x = 0
+			self.y = 0
+			self.x_vel = 0
+			self.y_vel = 0
+			self.color = 0xffffff
+		def __str__(self):
+			return f"Ball position: ({self.x}, {self.y}), Ball vel: {self.x_vel}x{self.y_vel}, Color: {self.color}"
+
+	class Player:
+		def __init__(self, position):
+			if position == 1:
+				self.x = (game_area_width * -1) + 10
+			else
+				self.x = game_area_width - 10
+			self.y = 0
+			self.paddle_width = 5
+			self.paddle_height = 20
+			self.score = 0
+		def __str__(self):
+            return f"Player position: ({self.x}, {self.y}), Paddle size: {self.paddle_width}x{self.paddle_height}, Score: {self.score}"
+
+		def update_position(self):
+
+
+
+    def __init__(self):
+		self.ball = self.Ball()
+		self.players = [self.Player(1), self.Player(2)]
+
+
+    async def handle_player_input(self, player_id, input_data):
+        pass
+
+    async def update_game_state(self):
+        pass
+
+	def printState(self):
+		print('|player1 state|:', self.players[0])
+		print('|player2 state|:', self.players[1])
+		print('|ball state|:', self.ball)
+
+
 class GameManager:
 	def __init__(self):
 		self.game_rooms = {}
@@ -51,6 +100,7 @@ class GameManager:
 
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
+	gamestate = GameState()
 	update_lock = None
 
 	async def connect(self):
@@ -66,7 +116,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game_room, self.channel_name
 		)
 	
-	async def join_game():
+	async def join_game(self):
 		self.game_room = self.game_manager.find_or_create_game_room()
 		self.game_manager.add_player_to_room(self.game_room, self.player_id)
 		print('ROOM LEN FOR POSITION', self.game_manager.room_len(self.game_room))
@@ -171,13 +221,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'key': event.get('value')
 		}))
 #END HANDLERS
-
-	async def game_loop(self):
-		async with await self.get_update_lock():
-			while True:
-				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
-
 	async def get_update_lock(self):
 		if self.update_lock is None:
 			self.update_lock = asyncio.Lock()
 		return self.update_lock
+
+	async def game_loop(self):
+		async with await self.get_update_lock():
+			while True:
+				print('Game_looping')
+				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state

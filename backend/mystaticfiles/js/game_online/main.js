@@ -61,7 +61,7 @@ export function start()
 		{
 			console.log('Starting game . . .');
 			game_running = true;
-			ball.launch();
+			ball.get_update(0, 0, 1, 0, 0xffffff)
 			initControls();
 		}
 		if (data.type === 'player_key_up' || data.type === 'player_key_down')
@@ -83,44 +83,11 @@ export function start()
 	animate();
 }
 
-function updateGameState():
-{
+// function updateGameState():
+// {
 	
-}
+// }
 
-function player_move_handler(type, dataposition, key)
-{
-	if (dataposition == 1)
-	{
-		if (type == 'player_key_down')
-		{
-			player_one.is_moving = true;
-			if (key == 'KeyW')
-				player_one.moving_dir = true;
-			else
-				player_one.moving_dir = false;		
-		}
-		else if (type == 'player_key_up')
-		{
-			player_one.is_moving = false;
-		}
-	}
-	else if (dataposition == 2)
-	{
-		if (type == 'player_key_down')
-		{
-			player_two.is_moving = true;
-			if (key == 'KeyW')
-				player_two.moving_dir = true;
-			else
-				player_two.moving_dir = false;
-		}
-		else if (type == 'player_key_up')
-		{
-			player_two.is_moving = false;
-		}
-	}
-}
 
 function initDisplay()
 {
@@ -204,6 +171,58 @@ function handleKeyUp(event) {
 	}
 }
 
+function move_players()
+{
+	if (player_one.is_moving)
+	{
+		if (player_one.moving_dir)
+			player_one.move(true)
+		else
+			player_one.move(false)
+	}
+	if (player_two.is_moving)
+	{
+		if (player_two.moving_dir)
+			player_two.move(true)
+		else
+			player_two.move(false)
+	}
+}
+
+function player_move_handler(type, dataposition, key)
+{
+	if (dataposition == 1)
+	{
+		if (type == 'player_key_down')
+		{
+			player_one.is_moving = true;
+			if (key == 'KeyW')
+				player_one.moving_dir = true;
+			else
+				player_one.moving_dir = false;		
+		}
+		else if (type == 'player_key_up')
+		{
+			player_one.is_moving = false;
+		}
+	}
+	else if (dataposition == 2)
+	{
+		if (type == 'player_key_down')
+		{
+			player_two.is_moving = true;
+			if (key == 'KeyW')
+				player_two.moving_dir = true;
+			else
+				player_two.moving_dir = false;
+		}
+		else if (type == 'player_key_up')
+		{
+			player_two.is_moving = false;
+		}
+	}
+}
+
 function initControls(){
 	//Controls
 	window.addEventListener('keydown', handleKeyDown);
@@ -241,8 +260,6 @@ function winning()
 	ball.stop();
 	scene.remove(player_one_score_text)
 	scene.remove(player_two_score_text)
-	// if (powerup_manager.array[0])
-	// 	scene.remove(powerup_manager.array[0].mesh, powerup_manager.array[0].light)
 	var light1;
 	var light2;
 	if (player_one.score == constants.WINNING_SCORE)
@@ -267,23 +284,7 @@ function winning()
 	game_running = true
 }
 
-function move_players()
-{
-	if (player_one.is_moving)
-	{
-		if (player_one.moving_dir)
-			player_one.move(true)
-		else
-			player_one.move(false)
-	}
-	if (player_two.is_moving)
-	{
-		if (player_two.moving_dir)
-			player_two.move(true)
-		else
-			player_two.move(false)
-	}
-}
+
 
 //GameLoop
 function animate() {
