@@ -207,7 +207,28 @@ function getCurrentState() {
 }
 
 let lastDecisionTime = 0;
-let lastDecision = null;
+let lastDecision = 0;
+let lastAImove = 2;
+
+function AIplayer1(player_one, ball)
+{
+    const ballPositionY = ball.mesh.position.y;
+    const AiPaddlePositionY = player_one.mesh.position.y;
+    const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
+
+	if(Math.abs(distanceFromAiPaddle) < 10) {
+		lastAImove = 2;
+	}
+    else if (distanceFromAiPaddle > 0) {
+        lastAImove = 0; // Move up
+    } else {
+        lastAImove = 1; // Move down
+    }
+}
+
+setInterval(() => {
+    AIplayer1(player_one, ball);
+}, 1000);
 
 function handle_input(player_one, player_two)
 {
@@ -215,25 +236,22 @@ function handle_input(player_one, player_two)
 	const currentState = getCurrentState();
 	aiPong.setInputs(currentState);
 	aiPong.think();
-    if (now - lastDecisionTime > 0) { // Plus d'une seconde depuis la dernière décision
+    if (now - lastDecisionTime > 0) {
         let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
-        lastDecision = decisionIndex; // Mise à jour de la dernière décision
-        lastDecisionTime = now; // Mise à jour du temps
+        lastDecision = decisionIndex;
+        lastDecisionTime = now;
     }
-    
-    // Appliquer la dernière décision
-    switch(lastDecision) {
-        case 0:
-            player_two.move(true);
-            break;
-        case 1:
-            player_two.move(false);
-            break;
+	switch(lastAImove) {
+		case 0:
+			player_one.move(true);
+			break;
+		case 1:
+			player_one.move(false);
+			break;
 		case 2:
 			break;
-        default:
-            // Vous pouvez choisir de ne rien faire si aucune décision valide n'a été prise
-            // ou appliquer une action par défaut
+		default:
+			console.error("Action non reconnue pour le joueur 1");
 	}
 	if (keys['ArrowUp'])
 		player_two.move(true);
