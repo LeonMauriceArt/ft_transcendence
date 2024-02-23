@@ -111,6 +111,7 @@ export class Game {
                 }
                 else {
                     this.score -= 1;
+                    this.malus += 1;
                 }
                 this.ballPosition.x = 0
                 this.ballPosition.y = 0
@@ -127,7 +128,7 @@ export class Game {
         }
     }
 
-export var population = new Population(200);
+export var population = new Population(150);
 
 export async function train() {
     console.log("Début de l'entraînement...");

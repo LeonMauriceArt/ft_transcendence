@@ -13,7 +13,7 @@ export class Player{
 		this.survivalTime = 0;
 		this.maxHits = 150;
 		this.lastDecisionTime = 0;
-		this.lastDesicion = 0;
+		this.lastDecision = 0;
 
 		this.decisions = []; //Current Output values
 		this.vision = []; //Current input values
@@ -58,7 +58,7 @@ export class Player{
 	calculateFitness(){
 		this.fitness = this.game.hits;
 		this.fitness += this.survivalTime;
-		this.fitness -= this.game.malus;
+		this.fitness -= this.game.malus * 0.7;
 	}
 
 	setInputs(currentState){

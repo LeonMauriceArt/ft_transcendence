@@ -20,19 +20,22 @@ export class Population{
 	}
 
 	updateAI(){
+		const now = Date.now();
 		for(let i = 0; i < this.population.length; i++){
-			if(!this.population[i].done()){
-				this.population[i].look();
-				this.population[i].think();
-				let decisionIndex = this.population[i].decisions.indexOf(Math.max(...this.population[i].decisions));
-				this.population[i].game.simulateEpisode(decisionIndex, this.population[i].fitness);
+			if(now - this.population[i].lastDecisionTime > 60) {
+				if(!this.population[i].done()){
+					this.population[i].look();
+					this.population[i].think();
+					let decisionIndex = this.population[i].decisions.indexOf(Math.max(...this.population[i].decisions));
+					this.population[i].lastDecision = decisionIndex;
+				}
 			}
+			this.population[i].game.simulateEpisode(this.population[i].lastDecision, this.population[i].fitness);
 		}
 	}
 	
 	naturalSelection(){
 		this.calculateFitness();
-		console.log("Best Fitness: " + this.bestFitness);
 		let children = [];
 		
 		this.fillMatingPool();

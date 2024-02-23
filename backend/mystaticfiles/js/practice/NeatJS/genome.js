@@ -3,12 +3,11 @@ import { Connection } from './connection.js';
 
 //The Genome Class
 //Well.. this is the main class
-//This is where all the magic appends
+//This is where all the magic happens
 export class Genome {
 	constructor(inp, out, id, offSpring = false) {
 		this.inputs = inp; //Number of inputs
 		this.outputs = out; //Number of outputs
-		this.id = id; //Genome id -> used for the drawing
 		this.layers = 2;
 		this.nextNode = 0;
 

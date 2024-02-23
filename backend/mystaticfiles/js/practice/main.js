@@ -8,7 +8,6 @@ import {Wall} from './Arena.js'
 import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
-import { Power_Manager } from './Powerups.js';
 import { train } from './train.js';
 import { Player as AI} from './NeatJS/player.js';
 
@@ -16,7 +15,6 @@ var gameisover, camera, orbitcontrols, renderer, player_one,
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
-// powerup_manager
 
 const keys = {};
 var PongAI = new AI();
@@ -43,9 +41,7 @@ var id = null;
 var aiPong;
 
 async function initAI() {
-    aiPong = await train(); // Attendre et obtenir le meilleur joueur
-    // À ce stade, aiPong est assigné au bestPlayer retourné par trainAI
-    // Vous pouvez maintenant utiliser aiPong et ses méthodes
+    aiPong = await train(); 
 }
 
 
@@ -98,9 +94,6 @@ function initArena()
 	//Adding the ball
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
-
-	//Adding the powerup_manager
-	// powerup_manager = new Power_Manager()
 
 	//Adding the floor and roof
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
@@ -168,8 +161,6 @@ function winning()
 	ball.stop();
 	scene.remove(player_one_score_text)
 	scene.remove(player_two_score_text)
-	// if (powerup_manager.array[0])
-	// 	scene.remove(powerup_manager.array[0].mesh, powerup_manager.array[0].light)
 	var light1;
 	var light2;
 	if (player_one.score == constants.WINNING_SCORE)
@@ -210,11 +201,32 @@ let lastDecisionTime = 0;
 let lastDecision = 0;
 let lastAImove = 2;
 
-function AIplayer1(player_one, ball)
+function predictBallPosition()
 {
-    const ballPositionY = ball.mesh.position.y;
-    const AiPaddlePositionY = player_one.mesh.position.y;
-    const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
+	let projectedPosition = {x : ball.mesh.position.x, y : ball.mesh.position.y};
+	let velocity = { x: ball.x_vel, y: ball.y_vel };
+	while(projectedPosition.x > (constants.GAME_AREA_WIDTH * -1) + 10) {
+		projectedPosition.y += velocity.y;
+		projectedPosition.x += velocity.x;
+		if (projectedPosition.y + constants.BALL_RADIUS > constants.GAME_AREA_HEIGHT)
+		{
+			projectedPosition.y = constants.GAME_AREA_HEIGHT - constants.BALL_RADIUS
+			velocity.y *= -1
+		}
+		if(projectedPosition.y - constants.BALL_RADIUS < constants.GAME_AREA_HEIGHT * -1)
+		{
+			projectedPosition.y = constants.GAME_AREA_HEIGHT * -1 + constants.BALL_RADIUS
+			velocity.y *= -1
+		}
+	}
+	return projectedPosition;
+}
+
+function AIplayer1(player_one, projectedPosition)
+{
+	const ballPositionY = projectedPosition.y;
+	const AiPaddlePositionY = player_one.mesh.position.y;
+	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
 
 	if(Math.abs(distanceFromAiPaddle) < 10) {
 		lastAImove = 2;
@@ -226,21 +238,20 @@ function AIplayer1(player_one, ball)
     }
 }
 
-setInterval(() => {
-    AIplayer1(player_one, ball);
-}, 1000);
+let predictedBallPosition = null
 
 function handle_input(player_one, player_two)
 {
-    const now = Date.now();
 	const currentState = getCurrentState();
 	aiPong.setInputs(currentState);
 	aiPong.think();
-    if (now - lastDecisionTime > 0) {
-        let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
-        lastDecision = decisionIndex;
-        lastDecisionTime = now;
-    }
+    let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
+	if (ball.shouldPredict == true){
+		predictedBallPosition = predictBallPosition();
+		ball.shouldPredict = false
+	}
+		if (predictedBallPosition)
+			AIplayer1(player_one, predictedBallPosition)
 	switch(lastAImove) {
 		case 0:
 			player_one.move(true);
@@ -253,6 +264,18 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
+	// switch(decisionIndex) {
+	// 	case 0:
+	// 		player_two.move(true);
+	// 		break
+	// 	case 1:
+	// 		player_two.move(false);
+	// 		break;
+	// 	case 2:
+	// 		break;
+	// 	default:
+	// 		console.error("Action non reconnue pour le joueur 1");
+	// }
 	if (keys['ArrowUp'])
 		player_two.move(true);
 	if (keys['ArrowDown'])
@@ -261,10 +284,6 @@ function handle_input(player_one, player_two)
 		player_one.move(true);
 	if (keys['KeyS'])
 		player_one.move(false);
-	// if (keys['KeyD'])
-	// 	player_one.use_power(powerup_manager);
-	// if (keys['ArrowLeft'])
-	// 	player_two.use_power(powerup_manager);
 }
 
 //GameLoop
@@ -275,7 +294,6 @@ function animate() {
 	
 	if (!gameisover)
 	{
-		// powerup_manager.update(player_one, player_two, ball, scene)
 		ball.update(player_one, player_two);
 		if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
 		handle_scores()
