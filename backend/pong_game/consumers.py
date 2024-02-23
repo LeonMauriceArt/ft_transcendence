@@ -9,6 +9,10 @@ from asgiref.sync import async_to_sync
 game_area_width = 70
 game_area_height = 50
 
+tick_rate = 60  # ticks per second
+tick_duration = 1 / tick_rate  # duration of each tick in seconds
+# tick_duration_ms = tick_duration * 1000  # convert to milliseconds
+
 class GameState:
 
 	class Ball:
@@ -25,29 +29,27 @@ class GameState:
 		def __init__(self, position):
 			if position == 1:
 				self.x = (game_area_width * -1) + 10
-			else
+			else:
 				self.x = game_area_width - 10
 			self.y = 0
 			self.paddle_width = 5
 			self.paddle_height = 20
 			self.score = 0
 		def __str__(self):
-            return f"Player position: ({self.x}, {self.y}), Paddle size: {self.paddle_width}x{self.paddle_height}, Score: {self.score}"
+			return f"Player position: ({self.x}, {self.y}), Paddle size: {self.paddle_width}x{self.paddle_height}, Score: {self.score}"
 
 		def update_position(self):
+			pass
 
-
-
-    def __init__(self):
+	def __init__(self):
 		self.ball = self.Ball()
 		self.players = [self.Player(1), self.Player(2)]
 
+	async def handle_player_input(self, player_id, input_data):
+		pass
 
-    async def handle_player_input(self, player_id, input_data):
-        pass
-
-    async def update_game_state(self):
-        pass
+	async def update_game_state(self):
+		pass
 
 	def printState(self):
 		print('|player1 state|:', self.players[0])
@@ -229,5 +231,5 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def game_loop(self):
 		async with await self.get_update_lock():
 			while True:
-				print('Game_looping')
-				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
+				print('Game_Update')
+				await asyncio.sleep(tick_duration)  # Example: Game loop sleeps for 1 second before updating game state
