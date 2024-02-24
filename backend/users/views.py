@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
-from .forms import RegistrationForm
+from django import forms
+from .forms import RegistrationForm, LoginForm
 from .models import UserProfile
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
@@ -46,3 +47,24 @@ def delete_users(request):
           logout(request.user)
      UserProfile.objects.all().delete()
      return user(request)
+
+def login_view(request):
+    context = {}
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.data.get('username')
+            password = form.data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('welcome')
+            else:
+                form.add_error(None, "Invalid username or password")
+        else:
+            form.add_error(None, "Invalid username or password")
+            context['login_form'] = form
+    else:
+        form = LoginForm()
+        context['login_form'] = form
+    return render(request, 'login.html', context)

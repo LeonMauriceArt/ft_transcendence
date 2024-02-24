@@ -12,7 +12,7 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(user=self._db)
         return user
-    
+
 class UserProfile(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True, default="")
     is_active = models.BooleanField(default=True)
@@ -24,6 +24,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255, default="")
     last_name = models.CharField(max_length=255, default="")
     games_won = models.IntegerField(default=0)
+    nickName = models.CharField(max_length=255, default=username)
     # avatar = models.ImageField(upload_to="avatars")
 
     objects = CustomUserManager()
@@ -32,7 +33,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-    
+
     def has_perm(self, perm, obj=None):
         return self.is_admin
-        
+
