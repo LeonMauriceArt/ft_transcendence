@@ -9,6 +9,6 @@ COPY requirements.txt /code/
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY . /code/
+RUN pip install -U 'Twisted[tls,http2]' && mkdir /usr/src/daphne_sock
 
-CMD ["daphne", "django_project.asgi:application", "-u", "/usr/src/app/daphne.sock"]
+COPY . /code/
