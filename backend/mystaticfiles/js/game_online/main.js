@@ -158,8 +158,11 @@ function initDisplay()
 function handleKeyDown(event) {
 	if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
 	{
+		var up = false;
+		if (event.code == 'KeyW')
+			up = true;
 		keys[event.code] = true;
-		sendMessageToServer({playerpos: position, type: 'player_key_down', value: event.code})
+		sendMessageToServer({type: 'player_key_down', playerpos: position,  direction: up})
 	}
 }
 
@@ -167,59 +170,7 @@ function handleKeyUp(event) {
 	if (event.code == 'KeyW' || event.code == 'KeyS')
 	{
 		keys[event.code] = false;
-		sendMessageToServer({playerpos: position, type: 'player_key_up', value: event.code})
-	}
-}
-
-function move_players()
-{
-	if (player_one.is_moving)
-	{
-		if (player_one.moving_dir)
-			player_one.move(true)
-		else
-			player_one.move(false)
-	}
-	if (player_two.is_moving)
-	{
-		if (player_two.moving_dir)
-			player_two.move(true)
-		else
-			player_two.move(false)
-	}
-}
-
-function player_move_handler(type, dataposition, key)
-{
-	if (dataposition == 1)
-	{
-		if (type == 'player_key_down')
-		{
-			player_one.is_moving = true;
-			if (key == 'KeyW')
-				player_one.moving_dir = true;
-			else
-				player_one.moving_dir = false;		
-		}
-		else if (type == 'player_key_up')
-		{
-			player_one.is_moving = false;
-		}
-	}
-	else if (dataposition == 2)
-	{
-		if (type == 'player_key_down')
-		{
-			player_two.is_moving = true;
-			if (key == 'KeyW')
-				player_two.moving_dir = true;
-			else
-				player_two.moving_dir = false;
-		}
-		else if (type == 'player_key_up')
-		{
-			player_two.is_moving = false;
-		}
+		sendMessageToServer({type: 'player_key_up', playerpos: position})
 	}
 }
 

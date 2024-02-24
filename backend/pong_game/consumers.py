@@ -5,55 +5,10 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .gamelogic import GameState
 
-game_area_width = 70
-game_area_height = 50
-
-class GameState:
-
-	class Ball:
-		def __init__(self):
-			self.x = 0
-			self.y = 0
-			self.x_vel = 0
-			self.y_vel = 0
-			self.color = 0xffffff
-		def __str__(self):
-			return f"Ball position: ({self.x}, {self.y}), Ball vel: {self.x_vel}x{self.y_vel}, Color: {self.color}"
-
-	class Player:
-		def __init__(self, position):
-			if position == 1:
-				self.x = (game_area_width * -1) + 10
-			else
-				self.x = game_area_width - 10
-			self.y = 0
-			self.paddle_width = 5
-			self.paddle_height = 20
-			self.score = 0
-		def __str__(self):
-            return f"Player position: ({self.x}, {self.y}), Paddle size: {self.paddle_width}x{self.paddle_height}, Score: {self.score}"
-
-		def update_position(self):
-
-
-
-    def __init__(self):
-		self.ball = self.Ball()
-		self.players = [self.Player(1), self.Player(2)]
-
-
-    async def handle_player_input(self, player_id, input_data):
-        pass
-
-    async def update_game_state(self):
-        pass
-
-	def printState(self):
-		print('|player1 state|:', self.players[0])
-		print('|player2 state|:', self.players[1])
-		print('|ball state|:', self.ball)
-
+tick_rate = 60
+tick_duration = 1 / tick_rate
 
 class GameManager:
 	def __init__(self):
@@ -100,7 +55,7 @@ class GameManager:
 
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
-	gamestate = GameState()
+	game = GameState()
 	update_lock = None
 
 	async def connect(self):
@@ -146,6 +101,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
+			game.is_running = True
 			await self.channel_layer.group_send(
 				self.game_room,
 				{
@@ -157,28 +113,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 			asyncio.create_task(self.game_loop())
 
 	async def receive(self, text_data):
-		text_data_json = json.loads(text_data)
-		data_type = text_data_json.get("type", "")
-		data_value = text_data_json.get("value", "")
+		data = json.loads(text_data)
+		data_type = data.get("type", "")
+		data_value = data.get("value", "")
 		print('RECEIVING DATA TYPE:', data_type, '| VALUE:', data_value)
 		if data_type == 'player_key_down':
-			await self.channel_layer.group_send(
-				self.game_room,
-				{
-					'type': data_type,
-					'position': self.position,
-					'value': data_value
-				}
-			)
+			game.set_player_movement(data.get("playerpos", ""), True, data.get("direction"))
+
 		if data_type == 'player_key_up':
-			await self.channel_layer.group_send(
-				self.game_room,
-				{
-					'type': data_type,
-					'position': self.position,
-					'value': data_value
-				}
-			)
+			game.set_player_movement(data.get("playerpos", ""), False, NULL)
+
 		if data_type == 'ball_update':
 			await self.channel_layer.group_send(
 				self.game_room,
@@ -228,6 +172,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def game_loop(self):
 		async with await self.get_update_lock():
-			while True:
+			while game.is_running == True:
 				print('Game_looping')
-				await asyncio.sleep(1)  # Example: Game loop sleeps for 1 second before updating game state
+				await asyncio.sleep(tick_duration)  # Example: Game loop sleeps for 1 second before updating game state
