@@ -14,11 +14,10 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - VAULT_ADDR=http://vault:8200
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_TOKEN=root
     depends_on:
       - db
       - vault
@@ -53,13 +52,16 @@ services:
 
   vault:
     container_name: vault
-    image: hashicorp/vault:latest
+    build:
+      context: vault
     ports:
       - "8200:8200"
     environment:
     # Development mode - runs in-memory storage backend and
     #                    won't persist data across container restarts
+      - VAULT_ADDR=http://0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_TOKEN=root
 
 volumes:
   postgres-data:
