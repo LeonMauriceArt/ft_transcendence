@@ -52,17 +52,14 @@ def login_view(request):
     context = {}
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.data.get('username')
-            password = form.data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('welcome')
-            else:
-                form.add_error(None, "Invalid username or password")
+        username = form.data.get('username')
+        password = form.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('welcome')
         else:
-            form.add_error(None, "Invalid username or password")
+            context['error'] = "Invalid username or password"
             context['login_form'] = form
     else:
         form = LoginForm()
