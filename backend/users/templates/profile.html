@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>User Profile</title>
+{% endblock %}
+
+{% block navbar_content %}
+    <h1>Welcome, {{ request.user.username }}</h1>
+    <p>Nom: {{ request.user.last_name }}</p>
+    <p>Prenom: {{ request.user.first_name }}</p>
+    <p>Username: {{ request.user.username }}</p>
+
+    <!-- Bouton pour modifier les informations -->
+    <button type="button" onclick="location.href='{% url 'edit_profile' %}'">Modify Information</button>
+{% endblock %}

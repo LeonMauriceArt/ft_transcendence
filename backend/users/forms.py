@@ -11,3 +11,8 @@ class LoginForm(AuthenticationForm):
     class Meta:
         model = UserProfile
         fields = ("username", "password")
+
+class ModifyForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ("username", "first_name", "last_name")

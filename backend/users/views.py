@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django import forms
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ModifyForm
 from .models import UserProfile
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
@@ -65,4 +65,18 @@ def login_view(request):
         form = LoginForm()
         context['login_form'] = form
     return render(request, 'login.html', context)
+
+def profile(request):
+    return render(request, 'profile.html', {'user': request.user})
+
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ModifyForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ModifyForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form': form})
+
 
