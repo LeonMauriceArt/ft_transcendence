@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block navbar_content %}
+
+<script src="{% static 'js/tournament/local_tournament.js' %}"></script>
+
+<div id="tournament">
+    <li onclick="create_local()">CREATE LOCAL TOURNAMENT</li>
+    <li>CREATE ONLINE TOURNAMENT</li>
+    <li>JOIN ONLINE TOURNAMENT</li>
+</div>
+<div id="dynamicContent"></div>
+{% endblock %}
+

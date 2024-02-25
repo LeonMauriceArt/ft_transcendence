@@ -42,19 +42,11 @@ services:
       - vault
 
   vault:
-<<<<<<< HEAD
     image: hashicorp/vault:latest
-=======
-    image: hashicorp/vault
->>>>>>> game_websockets
     ports:
       - "8200:8200"
     environment:
       - VAULT_DEV_ROOT_TOKEN_ID=root
-<<<<<<< HEAD
-=======
-  
->>>>>>> game_websockets
 
 volumes:
   postgres-data:

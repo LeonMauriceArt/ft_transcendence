@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'bootstrap4',
 	'pong_game',
+    'tournament',
 	'frontend',
 	'users',
 ]

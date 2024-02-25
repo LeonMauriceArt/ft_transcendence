@@ -5,5 +5,6 @@ from . import views
 urlpatterns = [
     path('', welcome, name='welcome'),
     path('play/', include('pong_game.urls')),
-    path('user/', include('users.urls')),
+    path('tournament/', include('tournament.urls')),
+    path('user/', include('users.urls'))
 ]
