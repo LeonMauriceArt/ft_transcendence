@@ -51,7 +51,7 @@ def delete_users(request):
 def login_view(request):
     context = {}
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = LoginForm(request, request.POST)
         username = form.data.get('username')
         password = form.data.get('password')
         user = authenticate(request, username=username, password=password)
@@ -59,9 +59,10 @@ def login_view(request):
             login(request, user)
             return redirect('welcome')
         else:
-            context['error'] = "Invalid username or password"
             context['login_form'] = form
+            context['error'] = "Invalid username or password"
     else:
         form = LoginForm()
         context['login_form'] = form
     return render(request, 'login.html', context)
+
