@@ -228,7 +228,7 @@ function AIplayer1(player_one, projectedPosition)
 	const AiPaddlePositionY = player_one.mesh.position.y;
 	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
 
-	if(Math.abs(distanceFromAiPaddle) < 10) {
+	if(Math.abs(distanceFromAiPaddle) < 2) {
 		lastAImove = 2;
 	}
     else if (distanceFromAiPaddle > 0) {
@@ -250,8 +250,8 @@ function handle_input(player_one, player_two)
 		predictedBallPosition = predictBallPosition();
 		ball.shouldPredict = false
 	}
-		if (predictedBallPosition)
-			AIplayer1(player_one, predictedBallPosition)
+	if (predictedBallPosition)
+		AIplayer1(player_one, predictedBallPosition)
 	switch(lastAImove) {
 		case 0:
 			player_one.move(true);
@@ -264,18 +264,18 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
-	// switch(decisionIndex) {
-	// 	case 0:
-	// 		player_two.move(true);
-	// 		break
-	// 	case 1:
-	// 		player_two.move(false);
-	// 		break;
-	// 	case 2:
-	// 		break;
-	// 	default:
-	// 		console.error("Action non reconnue pour le joueur 1");
-	// }
+	switch(decisionIndex) {
+		case 0:
+			player_two.move(true);
+			break
+		case 1:
+			player_two.move(false);
+			break;
+		case 2:
+			break;
+		default:
+			console.error("Action non reconnue pour le joueur 1");
+	}
 	if (keys['ArrowUp'])
 		player_two.move(true);
 	if (keys['ArrowDown'])

@@ -75,14 +75,14 @@ export class Game {
             if ((player.y + constants.PADDLE_HEIGHT / 2) + 1 <= constants.GAME_AREA_HEIGHT)
                 player.y += 1;
             else
-                this.malus += 0.1;
+                this.malus += 0.08;
         }
         else
         {
             if ((player.y - constants.PADDLE_HEIGHT / 2) - 1 > constants.GAME_AREA_HEIGHT * -1)
                 player.y -= 1;
             else
-                this.malus += 0.1;
+                this.malus += 0.08;
         }
     }
 
@@ -128,7 +128,7 @@ export class Game {
         }
     }
 
-export var population = new Population(150);
+export var population = new Population(200);
 
 export async function train() {
     console.log("Début de l'entraînement...");
