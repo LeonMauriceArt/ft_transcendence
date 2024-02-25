@@ -17,8 +17,8 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_TOKEN=root
+      # - VAULT_ADDR=http://0.0.0.0:8200
+      # - VAULT_TOKEN=root
     depends_on:
       - db
       - vault
@@ -59,7 +59,7 @@ services:
     environment:
     # Development mode - runs in-memory storage backend and
     #                    won't persist data across container restarts
-      - VAULT_DEV_ROOT_TOKEN_ID=root
+      # - VAULT_DEV_ROOT_TOKEN_ID=root
 
 volumes:
   postgres-data:
