@@ -25,8 +25,6 @@ export class Player
 		this.mesh.position.set(this.x, this.y, 0);
 		this.score = 0;
 		this.powerups = [];
-		this.is_moving = false;
-		this.moving_dir = false;
 	}
 	move(up)
 	{
