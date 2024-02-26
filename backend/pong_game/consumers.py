@@ -37,9 +37,9 @@ class GameManager:
 			if player_id in self.game_rooms[room_name]:
 				print('#GAMEMANAGER# Removing player', player_id, 'from room', room_name)
 				self.game_rooms[room_name].remove(player_id)
-				if (self.room_len(room_len) == 0):
+				if (self.room_len(room_name) == 0):
 					print('#GAMEMANAGER# Removing room', room_name)
-					self.game_rooms.remove(room_name)
+					del self.game_rooms[room_name]
 
 	def players_in_room(self, room_name):
 		print('#GAMEMANAGER# Number of players in', room_name, '=', len(self.game_rooms[room_name]))
@@ -101,7 +101,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
-			game.is_running = True
+			self.game.is_running = True
 			await self.channel_layer.group_send(
 				self.game_room,
 				{
@@ -110,28 +110,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			print('#GAMECONSUMER# Room', self.game_room, 'full, can start game')
+			self.game.ball.x_vel = self.game.ball.speed
 			asyncio.create_task(self.game_loop())
 
 	async def receive(self, text_data):
 		data = json.loads(text_data)
 		data_type = data.get("type", "")
 		data_value = data.get("value", "")
-		print('RECEIVING DATA TYPE:', data_type, '| VALUE:', data_value)
 		if data_type == 'player_key_down':
-			game.set_player_movement(data.get("playerpos", ""), True, data.get("direction"))
-
+			await self.game.set_player_movement(data.get("playerpos", ""), True, data.get("direction"))
 		if data_type == 'player_key_up':
-			game.set_player_movement(data.get("playerpos", ""), False, NULL)
-
-		if data_type == 'ball_update':
-			await self.channel_layer.group_send(
-				self.game_room,
-				{
-					'type': data_type,
-					'position': self.position,
-					'value': data_value
-				}
-			)
+			await self.game.set_player_movement(data.get("playerpos", ""), False, False)
 
 #HANDLING MESSAGES
 	async def player_join(self, event):
@@ -164,14 +153,63 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'position': event.get('position'),
 			'key': event.get('value')
 		}))
+	async def game_state(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('type'),
+			'player_one_pos_y': event.get('player_one_pos_y'),
+			'player_two_pos_y': event.get('player_two_pos_y'),
+			'player_one_score': event.get('player_one_score'),
+			'player_two_score': event.get('player_two_score'),
+			'ball_x': event.get('ball_x'),
+			'ball_y': event.get('ball_y'),
+			'ball_x_vel': event.get('ball_x_vel'),
+			'ball_y_vel': event.get('ball_y_vel'),
+			'ball_color': event.get('ball_color'),
+		}))
+	async def game_end(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('type'),
+			'winner': event.get('winner'),
+		}))
 #END HANDLERS
+
 	async def get_update_lock(self):
 		if self.update_lock is None:
 			self.update_lock = asyncio.Lock()
 		return self.update_lock
 
+	async def send_game_state(self):
+		await self.channel_layer.group_send(
+			self.game_room,
+			{
+				'type': 'game_state',
+				'player_one_pos_y': self.game.players[0].y,
+				'player_two_pos_y': self.game.players[1].y,
+				'player_one_score': self.game.players[0].score,
+				'player_two_score': self.game.players[1].score,
+				'ball_x': self.game.ball.x,
+				'ball_y': self.game.ball.y,
+				'ball_x_vel': self.game.ball.x_vel,
+				'ball_y_vel': self.game.ball.y_vel,
+				'ball_color': self.game.ball.color,
+			}
+		)
+
 	async def game_loop(self):
 		async with await self.get_update_lock():
-			while game.is_running == True:
-				print('Game_looping')
+			while self.game.is_running == True:
+				await self.game.update();
+				await self.send_game_state()
 				await asyncio.sleep(tick_duration)  # Example: Game loop sleeps for 1 second before updating game state
+			winner = None
+			if self.game.players[0].score >= self.game.winning_score:
+				winner = 'player_one'
+			elif self.game.players[1].score >= self.game.winning_score:
+				winner = 'player_two'
+			await self.channel_layer.group_send(
+			self.game_room,
+			{
+				'type': 'game_end',
+				'winner': winner,
+			}
+		)

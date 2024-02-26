@@ -39,10 +39,6 @@ export class Player
 				this.mesh.position.y -= PLAYER_SPEED;
 		}
 	}
-	reset()
-	{
-		this.mesh.position.y = 0
-	}
 	score_point()
 	{
 		if (this.score < WINNING_SCORE)

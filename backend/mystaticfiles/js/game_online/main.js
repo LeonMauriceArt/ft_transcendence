@@ -19,8 +19,6 @@ player_one_goal, player_two_goal, someone_won
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
 
-const send_rate_ms = 30
-
 const keys = {};
 
 var position = null;
@@ -30,14 +28,11 @@ var screenShake = ScreenShake()
 game_running = false
 someone_won = false
 
-var updateInterval
-
 const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
 	function (loadedFont){
 		droidFont = loadedFont;
 	});
-	
 	
 var id = null;
 
@@ -65,26 +60,21 @@ export function start()
 		{
 			console.log('Starting game . . .');
 			game_running = true;
-			updateInterval = setInterval(send_update_interval, send_rate_ms)
 			ball.get_update(0, 0, 1, 0, 0xffffff)
 			initControls();
-		}
-		if (data.type === 'player_key_up' || data.type === 'player_key_down')
-		{
-			player_move_handler(data.type, data.position, data.key);
 		}
 		if (data.type === 'game_state')
 		{
 			updateGameState(data);
-		}
+		} 
 		if (data.type === 'game_end')
 		{
-			clearInterval(updateInterval);
+			someone_won = true
+			display_winner(data.winner)
 		}
 	};
 	wss.onclose = () => 
 	{
-		clearInterval(updateInterval);
 		console.log('Websocket connection closed.');
 	};
 	if (id !==null)
@@ -92,25 +82,30 @@ export function start()
 	animate();
 }
 
-function send_update_interval()
-{
-	console.log('Sending player data to server')
-	if (position == 1)
-		sendMessageToServer({playerpos: position, player_y: player_one.mesh.position.y})
-	else
-		sendMessageToServer({playerpos: position, player_y: player_two.mesh.position.y})
-}
-
-function updateGameState()
+function updateGameState(data)
 {
 	player_one.mesh.position.y = data.player_one_pos_y
 	player_two.mesh.position.y = data.player_two_pos_y
+	ball.mesh.position.x = data.ball_x
+	ball.mesh.position.y = data.ball_y
+	ball.light.position.set(ball.mesh.position.x, ball.mesh.position.y)
+	if (ball.color != data.ball_color)
+		ball.setcolor(data.ball_color)
 	if (data.player_one_score != player_one.score)
-		handle_scores(player_one)
+	{
+		player_one.score += 1
+		console.log(data.player_one_score, player_one.score)
+		handle_scores('1')
+	}
 	if (data.player_two_score != player_two.score)
-		handle_scores(player_two)
+	{
+		player_two.score += 1
+		console.log(data.player_two_score, player_two.score)
+		handle_scores('2')
+	}
 	ball.get_update(data.ball_x, data.ball_y, data.ball_x_vel, data.ball_y_vel, data.ball_color)
 }
+
 
 
 function initDisplay()
@@ -170,20 +165,28 @@ function initDisplay()
 }
 
 function handleKeyDown(event) {
-	if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
+	if(game_running)
 	{
-		var up = false;
-		if (event.code == 'KeyW')
-			up = true;
-		keys[event.code] = true;
-		sendMessageToServer({type: 'player_key_down', playerpos: position,  direction: up})
+		if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
+		{
+			var up = false;
+			if (event.code == 'KeyW')
+				up = true;
+			keys[event.code] = true;
+			sendMessageToServer({type: 'player_key_down', playerpos: position,  direction: up})
+		}
 	}
 }
 
 function handleKeyUp(event) {
-	if (event.code == 'KeyW' || event.code == 'KeyS')
-		keys[event.code] = false;
-		sendMessageToServer({type: 'player_key_up', playerpos: position})
+	if (game_running)
+	{
+		if (event.code == 'KeyW' || event.code == 'KeyS')
+		{
+			keys[event.code] = false;
+			sendMessageToServer({type: 'player_key_up', playerpos: position})
+		}
+	}
 }
 
 
@@ -198,7 +201,6 @@ function handle_scores(player_scoring)
 	if (player_scoring == '1')
 	{
 		screenShake.shake( camera, new THREE.Vector3(-5, -5, 20), constants.BALL_RESPAWN_TIME * 1000/* ms */ );
-		player_one.score_point()
 		scene.remove(player_one_score_text)
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 		scene.add(player_one_score_text)
@@ -206,19 +208,13 @@ function handle_scores(player_scoring)
 	else
 	{
 		screenShake.shake( camera, new THREE.Vector3(5, 5, 20), constants.BALL_RESPAWN_TIME * 1000 /* ms */ );
-		player_two.score_point()
 		scene.remove(player_two_score_text)
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 		scene.add(player_two_score_text)
 	}
-	ball.reset()
-	player_one.reset()
-	player_two.reset()
-	if (player_one.score == constants.WINNING_SCORE || player_two.score == constants.WINNING_SCORE)
-		winning()
 }
 
-function winning()
+function display_winner(winning_player)
 {
 	orbitcontrols.autoRotate = true;
 	ball.stop();
@@ -226,7 +222,7 @@ function winning()
 	scene.remove(player_two_score_text)
 	var light1;
 	var light2;
-	if (player_one.score == constants.WINNING_SCORE)
+	if (winning_player == 'player_one')
 	{
 		winning_text = createTextMesh(droidFont, "PLAYER 1 WIN", player_one_score_text, 0, 0, 0, 0xffffff, 13)
 		winning_text.material.emissiveIntensity = 0.5
@@ -244,8 +240,9 @@ function winning()
 		light2 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);
 		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
 	}
+	scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 	scene.add(winning_text, light1, light2)
-	game_running = true
+	// game_running = true
 }
 
 
@@ -256,18 +253,9 @@ function animate() {
 	{
 		screenShake.update(camera);
 		orbitcontrols.update();
-		handle_input();
-		handle_scores();
-		ball.update(player_one, player_two);
 	}
-	else
-	{
-		if(someone_won)
-		{
-			winning_text.lookAt(camera.position)
-			scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
-		}
-	}
+	// else if (someone_won)
+		// winning_text.lookAt(camera.position)
 	render();
 	id = requestAnimationFrame( animate );
 }
