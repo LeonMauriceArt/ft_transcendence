@@ -299,12 +299,6 @@ function animate() {
 		winning_text.lookAt(camera.position)
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 	}
-	render();
-	id = requestAnimationFrame( animate );
-}
-
-function render(){
-
 	renderer.render( scene, camera );
-
+	id = requestAnimationFrame( animate );
 }
