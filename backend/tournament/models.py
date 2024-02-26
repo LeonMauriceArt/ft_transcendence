@@ -13,5 +13,6 @@ class Tournament(models.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'players_count': self.players.count()
+            'players_count': self.players.count(),
+            'players': [{'id': player.id, 'name': player.name} for player in self.players.all()]
         }
