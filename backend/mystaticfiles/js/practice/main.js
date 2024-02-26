@@ -49,10 +49,9 @@ export function start()
 {
 	if (id !==null)
 		cancelAnimationFrame(id);
-	initAI().then(() => {
-		initGame();
-		animate();
-	});
+//	initAI()
+	initGame();
+	animate();
 }
 
 function initGame()
@@ -242,10 +241,10 @@ let predictedBallPosition = null
 
 function handle_input(player_one, player_two)
 {
-	const currentState = getCurrentState();
-	aiPong.setInputs(currentState);
-	aiPong.think();
-    let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
+	// const currentState = getCurrentState();
+	// aiPong.setInputs(currentState);
+	// aiPong.think();
+    // let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
 	if (ball.shouldPredict == true){
 		predictedBallPosition = predictBallPosition();
 		ball.shouldPredict = false
@@ -264,26 +263,22 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
-	switch(decisionIndex) {
-		case 0:
-			player_two.move(true);
-			break
-		case 1:
-			player_two.move(false);
-			break;
-		case 2:
-			break;
-		default:
-			console.error("Action non reconnue pour le joueur 1");
-	}
+	// switch(decisionIndex) {
+	// 	case 0:
+	// 		player_two.move(true);
+	// 		break
+	// 	case 1:
+	// 		player_two.move(false);
+	// 		break;
+	// 	case 2:
+	// 		break;
+	// 	default:
+	// 		console.error("Action non reconnue pour le joueur 1");
+	// }
 	if (keys['ArrowUp'])
 		player_two.move(true);
 	if (keys['ArrowDown'])
 		player_two.move(false);
-	if (keys['KeyW'])
-		player_one.move(true);
-	if (keys['KeyS'])
-		player_one.move(false);
 }
 
 //GameLoop
