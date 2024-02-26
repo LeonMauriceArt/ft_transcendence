@@ -5,12 +5,12 @@
 {% block navbar_content %}
 
 <script src="{% static 'js/tournament/local_tournament.js' %}"></script>
+<script src="{% static 'js/tournament/online_tournament.js' %}"></script>
 
 <div id="tournament">
-    <li onclick="create_local()">CREATE LOCAL TOURNAMENT</li>
-    <li>CREATE ONLINE TOURNAMENT</li>
-    <li>JOIN ONLINE TOURNAMENT</li>
+    <li onclick="load_create_local()">CREATE LOCAL TOURNAMENT</li>
+    <li onclick="load_create_online()">CREATE ONLINE TOURNAMENT</li>
+    <li onclick="load_join_online()">JOIN ONLINE TOURNAMENT</li>
 </div>
 <div id="dynamicContent"></div>
 {% endblock %}
-

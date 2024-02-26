@@ -1,5 +1,5 @@
 function loadContent(path, elementId){
-    fetch(path)
+    return fetch(path)
         .then(response => response.text())
         .then(htmlContent => {
             const tempElement = document.createElement('div');

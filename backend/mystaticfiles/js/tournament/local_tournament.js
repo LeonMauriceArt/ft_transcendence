@@ -7,7 +7,7 @@ const hasEmptyString = (arr) => {
             return true;
     });
     return false;
-}
+};
 
 const hasDuplicateStrings = (arr) => {
   let hasDuplicates = false;
@@ -21,9 +21,9 @@ const hasDuplicateStrings = (arr) => {
   });
 
   return hasDuplicates;
-}
+};
 
-const create_local = () => {
+const load_create_local = () => {
     loadContent('/tournament/create_local', 'dynamicContent');
 };
 
@@ -43,10 +43,9 @@ const start_tournament = () => {
 };
 
 const player_state_block = ({ username, win, loss }) => {
-}
+};
 
 const show_current_state = () => {
-    const div = document.createElement('div')
-    const h2
-}
+    const div = document.createElement('div');
+};
 
