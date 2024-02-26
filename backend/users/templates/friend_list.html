@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Friend List</title>
+{% endblock %}
+
+{% block navbar_content %}
+<h2>Friends</h2>
+<ul>
+    {% for friend_username, is_online in friends %}
+    <li>
+        {{ friend_username }} - 
+        {% if is_online %}
+            <span style="color: green;">Online</span>
+        {% else %}
+            <span style="color: red;">Offline</span>
+        {% endif %}
+    </li>
+{% empty %}
+    <p>No friend.</p>
+{% endfor %}
+</ul>
+{% endblock %}

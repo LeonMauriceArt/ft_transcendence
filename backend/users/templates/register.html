@@ -6,19 +6,21 @@
 
 {% block navbar_content %}
 <h1>Register</h1>
-<h2>
-<form id="registration-form" onsubmit="submitRegisterForm(event)">
+<form id="registration-form" onsubmit="submitRegisterForm(event)" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in registration_form %}
         <p>
-            {{field.label_tag}}
-            {{field}}
-            {% if field.help_text %}
-            <small style="color:yellow;">{{field.help_text}}</small>
+            {{ field.label_tag }}
+            {% if field.name == 'avatar' %}
+                {{ field }}
+            {% else %}
+                {{ field }}
             {% endif %}
-
+            {% if field.help_text %}
+                <small style="color: yellow;">{{ field.help_text }}</small>
+            {% endif %}
             {% for error in field.errors %}
-            <p style="color: red;">{{error}}</p>
+                <p style="color: red;">{{ error }}</p>
             {% endfor %}
         </p>
     {% endfor %}

@@ -45,7 +45,10 @@
 				<li type="button" page="/"><a>Home</a></li>
 				<li type="button" page="/play/"><a>PLAY</a></li>
 				{% if user.is_authenticated %}
-					<li type="button" page="/user/profile/">{{request.user.username}}</li>
+					<li type="button" page="/user/profile/">{{ request.user.username }}</li>
+					<li type="button" page="/user/online/"><a>Online users</a></li>
+					<li type="button" page="/user/friend_list/"><a>Friends</a></li>
+					<li type="button" page="/user/friend_requests/"><a>Friend Requests</a></li>
 					<li type="button" page="/user/logout/">Logout</li>
 				{% else %}
 					<li type="button" page="/user/"><a>Login</a></li>
@@ -53,8 +56,15 @@
 			</ul>
 		</nav>
 	</div>
-
+	{% if messages %}
+    {% for message in messages %}
+        <div style="color: red;">{{ message }}</div>
+    {% endfor %}
+	{% endif %}
 	<div id="content">
+		{% if user.is_authenticated %}
+			<img src="{{ user.avatar.url }}" style="width: 100px; height: 100px;">
+		{% endif %}
 		{% block navbar_content %}{% endblock %}
 	</div>
 <!-- <script>

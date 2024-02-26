@@ -9,6 +9,8 @@ COPY requirements.txt /code/
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+RUN pip install pillow
+
 COPY . /code/
 
 CMD ["daphne", "django_project.asgi:application", "-u", "/usr/src/app/daphne.sock"]
