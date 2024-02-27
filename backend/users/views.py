@@ -103,23 +103,17 @@ def friend_requests_view(request):
 	friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
 	return render(request, 'friend_requests.html', {'friend_requests': friend_requests})
 
-from django.shortcuts import render
-from .models import Friendship
-
-from django.utils.timezone import now
-from datetime import timedelta
-
 def friend_list_view(request):
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
     friend_list = []
     for friendship in friends:
         is_online = now() - friendship.friend.last_active < timedelta(minutes=5)
-        avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
+        avatar_url = friendship.friend.avatar.url
         friend_list.append((friendship.friend.username, is_online, avatar_url))
     for friendship in other_friends:
         is_online = now() - friendship.creator.last_active < timedelta(minutes=5)
-        avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
+        avatar_url = friendship.creator.avatar.url
         friend_list.append((friendship.creator.username, is_online, avatar_url))
 
     return render(request, 'friend_list.html', {'friends': friend_list})
