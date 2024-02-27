@@ -5,6 +5,7 @@ RUN wget -O /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/j
 
 COPY config.hcl /vault/config/config.hcl
 
-# COPY start_vault.sh /start_up
+COPY start_vault.sh start_up.sh
+COPY config_path.sh /usr/local/bin/config_path.sh
 
-# RUN chmod +x start_up
+RUN chmod +x start_up.sh

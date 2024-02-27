@@ -11,12 +11,14 @@ services:
     volumes:
       - daphne-sock:/usr/src/daphne_sock
       - static_volume:/code/mystaticfiles
+      - vault_data:/run/secrets/keys:ro
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
       - db
+      - vault
 
   db:
     container_name: postgres
@@ -51,13 +53,17 @@ services:
     build:
       context: vault
     ports:
-      - "8300:8200"
+      - "8200:8200"
     env_file:
       - .env
+    volumes:
+      - vault_data:/keys
     cap_add:
       - IPC_LOCK
+    command: /bin/sh /start_up.sh
 
 volumes:
   postgres-data:
   daphne-sock:
   static_volume:
+  vault_data:
