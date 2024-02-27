@@ -30,7 +30,7 @@ class GameState:
 			if self.x_vel < 0 :
 				if self.y <= player_one.y + paddle_height / 2 and self.y >= player_one.y - paddle_height / 2 and self.x > player_one.x :
 					if self.x - self.radius <= player_one.x + paddle_width / 2 :
-						self.color = 0x0000ff
+						self.color = 0x00ffff
 						self.x_vel *= -1
 						middle_y = player_one.y
 						difference_in_y = middle_y - self.y
