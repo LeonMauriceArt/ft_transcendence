@@ -13,7 +13,7 @@ import { Power_Manager } from './Powerups.js';
 var game_running, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
-player_one_goal, player_two_goal, someone_won
+player_one_goal, player_two_goal
 // powerup_manage
 
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
@@ -26,7 +26,8 @@ var position = null;
 var screenShake = ScreenShake()
 
 game_running = false
-someone_won = false
+
+let is_initial = false
 
 const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
@@ -44,6 +45,7 @@ function sendMessageToServer(message)
 export function start()
 {
 	initDisplay();
+	initArena();
 	wss = new WebSocket(wssurl);
 	wss.onopen = () => {
 		console.log('Websocket connection established.');
@@ -60,6 +62,7 @@ export function start()
 		{
 			console.log('Starting game . . .');
 			game_running = true;
+			is_initial = false;
 			ball.get_update(0, 0, 1, 0, 0xffffff)
 			initControls();
 		}
@@ -69,7 +72,7 @@ export function start()
 		} 
 		if (data.type === 'game_end')
 		{
-			someone_won = true
+			console.log('game is ending')
 			display_winner(data.winner)
 		}
 	};
@@ -80,6 +83,27 @@ export function start()
 	if (id !==null)
 		cancelAnimationFrame(id);
 	animate();
+}
+
+export function resetGame(){
+	if (wss && wss.readyState === WebSocket.OPEN){
+		wss.close();
+	}
+	scene.children.forEach(child => {
+		scene.remove(child);
+	});
+	scene.traverse(obj => {
+		if (obj.material) {
+			obj.material.dispose();
+		}
+		if (obj.geometry) {
+			obj.geometry.dispose();
+		}
+		if (obj.texture) {
+			obj.texture.dispose();
+		}
+	});
+	initArena();
 }
 
 function updateGameState(data)
@@ -94,19 +118,15 @@ function updateGameState(data)
 	if (data.player_one_score != player_one.score)
 	{
 		player_one.score += 1
-		console.log(data.player_one_score, player_one.score)
-		handle_scores('1')
+		handle_scores('player_one')
 	}
 	if (data.player_two_score != player_two.score)
 	{
 		player_two.score += 1
-		console.log(data.player_two_score, player_two.score)
-		handle_scores('2')
+		handle_scores('player_two')
 	}
 	ball.get_update(data.ball_x, data.ball_y, data.ball_x_vel, data.ball_y_vel, data.ball_color)
 }
-
-
 
 function initDisplay()
 {
@@ -129,7 +149,10 @@ function initDisplay()
 		1000
 	);
 	camera.position.z = constants.CAMERA_STARTPOS_Z
-	
+}
+
+function initArena()
+{
 	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
 	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
 	scene.add(player_one.mesh, player_two.mesh)
@@ -142,7 +165,7 @@ function initDisplay()
 	orbitcontrols.dampingFactor = 0.05;
 	orbitcontrols.enabled = false
 	orbitcontrols.screenSpacePanning = true;
-
+	
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
 	var lower_wall = new Wall(constants.GAME_AREA_HEIGHT * -1, 300, material.wallMaterial)
 	scene.add(upper_wall.mesh, lower_wall.mesh)
@@ -162,6 +185,7 @@ function initDisplay()
 	player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 	player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 	scene.add(player_one_score_text, player_two_score_text)
+	is_initial = true
 }
 
 function handleKeyDown(event) {
@@ -173,7 +197,7 @@ function handleKeyDown(event) {
 			if (event.code == 'KeyW')
 				up = true;
 			keys[event.code] = true;
-			sendMessageToServer({type: 'player_key_down', playerpos: position,  direction: up})
+			sendMessageToServer({type: 'player_key_down', player: position,  direction: up})
 		}
 	}
 }
@@ -184,21 +208,19 @@ function handleKeyUp(event) {
 		if (event.code == 'KeyW' || event.code == 'KeyS')
 		{
 			keys[event.code] = false;
-			sendMessageToServer({type: 'player_key_up', playerpos: position})
+			sendMessageToServer({type: 'player_key_up', player: position})
 		}
 	}
 }
 
-
 function initControls(){
-	//Controls
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
 }
 
 function handle_scores(player_scoring)
 {
-	if (player_scoring == '1')
+	if (player_scoring == 'player_one')
 	{
 		screenShake.shake( camera, new THREE.Vector3(-5, -5, 20), constants.BALL_RESPAWN_TIME * 1000/* ms */ );
 		scene.remove(player_one_score_text)
@@ -242,20 +264,16 @@ function display_winner(winning_player)
 	}
 	scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 	scene.add(winning_text, light1, light2)
-	// game_running = true
+	game_running = false
 }
 
 
 //GameLoop
 function animate() {
-
-	if (game_running)
-	{
-		screenShake.update(camera);
-		orbitcontrols.update();
-	}
-	// else if (someone_won)
-		// winning_text.lookAt(camera.position)
+	screenShake.update(camera);
+	orbitcontrols.update();
+	if (winning_text)
+		winning_text.lookAt(camera.position)
 	render();
 	id = requestAnimationFrame( animate );
 }
@@ -263,3 +281,21 @@ function animate() {
 function render(){
 	renderer.render( scene, camera );
 }
+
+window.addEventListener('unload', function(){
+	if (game_running)
+		sendMessageToServer({type: 'player_left', player: position})
+	resetGame();
+})
+
+function handlePageReload()
+{
+	if (game_running)
+		sendMessageToServer({type: 'player_left', player: position})
+	if (scene)
+		resetGame();
+}
+
+window.addEventListener('beforeunload', function(){
+	handlePageReload();
+})

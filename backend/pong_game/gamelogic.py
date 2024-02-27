@@ -95,10 +95,10 @@ class GameState:
 		self.winning_score = 3
 
 	async def set_player_movement(self, player_pos, is_moving, direction):
-		if player_pos == '1' :
+		if player_pos == 'player_one' :
 			self.players[0].is_moving = is_moving
 			self.players[0].up = direction
-		elif player_pos == '2' :
+		elif player_pos == 'player_two' :
 			self.players[1].is_moving = is_moving
 			self.players[1].up = direction
 
