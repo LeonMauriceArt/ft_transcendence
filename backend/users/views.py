@@ -18,11 +18,11 @@ def user(request):
 def registration_view(request):
      context = {}
      if request.method == 'POST':
-          form = RegistrationForm(request.POST)
+          form = RegistrationForm(request.POST, request.FILES)
           if form.is_valid():
                form.save()
                raw_password = form.cleaned_data.get('password1')
-               user_name = form.cleaned_data.get('username')
+               user_name = form.cleaned_data.get('username')   
                user = authenticate(username=user_name, password=raw_password)
                if user is not None:
                     login(request, user)
@@ -106,16 +106,21 @@ def friend_requests_view(request):
 from django.shortcuts import render
 from .models import Friendship
 
+from django.utils.timezone import now
+from datetime import timedelta
+
 def friend_list_view(request):
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
     friend_list = []
     for friendship in friends:
         is_online = now() - friendship.friend.last_active < timedelta(minutes=5)
-        friend_list.append((friendship.friend.username, is_online))
+        avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
+        friend_list.append((friendship.friend.username, is_online, avatar_url))
     for friendship in other_friends:
         is_online = now() - friendship.creator.last_active < timedelta(minutes=5)
-        friend_list.append((friendship.creator.username, is_online))
+        avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
+        friend_list.append((friendship.creator.username, is_online, avatar_url))
 
     return render(request, 'friend_list.html', {'friends': friend_list})
 
