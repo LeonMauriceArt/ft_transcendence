@@ -1,3 +1,10 @@
+const loadPage = (page) => {
+    const baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+
+    updateHistory(baseUrl + page);
+    loadContent(page, 'content');
+}
+
 function loadContent(path, elementId){
     return fetch(path)
         .then(response => response.text())
@@ -12,19 +19,6 @@ function loadContent(path, elementId){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-    const buttons = document.getElementById('btnContainer');
-
-    for (let i = 0; i < buttons.children.length; i++)
-    {
-        const btn = buttons.children[i];
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            updateHistory(baseUrl + btn.getAttribute('page'));
-            loadContent(btn.getAttribute('page'), 'content');
-        });
-    }
-
     window.addEventListener('popstate', (event) => {
         const page = window.location.pathname.split('/').pop();
         loadContent(page, 'content');
