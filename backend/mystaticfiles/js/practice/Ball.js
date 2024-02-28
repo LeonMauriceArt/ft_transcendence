@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-
 import * as constants from './Constants.js';
 import { ballMaterial } from './Materials.js';
 
@@ -18,6 +17,7 @@ export class Ball
 		this.light = new THREE.PointLight(0xffffff, 15000 ,150)
 		this.light.castShadow = false
 		this.timer = new THREE.Clock()
+		this.shouldPredict = false
 	}
 	setcolor(color)
 	{
@@ -68,10 +68,9 @@ export class Ball
 			this.light.position.set(this.mesh.position.x, this.mesh.position.y)
 		}
 	}
-	
-	handle_powerup_collision(player_one, player_two, powerups)
-	{
 
+	setPredict(x) {
+		this.shouldPredict = x
 	}
 
 	handle_ball_collision(player_one, player_two)
@@ -115,6 +114,7 @@ export class Ball
 					var reduction_factor = (constants.PADDLE_HEIGHT / 2) / this.speed
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
+					this.shouldPredict = true
 				}
 			}
 		}

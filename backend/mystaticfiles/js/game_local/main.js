@@ -191,10 +191,6 @@ function handle_input(player_one, player_two)
 		player_one.move(true);
 	if (keys['KeyS'])
 		player_one.move(false);
-	// if (keys['KeyD'])
-	// 	player_one.use_power(powerup_manager);
-	// if (keys['ArrowLeft'])
-	// 	player_two.use_power(powerup_manager);
 }
 
 //GameLoop
