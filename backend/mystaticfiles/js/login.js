@@ -3,6 +3,7 @@ function loadForm(url, elementId){
         .then(response => response.text())
         .then(htmlContent => {
             document.getElementById(elementId).innerHTML = htmlContent;
+            attachEventListeners();
         })
         .catch(error => console.error('Error:', error));
 }

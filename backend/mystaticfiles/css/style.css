@@ -14,6 +14,10 @@ body, h1, h2, h3, p, ul, li {
     margin: 0;
     padding: 0;
     font-family: 'PixelMix', sans-serif;
+    font-size: 24px; /* Taille de la police */
+    color: #333; /* Couleur du texte */
+    text-align: center; /* Centrer le texte */
+    margin: 20px 0;
 }
 
 body {
@@ -23,33 +27,40 @@ body {
 
 p {
 	margin-top : 20px;
+    width: 100%;
+    text-align: center;
 }
 
 nav {
     color: grey;
-    padding: 10px 0;
+    padding: 5px 0;
 	text-align: center;
 	margin: 0 auto;
 	margin-left: 40px;
 	margin-right: 40px;
+    margin-top: 10px;
     border: 2px solid grey;
 }
 
 ul {
-    list-style: none;
+    list-style-type: none; /* Supprime les puces */
+    padding: 0; /* Supprime le padding par défaut */
+    margin: 0 auto; /* Centre la liste */
+    width: 80%; /* Définir une largeur */
+    max-width: 600px; /* Et une largeur maximale */
 }
 
 li {
-    border: 2px solid grey;
-    display: inline-block;
-    padding: 20px;
-	margin-left: 30px;
-    transition: color 0.3s ease, border-color 0.3s ease; /* Added transition for border color */
+    border-bottom: 1px solid #ccc; /* Ajoute une bordure en bas de chaque élément de liste */
+    padding: 10px; /* Espacement à l'intérieur de chaque élément de liste */
+    display: flex; /* Utilise Flexbox pour aligner les éléments */
+    justify-content: space-between; /* Espacement */
 }
 
 li a {
     color: grey;
     text-decoration: none;
+    font-size: 14px;
     transition: color 0.3s ease;
 }
 
@@ -57,10 +68,19 @@ li:hover a {
     color: white;
 }
 
+li:empty {
+    text-align: center; /* Centre le texte */
+    color: #666; /* Couleur du texte */
+}
+
 a {
-    text-decoration: none;
-    color: grey;
-    font-weight: bold;
+    color: #007bff; /* Couleur des liens */
+    text-decoration: none; /* Supprime le soulignement */
+    font-size: 16px; /* Taille de la police */
+}
+
+a:hover {
+    text-decoration: underline; /* Ajoute un soulignement au survol */
 }
 
 #content {
@@ -78,18 +98,49 @@ a {
     color: grey;
 }
 
+.navbar {
+    background-color: black; 
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.navbar nav {
+    margin: 0 auto;
+    display: inline-block; /* Permet au nav de ne prendre que l'espace nécessaire */
+}
+
+.navbar ul {
+    display: flex; /* Active Flexbox */
+    justify-content: center; /* Centre les éléments horizontalement */
+    align-items: center; /* Alignement vertical au centre */
+    padding: 0;
+    list-style-type: none; /* Enlève les puces */
+}
+
+
+.navbar ul li {
+    margin: 0 10px; /* Ajoute un peu d'espace entre chaque élément */
+}
+
 .navbar ul li a {
-    color: grey;
-    transition: color 0.3s ease;
+    color: grey; /* Couleur initiale des liens */
+    padding: 5px 10px; /* Petit padding pour augmenter la zone cliquable */
+    transition: color 0.3s ease; /* Transition douce */
+    text-decoration: none; /* Supprime le soulignement */
 }
 
 .navbar ul li:hover a {
-    color: white;
+    color: white; /* Change la couleur au survol */
 }
 
 .navbar ul li:hover {
-    border-color: white;
-    color: white; /* Added to change the text color on li hover */
+    border-color: white; /* Optionnel si vous souhaitez une bordure au survol */
+}
+
+.navbar ul li.active a {
+    color: white; /* Couleur pour l'élément actuellement actif */
+    border-bottom: 2px solid white; /* Souligne l'élément actif */
 }
 
 .gamemodes li {
@@ -105,4 +156,44 @@ a {
     image-rendering: crisp-edges;
     box-sizing: border-box;
     border: 2px solid grey;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid grey; 
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Cette ligne peut aider mais n'est pas strictement nécessaire avec margin-left: auto; sur .logout-link */
+    position: absolute; /* Si vous voulez positionner absolument dans le coin supérieur */
+    top: 0;
+    left: 0;
+    width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
+    padding: 10px;
+}
+
+.username {
+    color: white;
+    margin-left: 10px;
+    font-family: 'PixelMix', sans-serif;
+}
+
+.logout-link {
+    color: red; /* Couleur du texte en rouge */
+    margin-left: auto; /* Pousse le lien vers la droite dans un conteneur Flexbox */
+    text-decoration: none; /* Supprime le soulignement */
+    font-family: 'PixelMix', sans-serif; /* Applique la même police que les autres textes */
+}
+
+/* Pour positionner le lien de déconnexion en haut à droite si hors du user-info */
+.user-logout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px;
 }

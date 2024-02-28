@@ -9,8 +9,7 @@
         <p>Name: {{ request.user.last_name }}</p>
         <p>LastName: {{ request.user.first_name }}</p>
         <p>Username: {{ request.user.username }}</p>
-        <!-- Lien ou bouton pour modifier les informations -->
-        <button type="button" onclick="location.href='{% url 'edit_profile' %}'">Modify Information</button>
+        <a href="#" onclick="loadPage('/user/edit_profile/'); return false;">Modify Information</a>
         <h2>Friends</h2>
         <ul>
             {% for friend_username, is_online, avatar_url in friends %}
@@ -34,7 +33,7 @@
             {% for request in friend_requests %}
                 <li>
                     From : {{ request.creator.username }}
-                    <a href="{% url 'accept_friend_request' friendship_id=request.id %}">Accepter</a>
+                    <button class="accept-friend-request" data-friendship-id="{{ request.id }}">Accept Friend Request</button>
                 </li>
             {% empty %}
                 <p>No friend request.</p>

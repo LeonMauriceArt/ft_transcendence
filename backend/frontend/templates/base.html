@@ -9,6 +9,7 @@
     <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'js/login.js' %}"></script>
 	<script src="{% static 'js/play.js' %}"></script>
+	<script src="{% static 'js/friends.js' %}"></script>
 	<script src="{% static 'js/tournament/local_tournament.js' %}"></script>
 	<script src="{% static 'js/tournament/pre_online_tournament.js' %}"></script>
 	<script src="{% static 'js/tournament/online_tournament.js' %}"></script>
@@ -45,16 +46,14 @@
 	<div id="navbar" class="navbar">
 		<nav>
 			<ul id="btnContainer">
-				<li type="button" onclick="loadPage('/')"><a>Home</a></li>
-				<li type="button" onclick="loadPage('/play')"><a>PLAY</a></li>
-				<li type="button" onclick="loadPage('/tournament/')"><a>TOURNAMENT</a></li>
+				<li><a href="#" onclick="loadPage('/'); return false;">Home</a></li>
+				<li><a href="#" onclick="loadPage('/play'); return false;">PLAY</a></li>
+				<li><a href="#" onclick="loadPage('/tournament/'); return false;">TOURNAMENT</a></li>
 				{% if user.is_authenticated %}
-					<li type="button" onclick="loadPage('/user/profile/')">{{ request.user.username }}</li>
-					<li type="button" onclick="loadPage('/user/online/')"><a>Online users</a></li>
-					<li type="button" onclick="loadPage('/user/logout/')">Logout</li>
+					<li><a href="#" onclick="loadPage('/user/online/'); return false;">Online users</a></li>
 				{% else %}
-					<li type="button" onclick="loadPage('/user/')"><a>Login</a></li>
-				{% endif %}
+					<li><a href="#" onclick="loadPage('/user/'); return false;">Login</a></li>
+				{% endif %}				
 			</ul>
 		</nav>
 	</div>
@@ -65,7 +64,11 @@
 	{% endif %}
 	<div id="content">
 		{% if user.is_authenticated %}
-			<img src="{{ user.avatar.url }}" style="width: 100px; height: 100px;">
+		<div class="user-info">
+			<img src="{{ user.avatar.url }}" alt="Avatar" class="avatar">
+			<a href="#" onclick="loadPage('/user/profile/'); return false;" class="username">{{ user.username }}</a>			
+			<a href="#" onclick="loadPage('/user/logout/'); return false;" class="logout-link">Logout</a>
+		</div>
 		{% endif %}
 		{% block navbar_content %}{% endblock %}
 	</div>

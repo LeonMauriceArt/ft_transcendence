@@ -2,10 +2,10 @@
 
 {% block navbar_content %}
     <h1>Edit Profile</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save changes</button>
-    </form>
-    <a href="{% url 'change_password' %}" class="button">Change Password</a>
+<form id="editProfileForm" onsubmit="submitProfileForm(event)">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save changes</button>
+</form>
+    <a href="#" onclick="loadPage('/user/change_password/'); return false;">Change Password</a>
 {% endblock %}

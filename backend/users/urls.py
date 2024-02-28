@@ -27,7 +27,7 @@ urlpatterns = [
     path('edit_profile/', edit_profile, name='edit_profile'), 
     path('change_password_done/', auth_views.PasswordChangeDoneView.as_view(template_name='change_password_done.html'), name='change_password_done'),
     path('change_password/', auth_views.PasswordChangeView.as_view(template_name='change_password.html', success_url='/user/change_password_done/'), name='change_password'), 
-    path('send-friend-request/<int:user_id>/', send_friend_request, name='send_friend_request'),
-    path('accept-friend-request/<int:friendship_id>/', accept_friend_request, name='accept_friend_request'),
+    path('send_friend_request/<int:user_id>/', send_friend_request, name='send_friend_request'),
+    path('accept_friend_request/<int:friendship_id>/', accept_friend_request, name='accept_friend_request'),
     path('user/<int:user_id>/', user_profile, name='user_profile')
 ] 
