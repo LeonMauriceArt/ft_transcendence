@@ -108,11 +108,11 @@ def friend_list_view(request):
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
     friend_list = []
     for friendship in friends:
-        is_online = now() - friendship.friend.last_active < timedelta(minutes=5)
+        is_online = now() - friendship.friend.last_active < timedelta(seconds=30)
         avatar_url = friendship.friend.avatar.url
         friend_list.append((friendship.friend.username, is_online, avatar_url))
     for friendship in other_friends:
-        is_online = now() - friendship.creator.last_active < timedelta(minutes=5)
+        is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
         avatar_url = friendship.creator.avatar.url
         friend_list.append((friendship.creator.username, is_online, avatar_url))
 
