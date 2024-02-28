@@ -11,8 +11,8 @@ import * as constants from './Constants.js';
 import { train } from './train.js';
 import { Player as AI} from './NeatJS/player.js';
 
-var game_running, camera, orbitcontrols, renderer, player_one, 
-player_two, ball, scene, 
+var game_running, camera, orbitcontrols, renderer, player_one,
+player_two, ball, scene,
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
 
@@ -41,7 +41,7 @@ var id = null;
 var aiPong;
 
 async function initAI() {
-    aiPong = await train(); 
+    aiPong = await train();
 }
 
 
@@ -49,10 +49,8 @@ export function start()
 {
 	if (id !==null)
 		cancelAnimationFrame(id);
-	initAI().then(() => {
 		initGame();
 		animate();
-	});
 }
 
 function initGame()
@@ -60,26 +58,26 @@ function initGame()
 	//Renderer
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-	
+
 	var container = document.getElementById('canvas');
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
 	renderer.setSize(w, h);
 	container.appendChild(renderer.domElement);
-	
+
 	//Init Scene
 	scene = new THREE.Scene();
 	scene.fog = new THREE.Fog( 0x00000, 5, 300 );
-	
+
 	//Camera
 	camera = new THREE.PerspectiveCamera(
-		45, 
+		45,
 		constants.WIN_WIDTH / constants.WIN_HEIGHT,
 		0.1,
 		1000
 		);
 		camera.position.z = constants.CAMERA_STARTPOS_Z
-		
+
 	initArena()
 	initControls()
 }
@@ -99,7 +97,7 @@ function initArena()
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
 	var lower_wall = new Wall(constants.GAME_AREA_HEIGHT * -1, 300, material.wallMaterial)
 	scene.add(upper_wall.mesh, lower_wall.mesh)
-	
+
 	//Creating and adding the two player goals
 	player_one_goal = new THREE.Mesh(
 		new THREE.PlaneGeometry(20, constants.GAME_AREA_HEIGHT * 2, 1, 4),
@@ -191,7 +189,7 @@ function getCurrentState() {
 	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
 
 	const currentState = [
-		ballPositionY, 
+		ballPositionY,
 		AiPaddlePositionY, distanceFromAiPaddle
 	];
 	return currentState;
@@ -242,10 +240,10 @@ let predictedBallPosition = null
 
 function handle_input(player_one, player_two)
 {
-	const currentState = getCurrentState();
-	aiPong.setInputs(currentState);
-	aiPong.think();
-    let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
+	// const currentState = getCurrentState();
+	// aiPong.setInputs(currentState);
+	// aiPong.think();
+    // let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
 	if (ball.shouldPredict == true){
 		predictedBallPosition = predictBallPosition();
 		ball.shouldPredict = false
@@ -264,18 +262,18 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
-	switch(decisionIndex) {
-		case 0:
-			player_two.move(true);
-			break
-		case 1:
-			player_two.move(false);
-			break;
-		case 2:
-			break;
-		default:
-			console.error("Action non reconnue pour le joueur 1");
-	}
+	// switch(decisionIndex) {
+	// 	case 0:
+	// 		player_two.move(true);
+	// 		break
+	// 	case 1:
+	// 		player_two.move(false);
+	// 		break;
+	// 	case 2:
+	// 		break;
+	// 	default:
+	// 		console.error("Action non reconnue pour le joueur 1");
+	// }
 	if (keys['ArrowUp'])
 		player_two.move(true);
 	if (keys['ArrowDown'])
@@ -288,10 +286,10 @@ function handle_input(player_one, player_two)
 
 //GameLoop
 function animate() {
-	
+
 	screenShake.update(camera);
 	orbitcontrols.update();
-	
+
 	if (!game_running)
 	{
 		ball.update(player_one, player_two);

@@ -9,8 +9,9 @@ services:
     # command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
     command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
+      - ./backend:/code
       - daphne-sock:/usr/src/daphne_sock
-      - static_volume:/code/mystaticfiles
+      # - static_volume:/code/mystaticfiles
     ports:
       - "8000:8000"
     environment:
@@ -48,7 +49,7 @@ services:
      - ./nginx/startup.sh:/startup.sh
      - ./nginx/main.conf:/etc/nginx/modsec/main.conf
      - daphne-sock:/usr/src/daphne_sock
-     - static_volume:/code/mystaticfiles:ro
+    #  - static_volume:/code/mystaticfiles:ro
     command: /bin/bash /startup.sh
 
   vault:
@@ -62,4 +63,4 @@ services:
 volumes:
   postgres-data:
   daphne-sock:
-  static_volume:
+  # static_volume:
