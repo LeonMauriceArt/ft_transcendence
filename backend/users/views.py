@@ -1,62 +1,133 @@
-from django.shortcuts import render
-from django.db import IntegrityError
-from django.http import HttpResponse
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django import forms
+from .forms import RegistrationForm, LoginForm, ModifyForm
+from .models import UserProfile, Friendship
 from django.template import loader
-from .models import UserProfile
-import json
-
-def check_login(request):
-     if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        if UserProfile.objects.filter(login=data).exists():
-             return HttpResponse(status=409)
-        else:
-            return HttpResponse(status=200)
+from django.http import HttpResponse, JsonResponse
+from django.utils.timezone import now, timedelta
+from django.contrib import messages
 
 def user(request):
-	user_profiles = UserProfile.objects.all()
-	template = loader.get_template('user.html')
-	context = { 'user_profiles': user_profiles
-	}
-	return HttpResponse(template.render(context, request))
+     user_profiles = UserProfile.objects.all().values
+     template = loader.get_template('user.html')
+     context = { 'user_profiles': user_profiles
+     }
+     return HttpResponse(template.render(context, request))
 
-def login_form(request):
-     return render(request, 'login.html')
+def registration_view(request):
+     context = {}
+     if request.method == 'POST':
+          form = RegistrationForm(request.POST, request.FILES)
+          if form.is_valid():
+               form.save()
+               raw_password = form.cleaned_data.get('password1')
+               user_name = form.cleaned_data.get('username')   
+               user = authenticate(username=user_name, password=raw_password)
+               if user is not None:
+                    login(request, user)
+                    return redirect ('welcome')
+          else:
+               context['registration_form'] = form
+     else:
+          form = RegistrationForm()
+          context['registration_form'] = form
+     return render(request, 'register.html', context)
 
-def registration_form(request):
-     return render(request, 'register.html')
+def logout_view(request):
+     logout(request)
+     return redirect('welcome')
 
-def submit_register(request):
+def auth_status(request):
+     if (request.user.is_authenticated):
+          return JsonResponse({'authenticated':True, 'username':request.user.username})
+     else:
+        return JsonResponse({'authenticated': False})
+
+def delete_users(request):
+     if (request.user.is_authenticated):
+          logout(request.user)
+     UserProfile.objects.all().delete()
+     return user(request)
+
+def login_view(request):
+    context = {}
     if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        login = data.get('login')
-        password = data.get('password')
-        firstName = data.get('firstName')
-        lastName = data.get('lastName')
-
-        try:
-            user_profile = UserProfile(login=login, firstName=firstName,lastName=lastName,password=password)
-            # user_profile.save()
-            return HttpResponse(status=201)
-        except IntegrityError as e:
-            return HttpResponse(status=400)
+        form = LoginForm(request, request.POST)
+        username = form.data.get('username')
+        password = form.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('welcome')
+        else:
+            context['login_form'] = form
+            context['error'] = "Invalid username or password"
     else:
-         return HttpResponse(status=500)
+        form = LoginForm()
+        context['login_form'] = form
+    return render(request, 'login.html', context)
 
+def user_profile(request, user_id):
+    user_profile = get_object_or_404(UserProfile, pk=user_id)
+    return render(request, 'user_profile.html', {'user_profile': user_profile})
 
+def profile(request):
+    friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
 
-def submit_login(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        login = data.get('login')
-        password = data.get('password')
+    friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
+    other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
+    friend_list = []
+    for friendship in friends:
+        is_online = now() - friendship.friend.last_active < timedelta(seconds=30)
+        avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
+        friend_list.append((friendship.friend.username, is_online, avatar_url))
+    for friendship in other_friends:
+        is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
+        avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
+        friend_list.append((friendship.creator.username, is_online, avatar_url))
 
-        try:
-             user_profile = UserProfile.objects.get(login=login, password=password)
-             return HttpResponse(status=200)
-        except UserProfile.DoesNotExist:
-             return HttpResponse(status=401)
-    else:
-         return HttpResponse(status=400)
+    context = {
+        'user': request.user,
+        'friend_requests': friend_requests,
+        'friends': friend_list,
+    }
+
+    return render(request, 'profile.html', context)
+
+def edit_profile(request):
+	if request.method == 'POST':
+		form = ModifyForm(request.POST, request.FILES, instance=request.user)
+		if form.is_valid():
+			form.save()
+			return redirect('profile')
+	else:
+		form = ModifyForm(instance=request.user)
+	return render(request, 'edit_profile.html', {'form': form})
+
+def list_users_online(request):
+	time_threshold = now() - timedelta(minutes=5)
+	users_online = UserProfile.objects.filter(last_active__gte=time_threshold)
+	return render(request, 'online.html', {'users_online': users_online})
+
+def send_friend_request(request, user_id):
+	if request.method == 'GET':
+		target_user = get_object_or_404(UserProfile, id=user_id)
+		if request.user != target_user and not Friendship.objects.filter(creator=request.user, friend=target_user).exists() and not Friendship.objects.filter(creator=target_user, friend=request.user).exists():
+			Friendship.objects.create(creator=request.user, friend=target_user, status='pending')
+			messages.success(request, 'Friend request sent !')
+			return redirect('list_users_online')
+		else:
+			messages.error(request, 'Can\'t send friend request.')
+			return redirect('list_users_online')
+	else:
+		return redirect('list_users_online')
+
+def accept_friend_request(request, friendship_id):
+	friendship = get_object_or_404(Friendship, id=friendship_id, friend=request.user, status='pending')
+	friendship.status = 'accepted'
+	friendship.save()
+	messages.success(request, 'You accepted the friend request !')
+	return redirect('friend_requests')
 
 

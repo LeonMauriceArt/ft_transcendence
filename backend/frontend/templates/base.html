@@ -12,9 +12,10 @@
 	<script src="{% static 'js/tournament/local_tournament.js' %}"></script>
 	<script src="{% static 'js/tournament/pre_online_tournament.js' %}"></script>
 	<script src="{% static 'js/tournament/online_tournament.js' %}"></script>
+	<script src="{% static 'js/register.js' %}"></script>
 	<script>
 		var droid ="{% static 'fonts/droid_sans_bold.typeface.json' %}";
-		</script> 
+	</script> 
 	<script type="importmap">
 		{
 			"imports": {
@@ -41,20 +42,36 @@
 <body>
 	<h1 id="projectname">P.O.N.G</h1>
 
-	<div class="navbar">
+	<div id="navbar" class="navbar">
 		<nav>
 			<ul id="btnContainer">
 				<li type="button" page="/"><a>Home</a></li>
 				<li type="button" page="/play/"><a>PLAY</a></li>
 				<li type="button" page="/tournament/"><a>TOURNAMENT</a></li>
-				<li type="button" page="/user/"><a>Login</a></li>
+				{% if user.is_authenticated %}
+					<li type="button" page="/user/profile/">{{ request.user.username }}</li>
+					<li type="button" page="/user/online/"><a>Online users</a></li>
+					<li type="button" page="/user/logout/">Logout</li>
+				{% else %}
+					<li type="button" page="/user/"><a>Login</a></li>
+				{% endif %}
 			</ul>
 		</nav>
 	</div>
-	
+	{% if messages %}
+    {% for message in messages %}
+        <div style="color: red;">{{ message }}</div>
+    {% endfor %}
+	{% endif %}
 	<div id="content">
+		{% if user.is_authenticated %}
+			<img src="{{ user.avatar.url }}" style="width: 100px; height: 100px;">
+		{% endif %}
 		{% block navbar_content %}{% endblock %}
 	</div>
+<!-- <script>
+	window.addEventListener('load', updateNavbar);
+</script> -->
 </body>
 </html>
 

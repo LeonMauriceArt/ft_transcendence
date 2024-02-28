@@ -1,16 +1,21 @@
-{%load static%}
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Login</title>
+{% endblock %}
+
+{% block navbar_content %}
 <h1>Login</h1>
-<br><br>
-<script src="{% static 'login.js' %}"></script>
-<h2>
-<form id="loginForm">
+<form id="login-form" onsubmit="submitLoginForm(event)">
     {% csrf_token %}
-    <label for="login">Login:</label>
-    <input type="text" id="login" name="login" required>
-    <br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-</h2>
-    <div id="errorMessage" style="color: red;"></div>
-    <button type="button" onclick="submitLoginForm()">Submit</button>
+    {% for field in login_form %}
+        <p>
+            {{ field.label_tag }}
+            {{ field }}
+        </p>
+    {% endfor %}
+    <span style="color: red;">{{ error }}</span><br>
+    <button type="submit" name="login">Login</button>
+
 </form>
+{% endblock %}
