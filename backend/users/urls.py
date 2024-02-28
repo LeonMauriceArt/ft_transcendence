@@ -10,9 +10,8 @@ from .views import (
     edit_profile,
     list_users_online, 
     send_friend_request,
-    friend_requests_view,
     accept_friend_request,
-    friend_list_view
+    user_profile
 )
 from django.contrib.auth import views as auth_views
 
@@ -29,7 +28,6 @@ urlpatterns = [
     path('change_password_done/', auth_views.PasswordChangeDoneView.as_view(template_name='change_password_done.html'), name='change_password_done'),
     path('change_password/', auth_views.PasswordChangeView.as_view(template_name='change_password.html', success_url='/user/change_password_done/'), name='change_password'), 
     path('send-friend-request/<int:user_id>/', send_friend_request, name='send_friend_request'),
-    path('friend_requests/', friend_requests_view, name='friend_requests'),
     path('accept-friend-request/<int:friendship_id>/', accept_friend_request, name='accept_friend_request'),
-    path('friend_list/', friend_list_view, name='friend_list')
+    path('user/<int:user_id>/', user_profile, name='user_profile')
 ] 

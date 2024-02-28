@@ -5,11 +5,49 @@
 {% endblock %}
 
 {% block navbar_content %}
-    <h1>Welcome, {{ request.user.username }}</h1>
-    <p>Name: {{ request.user.last_name }}</p>
-    <p>LastName: {{ request.user.first_name }}</p>
-    <p>Username: {{ request.user.username }}</p>
-
-    <!-- Bouton pour modifier les informations -->
-    <button type="button" onclick="location.href='{% url 'edit_profile' %}'">Modify Information</button>
+        <h1>Welcome, {{ request.user.username }}</h1>
+        <p>Name: {{ request.user.last_name }}</p>
+        <p>LastName: {{ request.user.first_name }}</p>
+        <p>Username: {{ request.user.username }}</p>
+        <!-- Lien ou bouton pour modifier les informations -->
+        <button type="button" onclick="location.href='{% url 'edit_profile' %}'">Modify Information</button>
+        <h2>Friends</h2>
+        <ul>
+            {% for friend_username, is_online, avatar_url in friends %}
+            <li>
+                {% if avatar_url %}
+                    <img src="{{ avatar_url }}" alt="Avatar" style="width: 50px; height: 50px;">
+                {% endif %}
+                {{ friend_username }} - 
+                {% if is_online %}
+                    <span style="color: green;">Online</span>
+                {% else %}
+                    <span style="color: red;">Offline</span>
+                {% endif %}
+            </li>
+            {% empty %}
+            <p>No friend.</p>
+            {% endfor %}
+        </ul>
+        <h2>Friend Requests</h2>
+        <ul>
+            {% for request in friend_requests %}
+                <li>
+                    From : {{ request.creator.username }}
+                    <a href="{% url 'accept_friend_request' friendship_id=request.id %}">Accepter</a>
+                </li>
+            {% empty %}
+                <p>No friend request.</p>
+            {% endfor %}
+        </ul>
+        <h2>Match History</h2>
+        {% if match_history %}
+        <ul>
+            {% for match in match_history %}
+                <li>{{ match.date }} - {{ match.outcome }} against {{ match.opponent }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <p>No match history.</p>
+    {% endif %}
 {% endblock %}

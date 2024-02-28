@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>{{ user_profile.username }}'s Profile</title>
+{% endblock %}
+
+{% block navbar_content %}
+    <h2>{{ user_profile.username }}'s Profile</h2>
+    <p>Username: {{ user_profile.username }}</p>
+
+    <h3>Match History</h3>
+    {% if match_history %}
+        <ul>
+            {% for match in match_history %}
+                <li>{{ match.date }} - {{ match.outcome }} against {{ match.opponent }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No match history.</p>
+    {% endif %}
+{% endblock %}

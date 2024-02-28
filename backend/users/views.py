@@ -68,8 +68,32 @@ def login_view(request):
         context['login_form'] = form
     return render(request, 'login.html', context)
 
+def user_profile(request, user_id):
+    user_profile = get_object_or_404(UserProfile, pk=user_id)
+    return render(request, 'user_profile.html', {'user_profile': user_profile})
+
 def profile(request):
-     return render(request, 'profile.html', {'user': request.user})
+    friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
+
+    friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
+    other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
+    friend_list = []
+    for friendship in friends:
+        is_online = now() - friendship.friend.last_active < timedelta(seconds=30)
+        avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
+        friend_list.append((friendship.friend.username, is_online, avatar_url))
+    for friendship in other_friends:
+        is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
+        avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
+        friend_list.append((friendship.creator.username, is_online, avatar_url))
+
+    context = {
+        'user': request.user,
+        'friend_requests': friend_requests,
+        'friends': friend_list,
+    }
+
+    return render(request, 'profile.html', context)
 
 def edit_profile(request):
 	if request.method == 'POST':
@@ -98,25 +122,6 @@ def send_friend_request(request, user_id):
 			return redirect('list_users_online')
 	else:
 		return redirect('list_users_online')
-
-def friend_requests_view(request):
-	friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
-	return render(request, 'friend_requests.html', {'friend_requests': friend_requests})
-
-def friend_list_view(request):
-    friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
-    other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
-    friend_list = []
-    for friendship in friends:
-        is_online = now() - friendship.friend.last_active < timedelta(seconds=30)
-        avatar_url = friendship.friend.avatar.url
-        friend_list.append((friendship.friend.username, is_online, avatar_url))
-    for friendship in other_friends:
-        is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
-        avatar_url = friendship.creator.avatar.url
-        friend_list.append((friendship.creator.username, is_online, avatar_url))
-
-    return render(request, 'friend_list.html', {'friends': friend_list})
 
 def accept_friend_request(request, friendship_id):
 	friendship = get_object_or_404(Friendship, id=friendship_id, friend=request.user, status='pending')

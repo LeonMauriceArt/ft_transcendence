@@ -47,8 +47,6 @@
 				{% if user.is_authenticated %}
 					<li type="button" page="/user/profile/">{{ request.user.username }}</li>
 					<li type="button" page="/user/online/"><a>Online users</a></li>
-					<li type="button" page="/user/friend_list/"><a>Friends</a></li>
-					<li type="button" page="/user/friend_requests/"><a>Friend Requests</a></li>
 					<li type="button" page="/user/logout/">Logout</li>
 				{% else %}
 					<li type="button" page="/user/"><a>Login</a></li>
