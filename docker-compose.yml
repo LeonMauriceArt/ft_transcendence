@@ -10,7 +10,7 @@ services:
     command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - daphne-sock:/usr/src/daphne_sock
-      - static_volume:/code/mystaticfiles
+      # - static_volume:/code/mystaticfiles
       - vault_data:/run/secrets/keys:ro
     ports:
       - "8000:8000"
@@ -45,7 +45,7 @@ services:
      - ./nginx/startup.sh:/startup.sh
      - ./nginx/main.conf:/etc/nginx/modsec/main.conf
      - daphne-sock:/usr/src/daphne_sock
-     - static_volume:/code/mystaticfiles:ro
+    #  - static_volume:/code/mystaticfiles:ro
     command: /bin/bash /startup.sh
 
   vault:
