@@ -10,14 +10,38 @@
 }
 
 /* Reset some default styles */
-body, h1, h2, h3, p, ul, li {
+body, p, ul, li {
     margin: 0;
     padding: 0;
     font-family: 'PixelMix', sans-serif;
-    font-size: 24px; /* Taille de la police */
-    color: #333; /* Couleur du texte */
-    text-align: center; /* Centrer le texte */
+    font-size: 24px;
+    color: #333;
+    text-align: center;
     margin: 20px 0;
+}
+
+h1 {
+    color: white;
+    font-family: 'PixelMix', sans-serif;
+    font-weight: bold;
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: white;
+    font-weight: bold;
+    font-family: 'PixelMix', sans-serif;
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+h3 {
+    color: white;
+    font-weight: bold;
+    font-family: 'PixelMix', sans-serif;
+    font-size: 28px;
+    margin-bottom: 25px;
 }
 
 body {
@@ -26,7 +50,8 @@ body {
 }
 
 p {
-	margin-top : 20px;
+    color: grey; 
+	margin-top : 10px;
     width: 100%;
     text-align: center;
 }
@@ -51,14 +76,14 @@ ul {
 }
 
 li {
-    border-bottom: 1px solid #ccc; /* Ajoute une bordure en bas de chaque élément de liste */
+    color: grey; 
     padding: 10px; /* Espacement à l'intérieur de chaque élément de liste */
     display: flex; /* Utilise Flexbox pour aligner les éléments */
     justify-content: space-between; /* Espacement */
 }
 
 li a {
-    color: grey;
+    color: grey; ;
     text-decoration: none;
     font-size: 14px;
     transition: color 0.3s ease;
@@ -91,11 +116,15 @@ a:hover {
 }
 
 #projectname {
-    margin: 20px;
-    font-size: 60px;
-    text-align: center;
-    font-family: 'PixelDogica', sans-serif;
-    color: grey;
+    margin: 20px 0 40px; /* Ajustez les marges comme nécessaire pour le positionnement vertical */
+    font-size: 60px; /* Taille de la police */
+    text-align: center; /* Centre le titre horizontalement */
+    font-family: 'PixelDogica', sans-serif; /* Police personnalisée */
+    color: white; /* Couleur du texte en blanc */
+    font-weight: bold; /* Rend le texte en gras */
+    position: relative; /* Position relative pour ajustements supplémentaires si nécessaire */
+    top: 0; /* Assurez-vous qu'il est en haut */
+    width: 100%; /* Assure que le titre prend toute la largeur */
 }
 
 .navbar {
@@ -196,4 +225,87 @@ a:hover {
     top: 0;
     left: 0;
     padding: 10px;
+}
+
+.profile-grid {
+    margin: 0 auto; /* Centrer le conteneur de la grille */
+    max-width: 1200px; /* Ou la largeur maximale que vous souhaitez pour votre grille */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Quatre colonnes pour les quatre titres */
+    grid-template-areas:
+        "profile-title friends-title requests-title history-title"
+        "profile-content friends-content requests-content history-content";
+    gap: 20px 100px;
+    justify-content: center;
+}
+
+.profile-title { grid-area: profile-title; }
+.friends-title { grid-area: friends-title; }
+.requests-title { grid-area: requests-title; }
+.history-title { grid-area: history-title; }
+
+.profile-content { grid-area: profile-content; }
+.friends-content { grid-area: friends-content; }
+.requests-content { grid-area: requests-content; }
+.history-content { grid-area: history-content; }
+
+.profile-content, .friends-content, .requests-content, .history-content {
+    margin-top: -20px;
+}
+
+.friend-content ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.status-online {
+    min-width: 15px;
+    height: 15px;
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+/* Statut hors ligne */
+.status-offline {
+    min-width: 15px;
+    height: 15px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.friend-content li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.friend-content img.avatar {
+    min-width: 30px; 
+    max-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid grey;
+    margin-right: 5px; 
+}
+
+.requests-content ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.requests-content li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 0;
 }

@@ -5,48 +5,66 @@
 {% endblock %}
 
 {% block navbar_content %}
+<div class="profile-grid">
+    <div class="profile-title">
         <h1>Welcome, {{ request.user.username }}</h1>
+    </div>
+    <div class="profile-content">
         <p>Name: {{ request.user.last_name }}</p>
         <p>LastName: {{ request.user.first_name }}</p>
         <p>Username: {{ request.user.username }}</p>
-        <a href="#" onclick="loadPage('/user/edit_profile/'); return false;">Modify Information</a>
-        <h2>Friends</h2>
-        <ul>
+        <button href="#" onclick="loadPage('/user/edit_profile/'); return false;">Modify Informations</button>
+    </div>
+    <div class="friends-title">
+            <h2>Friends</h2>
+    </div>
+    <div class="friend-content">
+            <ul>
             {% for friend_username, is_online, avatar_url in friends %}
             <li>
                 {% if avatar_url %}
-                    <img src="{{ avatar_url }}" alt="Avatar" style="width: 50px; height: 50px;">
+                    <img src="{{ avatar_url }}" alt="Avatar" class="avatar">
                 {% endif %}
-                {{ friend_username }} - 
+                {{ friend_username }}
                 {% if is_online %}
-                    <span style="color: green;">Online</span>
+                <span class="status-online" title="Online"></span>
                 {% else %}
-                    <span style="color: red;">Offline</span>
+                <span class="status-offline" title="Offline"></span>
                 {% endif %}
             </li>
             {% empty %}
             <p>No friend.</p>
             {% endfor %}
         </ul>
-        <h2>Friend Requests</h2>
-        <ul>
+    </div>
+    <div class="requests-title">
+    <h2>Friend Requests</h2>
+    </div>
+        <div class="requests-content">
+            <ul>
             {% for request in friend_requests %}
                 <li>
-                    From : {{ request.creator.username }}
-                    <button class="accept-friend-request" data-friendship-id="{{ request.id }}">Accept Friend Request</button>
+                    {{ request.creator.username }}
+                    <button class="accept-friend-request" data-friendship-id="{{ request.id }}">Accept</button>
                 </li>
             {% empty %}
                 <p>No friend request.</p>
             {% endfor %}
         </ul>
+    </div>
+    <div class="history-title">
         <h2>Match History</h2>
-        {% if match_history %}
+    </div>
+    <div class="history-content">
         <ul>
+        {% if match_history %}
             {% for match in match_history %}
                 <li>{{ match.date }} - {{ match.outcome }} against {{ match.opponent }}</li>
             {% endfor %}
-        </ul>
         {% else %}
             <p>No match history.</p>
-    {% endif %}
+        {% endif %}
+    </ul>
+    </div>
+</div>
 {% endblock %}
