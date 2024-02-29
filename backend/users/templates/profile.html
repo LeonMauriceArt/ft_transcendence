@@ -59,7 +59,8 @@
         <ul>
         {% if match_history %}
             {% for match in match_history %}
-                <li>{{ match.date }} - {{ match.outcome }} against {{ match.opponent }}</li>
+                <li>{{ match.date }} - {{ match.player_one }} {{match.player_one_score}} | {{match.player_two_score}} {{ match.player_two }}</li>
+                <li> Winner : {{match.winner}} </li>
             {% endfor %}
         {% else %}
             <p>No match history.</p>

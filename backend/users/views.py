@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from .forms import RegistrationForm, LoginForm, ModifyForm
 from .models import UserProfile, Friendship
+from pong_game.models import MatchHistory
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta
@@ -87,6 +88,8 @@ def profile(request):
         is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
         avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
         friend_list.append((friendship.creator.username, is_online, avatar_url))
+
+    # match_history = MatchHistory.objects.filter(creator=request.user, status='accepted').select_related('friend')
 
     context = {
         'user': request.user,
