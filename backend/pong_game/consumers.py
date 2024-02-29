@@ -41,7 +41,6 @@ class GameManager:
 				print('---PLAYER :', player_id, 'REMOVED FROM', room_name)
 				self.game_rooms[room_name]['players'].remove(player_id)
 				if (self.room_len(room_name) == 0):
-					print('&&&&&&&&&&&&&&&&&&&&& ROOM', room_name, 'DELETED &&&&&&&&&&&&&&&&&&&&&&&')
 					del self.game_rooms[room_name]
 					return True
 		return False
@@ -103,10 +102,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				'type':'set_position',
 				'value':'player_two'
 			}))
-		# await self.send(text_data=json.dumps({
-		# 	'type':'init_game',
-		# }))
-
 		await self.channel_layer.group_add(
 			self.game_room, self.channel_name
 		)
@@ -138,7 +133,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 					await self.end_game('player_two')
 				elif data.get("player", "") == 'player_two':
 					await self.end_game('player_one')
-				
+
+
 #-------HANDLING CHANNEL MESSAGES--------
 	async def game_start(self, event):
 		await self.send(text_data=json.dumps({
@@ -165,6 +161,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'key': event.get('value')
 		}))
 	async def game_state(self, event):
+		print('PLAYER', self.player_id, ' | RECEVING BALL_X:', event.get('ball_x'))
 		await self.send(text_data=json.dumps({
 			'type': event.get('type'),
 			'player_one_pos_y': event.get('player_one_pos_y'),
@@ -186,6 +183,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.channel_layer.group_discard(
 			self.game_room, self.channel_name
 		)
+
 #--------END HANDLERS---------
 
 	async def get_update_lock(self):
@@ -218,6 +216,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		})
 
 	async def end_game(self, winner):
+		self.game.is_running = False
 		if not winner :
 			game_winner = None
 			if self.game.players[0].score >= self.game.winning_score:

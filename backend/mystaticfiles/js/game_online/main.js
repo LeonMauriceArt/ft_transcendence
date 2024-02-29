@@ -19,6 +19,8 @@ player_one_goal, player_two_goal
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
 
+let first_launch = true;
+
 const keys = {};
 
 var position = null;
@@ -42,11 +44,16 @@ function sendMessageToServer(message)
 
 export function start()
 {
-	initDisplay();
-	initArena();
 	wss = new WebSocket(wssurl);
+	if (first_launch)
+	{
+		initDisplay();
+		first_launch = false;
+	}
+	else if (!first_launch)
+		delete_scene_objs()
+	initArena();
 	wss.onopen = () => {
-		resetGame()
 		console.log('Websocket connection established.');
 	}
 	wss.onmessage = (event) => 
@@ -70,25 +77,22 @@ export function start()
 		} 
 		if (data.type === 'game_end')
 		{
+			game_running = false;
 			console.log('GAME IS ENDING AND SOMEONE WON')
 			display_winner(data.winner)
+			wss.close()
 		}
-		// if (data.type === 'init_game')
-		// 	resetGame()
 	};
 	wss.onclose = () => 
 	{
 		console.log('Websocket connection closed.');
 	};
 	if (id !==null)
-		cancelAnimationFrame(id);
-	animate();
+	cancelAnimationFrame(id);
+animate();
 }
 
-export function resetGame(){
-	// if (wss && wss.readyState === WebSocket.OPEN){
-	// 	wss.close();
-	// }
+export function delete_scene_objs(){
 	scene.children.forEach(child => {
 		scene.remove(child);
 	});
@@ -103,7 +107,6 @@ export function resetGame(){
 			obj.texture.dispose();
 		}
 	});
-	initArena();
 }
 
 function updateGameState(data)
@@ -239,46 +242,30 @@ function display_winner(winning_player)
 {
 	orbitcontrols.autoRotate = true;
 	ball.stop();
-	scene.children.forEach(child => {
-		scene.remove(child);
-	});
-	scene.traverse(obj => {
-		if (obj.material) {
-			obj.material.dispose();
-		}
-		if (obj.geometry) {
-			obj.geometry.dispose();
-		}
-		if (obj.texture) {
-			obj.texture.dispose();
-		}
-	});
-	// scene.remove(player_one_score_text)
-	// scene.remove(player_two_score_text)
-	// scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
-	// var light1;
-	// var light2;
-	// if (winning_player == 'player_one')
-	// {
-	// 	winning_text = createTextMesh(droidFont, "PLAYER 1 WIN", player_one_score_text, 0, 0, 0, 0xffffff, 13)
-	// 	winning_text.material.emissiveIntensity = 0.5
-	// 	light1 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
-	// 	light1.position.set(constants.GAME_AREA_WIDTH / 3, constants.GAME_AREA_HEIGHT / 3)
-	// 	light2 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
-	// 	light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
-	// }
-	// else
-	// {
-	// 	winning_text = createTextMesh(droidFont, "PLAYER 2 WIN", player_two_score_text, 0, 0, 0, 0xffffff, 13)
-	// 	winning_text.material.emissiveIntensity = 0.5
-	// 	light1 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);
-	// 	light1.position.set(constants.GAME_AREA_WIDTH / 3, constants.GAME_AREA_HEIGHT / 3)
-	// 	light2 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);
-	// 	light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
-	// }
-	// scene.add(winning_text, light1, light2)
-	wss.close()
-	// game_running = false
+	scene.remove(player_one_score_text)
+	scene.remove(player_two_score_text)
+	scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+	var light1;
+	var light2;
+	if (winning_player == 'player_one')
+	{
+		winning_text = createTextMesh(droidFont, "PLAYER 1 WIN", player_one_score_text, 0, 0, 0, 0xffffff, 13)
+		winning_text.material.emissiveIntensity = 0.5
+		light1 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
+		light1.position.set(constants.GAME_AREA_WIDTH / 3, constants.GAME_AREA_HEIGHT / 3)
+		light2 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
+		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
+	}
+	else
+	{
+		winning_text = createTextMesh(droidFont, "PLAYER 2 WIN", player_two_score_text, 0, 0, 0, 0xffffff, 13)
+		winning_text.material.emissiveIntensity = 0.5
+		light1 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);
+		light1.position.set(constants.GAME_AREA_WIDTH / 3, constants.GAME_AREA_HEIGHT / 3)
+		light2 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);
+		light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
+	}
+	scene.add(winning_text, light1, light2)
 }
 
 
@@ -297,19 +284,22 @@ function render(){
 }
 
 window.addEventListener('unload', function(){
-	if (game_running)
+	if (wss)
 		sendMessageToServer({type: 'player_left', player: position})
-	resetGame();
 })
 
 function handlePageReload()
 {
-	if (game_running)
+	if (wss)
 		sendMessageToServer({type: 'player_left', player: position})
-	if (scene)
-		resetGame();
 }
 
 window.addEventListener('beforeunload', function(){
+	console.log('JE QUITTE LA PAGE')
 	handlePageReload();
 })
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden')
+		wss.close()
+});
