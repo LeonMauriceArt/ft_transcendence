@@ -295,11 +295,5 @@ function handlePageReload()
 }
 
 window.addEventListener('beforeunload', function(){
-	console.log('JE QUITTE LA PAGE')
 	handlePageReload();
 })
-
-document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'hidden')
-		wss.close()
-});
