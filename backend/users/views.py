@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta
 from django.template.loader import render_to_string
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 def user(request):
      user_profiles = UserProfile.objects.all().values
@@ -74,9 +75,9 @@ def user_profile(request, user_id):
     user_profile = get_object_or_404(UserProfile, pk=user_id)
     return render(request, 'user_profile.html', {'user_profile': user_profile})
 
+@login_required
 def profile(request):
     friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
-
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
     friend_list = []

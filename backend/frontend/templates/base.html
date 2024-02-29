@@ -67,7 +67,7 @@
 		<div class="user-info">
 			<img src="{{ user.avatar.url }}" alt="Avatar" class="avatar">
 			<a href="#" onclick="loadPage('/user/profile/'); return false;" class="username">{{ user.username }}</a>			
-			<a href="#" onclick="loadPage('/user/logout/'); return false;" class="logout-link">Logout</a>
+			<a href="#" onclick="logoutUser()" class="logout-link">Logout</a>
 		</div>
 		{% endif %}
 		{% block navbar_content %}{% endblock %}

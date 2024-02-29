@@ -78,6 +78,8 @@ TEMPLATES = [
     },
 ]
 
+LOGIN_URL = '/user/'
+
 LOGIN_REDIRECT_URL = '/'
 
 CHANNEL_LAYERS = {

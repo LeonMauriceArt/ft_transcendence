@@ -16,6 +16,26 @@ function attachEventListeners() {
     }
 }
 
+function logoutUser() {
+    fetch('/user/logout/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            updateNavbar();
+        } else {
+            console.error('Logout failed.');
+        }
+    })
+    .then(() => {
+        loadPage('/');
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 function changePassword(event) {
     event.preventDefault(); 
     const form = document.getElementById('changePasswordForm');
