@@ -192,7 +192,7 @@ a:hover {
     height: 50px;
     border-radius: 50%; 
     object-fit: cover;
-    border: 2px solid grey; 
+    border: 2px solid grey;
 }
 
 .user-info {
@@ -201,9 +201,8 @@ a:hover {
     justify-content: space-between; /* Cette ligne peut aider mais n'est pas strictement nécessaire avec margin-left: auto; sur .logout-link */
     position: absolute; /* Si vous voulez positionner absolument dans le coin supérieur */
     top: 0;
-    left: 0;
+    left: -10px;
     width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
-    padding: 10px;
 }
 
 .username {
