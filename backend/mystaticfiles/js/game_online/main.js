@@ -44,6 +44,11 @@ function sendMessageToServer(message)
 
 export function start()
 {
+	if (wss)
+	{
+		wss.close();
+		first_launch = false;
+	}
 	wss = new WebSocket(wssurl);
 	if (first_launch)
 	{
