@@ -3,11 +3,11 @@
 {% load static %}
 
 {% block navbar_content %}
-
 <div id="tournament">
     <li onclick="load_create_local()">CREATE LOCAL TOURNAMENT</li>
+        {% if user.is_authenticated %}
     <li onclick="load_create_online()">CREATE ONLINE TOURNAMENT</li>
-    <li onclick="load_join_online()">JOIN ONLINE TOURNAMENT</li>
+    <li onclick="load_tournament_requests()">TOURNAMENT REQUESTS</li>
+        {% endif %}
 </div>
-<div id="dynamicContent"></div>
 {% endblock %}

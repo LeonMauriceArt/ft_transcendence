@@ -24,7 +24,7 @@ const hasDuplicateStrings = (arr) => {
 };
 
 const load_create_local = () => {
-    loadContent('/tournament/create_local', 'dynamicContent');
+    loadContent('/tournament/create_local_page', 'content');
 };
 
 const start_tournament = () => {

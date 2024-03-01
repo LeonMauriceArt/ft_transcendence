@@ -192,7 +192,7 @@ a:hover {
     height: 50px;
     border-radius: 50%; 
     object-fit: cover;
-    border: 2px solid grey; 
+    border: 2px solid grey;
 }
 
 .user-info {
@@ -201,9 +201,8 @@ a:hover {
     justify-content: space-between;
     position: absolute; 
     top: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px;
+    left: -10px;
+    width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
 }
 
 .username {
