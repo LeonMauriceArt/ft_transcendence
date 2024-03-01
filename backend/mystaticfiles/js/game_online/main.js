@@ -47,6 +47,7 @@ export function start()
 	wss = new WebSocket(wssurl);
 	if (first_launch)
 	{
+		console.log('FIRST LAUNCH')
 		initDisplay();
 		first_launch = false;
 	}
@@ -133,6 +134,7 @@ function updateGameState(data)
 
 function initDisplay()
 {
+	console.log('Init ThreeJS')
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
 
@@ -156,6 +158,8 @@ function initDisplay()
 
 function initArena()
 {
+	console.log('- creating Arena and 3D scene -')
+	console.log('camera :', camera.position.z)
 	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
 	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
 	scene.add(player_one.mesh, player_two.mesh)
@@ -188,6 +192,7 @@ function initArena()
 	player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 	player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 	scene.add(player_one_score_text, player_two_score_text)
+	console.log('player:', player_one.mesh.position.x);
 }
 
 function handleKeyDown(event) {
@@ -297,3 +302,22 @@ function handlePageReload()
 window.addEventListener('beforeunload', function(){
 	handlePageReload();
 })
+
+
+const navbarButtons = document.querySelectorAll('#btnContainer a');
+
+navbarButtons.forEach(button => {
+	button.addEventListener('click', function(event){
+		console.log('Im leaving...')
+		wss.close();
+	})
+})
+
+const leaveButton = document.getElementById('navLeaveGame');
+
+if (leaveButton) 
+{
+	myButton.addEventListener('click', function(event) {
+		wss.close();
+	});
+}

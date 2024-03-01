@@ -69,6 +69,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 	update_lock = None
 
 	async def connect(self):
+		if not hasattr(self, 'owner'):
+			self.owner = self.scope['user']
+			print(self.owner)
+			# self.players.append(self.scope['user'])
+
 		self.player_id = str(uuid.uuid4())
 		await self.accept()
 		await self.join_game()

@@ -68,18 +68,18 @@ nav {
 }
 
 ul {
-    list-style-type: none; /* Supprime les puces */
-    padding: 0; /* Supprime le padding par défaut */
-    margin: 0 auto; /* Centre la liste */
-    width: 80%; /* Définir une largeur */
-    max-width: 600px; /* Et une largeur maximale */
+    list-style-type: none; 
+    padding: 0; 
+    margin: 0 auto; 
+    width: 80%; 
+    max-width: 600px; 
 }
 
 li {
     color: grey; 
-    padding: 10px; /* Espacement à l'intérieur de chaque élément de liste */
-    display: flex; /* Utilise Flexbox pour aligner les éléments */
-    justify-content: space-between; /* Espacement */
+    padding: 10px; 
+    display: flex; 
+    justify-content: space-between; 
 }
 
 li a {
@@ -94,18 +94,18 @@ li:hover a {
 }
 
 li:empty {
-    text-align: center; /* Centre le texte */
-    color: #666; /* Couleur du texte */
+    text-align: center;
+    color: #666;
 }
 
 a {
-    color: #007bff; /* Couleur des liens */
-    text-decoration: none; /* Supprime le soulignement */
-    font-size: 16px; /* Taille de la police */
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
 }
 
 a:hover {
-    text-decoration: underline; /* Ajoute un soulignement au survol */
+    text-decoration: underline;
 }
 
 #content {
@@ -116,15 +116,15 @@ a:hover {
 }
 
 #projectname {
-    margin: 20px 0 40px; /* Ajustez les marges comme nécessaire pour le positionnement vertical */
-    font-size: 60px; /* Taille de la police */
-    text-align: center; /* Centre le titre horizontalement */
-    font-family: 'PixelDogica', sans-serif; /* Police personnalisée */
-    color: white; /* Couleur du texte en blanc */
-    font-weight: bold; /* Rend le texte en gras */
-    position: relative; /* Position relative pour ajustements supplémentaires si nécessaire */
-    top: 0; /* Assurez-vous qu'il est en haut */
-    width: 100%; /* Assure que le titre prend toute la largeur */
+    margin: 20px 0 40px;
+    font-size: 60px;
+    text-align: center; 
+    font-family: 'PixelDogica', sans-serif; 
+    color: white;
+    font-weight: bold;
+    position: relative; 
+    top: 0; 
+    width: 100%;
 }
 
 .navbar {
@@ -136,40 +136,40 @@ a:hover {
 
 .navbar nav {
     margin: 0 auto;
-    display: inline-block; /* Permet au nav de ne prendre que l'espace nécessaire */
+    display: inline-block;
 }
 
 .navbar ul {
-    display: flex; /* Active Flexbox */
-    justify-content: center; /* Centre les éléments horizontalement */
-    align-items: center; /* Alignement vertical au centre */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 0;
-    list-style-type: none; /* Enlève les puces */
+    list-style-type: none;
 }
 
 
 .navbar ul li {
-    margin: 0 10px; /* Ajoute un peu d'espace entre chaque élément */
+    margin: 0 10px;
 }
 
 .navbar ul li a {
-    color: grey; /* Couleur initiale des liens */
-    padding: 5px 10px; /* Petit padding pour augmenter la zone cliquable */
-    transition: color 0.3s ease; /* Transition douce */
-    text-decoration: none; /* Supprime le soulignement */
+    color: grey;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+    text-decoration: none;
 }
 
 .navbar ul li:hover a {
-    color: white; /* Change la couleur au survol */
+    color: white;
 }
 
 .navbar ul li:hover {
-    border-color: white; /* Optionnel si vous souhaitez une bordure au survol */
+    border-color: white;
 }
 
 .navbar ul li.active a {
-    color: white; /* Couleur pour l'élément actuellement actif */
-    border-bottom: 2px solid white; /* Souligne l'élément actif */
+    color: white; 
+    border-bottom: 2px solid white;
 }
 
 .gamemodes li {
@@ -198,8 +198,8 @@ a:hover {
 .user-info {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Cette ligne peut aider mais n'est pas strictement nécessaire avec margin-left: auto; sur .logout-link */
-    position: absolute; /* Si vous voulez positionner absolument dans le coin supérieur */
+    justify-content: space-between;
+    position: absolute; 
     top: 0;
     left: -10px;
     width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
@@ -212,25 +212,23 @@ a:hover {
 }
 
 .logout-link {
-    color: red; /* Couleur du texte en rouge */
-    margin-left: auto; /* Pousse le lien vers la droite dans un conteneur Flexbox */
-    text-decoration: none; /* Supprime le soulignement */
-    font-family: 'PixelMix', sans-serif; /* Applique la même police que les autres textes */
+    color: red;
+    margin-left: auto;
+    text-decoration: none; 
+    font-family: 'PixelMix', sans-serif;
 }
 
-/* Pour positionner le lien de déconnexion en haut à droite si hors du user-info */
 .user-logout {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 10px;
 }
 
 .profile-grid {
-    margin: 0 auto; /* Centrer le conteneur de la grille */
-    max-width: 1200px; /* Ou la largeur maximale que vous souhaitez pour votre grille */
+    margin: 0 auto;
+    max-width: 1200px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Quatre colonnes pour les quatre titres */
+    grid-template-columns: repeat(4, 1fr);
     grid-template-areas:
         "profile-title friends-title requests-title history-title"
         "profile-content friends-content requests-content history-content";
@@ -267,7 +265,6 @@ a:hover {
     margin-right: 5px;
 }
 
-/* Statut hors ligne */
 .status-offline {
     min-width: 15px;
     height: 15px;
@@ -310,9 +307,9 @@ a:hover {
 }
 
 .profile-content p {
-    color: white; /* Couleur du texte en blanc */
-    font-size: 15px; /* Taille de la police réduite */
-    margin-bottom: 5px; /* Espacement en dessous de chaque paragraphe */
+    color: white; 
+    font-size: 15px; 
+    margin-bottom: 5px; 
 }
 
 button {
