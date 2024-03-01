@@ -8,7 +8,6 @@ import {Wall} from './Arena.js'
 import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
-import { Power_Manager } from './Powerups.js';
 
 var game_running, camera, orbitcontrols, renderer, player_one, 
 player_two, ball, scene, 
@@ -37,22 +36,16 @@ fontlLoader.load(droid,
 	
 var id = null;
 
-function sendMessageToServer(message)
-{
-	wss.send(JSON.stringify(message));
-}
 
 export function start()
 {
 	wss = new WebSocket(wssurl);
 	if (first_launch)
 	{
-		console.log('FIRST LAUNCH')
 		initDisplay();
 		first_launch = false;
 	}
-	else if (!first_launch)
-		delete_scene_objs()
+	delete_scene_objs()
 	initArena();
 	wss.onopen = () => {
 		console.log('Websocket connection established.');
@@ -90,11 +83,12 @@ export function start()
 	};
 	if (id !==null)
 	cancelAnimationFrame(id);
-animate();
+	animate();
 }
 
-export function delete_scene_objs(){
+function delete_scene_objs(){
 	scene.children.forEach(child => {
+		console.log('removing', child, '...')
 		scene.remove(child);
 	});
 	scene.traverse(obj => {
@@ -118,7 +112,7 @@ function updateGameState(data)
 	ball.mesh.position.y = data.ball_y
 	ball.light.position.set(ball.mesh.position.x, ball.mesh.position.y)
 	if (ball.color != data.ball_color)
-		ball.setcolor(data.ball_color)
+	ball.setcolor(data.ball_color)
 	if (data.player_one_score != player_one.score)
 	{
 		player_one.score += 1
@@ -137,7 +131,7 @@ function initDisplay()
 	console.log('Init ThreeJS')
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-
+	
 	var container = document.getElementById('canvas');
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
@@ -152,18 +146,18 @@ function initDisplay()
 		constants.WIN_WIDTH / constants.WIN_HEIGHT,
 		0.1,
 		1000
-	);
-	camera.position.z = constants.CAMERA_STARTPOS_Z
-}
-
-function initArena()
-{
-	console.log('- creating Arena and 3D scene -')
-	console.log('camera :', camera.position.z)
-	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
-	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
-	scene.add(player_one.mesh, player_two.mesh)
+		);
+		camera.position.z = constants.CAMERA_STARTPOS_Z
+	}
 	
+	function initArena()
+	{
+		console.log('- creating Arena and 3D scene -')
+		console.log('camera :', camera.position.z)
+		player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
+		player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
+		scene.add(player_one.mesh, player_two.mesh)
+		
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
 	
@@ -180,21 +174,21 @@ function initArena()
 	player_one_goal = new THREE.Mesh(
 		new THREE.PlaneGeometry(20, constants.GAME_AREA_HEIGHT * 2, 1, 4),
 		material.wallMaterial)
-	player_one_goal.rotation.y = Math.PI / 2
-	player_one_goal.position.x = constants.GAME_AREA_WIDTH * -1
+		player_one_goal.rotation.y = Math.PI / 2
+		player_one_goal.position.x = constants.GAME_AREA_WIDTH * -1
 	player_two_goal = new THREE.Mesh(
 		new THREE.PlaneGeometry(20, constants.GAME_AREA_HEIGHT * 2, 1, 4),
 		material.wallMaterial)
-	player_two_goal.rotation.y = (Math.PI / 2) * -1
-	player_two_goal.position.x = constants.GAME_AREA_WIDTH
-	scene.add(player_one_goal, player_two_goal)
+		player_two_goal.rotation.y = (Math.PI / 2) * -1
+		player_two_goal.position.x = constants.GAME_AREA_WIDTH
+		scene.add(player_one_goal, player_two_goal)
+		
+		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
+		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
+		scene.add(player_one_score_text, player_two_score_text)
+		console.log('player:', player_one.mesh.position.x);
+	}
 	
-	player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
-	player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
-	scene.add(player_one_score_text, player_two_score_text)
-	console.log('player:', player_one.mesh.position.x);
-}
-
 function handleKeyDown(event) {
 	if(game_running)
 	{
@@ -202,7 +196,7 @@ function handleKeyDown(event) {
 		{
 			var up = false;
 			if (event.code == 'KeyW')
-				up = true;
+			up = true;
 			keys[event.code] = true;
 			sendMessageToServer({type: 'player_key_down', player: position,  direction: up})
 		}
@@ -273,6 +267,11 @@ function display_winner(winning_player)
 	scene.add(winning_text, light1, light2)
 }
 
+function sendMessageToServer(message)
+{
+	if (wss)
+		wss.send(JSON.stringify(message));
+}
 
 //GameLoop
 function animate() {
@@ -308,16 +307,17 @@ const navbarButtons = document.querySelectorAll('#btnContainer a');
 
 navbarButtons.forEach(button => {
 	button.addEventListener('click', function(event){
-		console.log('Im leaving...')
-		wss.close();
+		if (wss)
+			sendMessageToServer({type: 'player_left', player: position})
 	})
 })
 
-const leaveButton = document.getElementById('navLeaveGame');
+const leaveButton = document.getElementById('leaveGame');
 
 if (leaveButton) 
 {
-	myButton.addEventListener('click', function(event) {
-		wss.close();
+	leaveButton.addEventListener('click', function(event) {
+		if(wss)
+			sendMessageToServer({type: 'player_left', player: position})
 	});
 }

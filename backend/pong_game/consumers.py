@@ -138,7 +138,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 					await self.end_game('player_two')
 				elif data.get("player", "") == 'player_two':
 					await self.end_game('player_one')
-
+			else :
+				await self.send(text_data=json.dumps({
+					'type': 'game_end',
+					'winner': 'player_one',
+				}))
 
 #-------HANDLING CHANNEL MESSAGES--------
 	async def game_start(self, event):
