@@ -1,6 +1,7 @@
-# vault server -config /vault/config/config.hcl
-vault server -dev &
+# vault server -config /config/config.hcl
 
-sleep 2
+vault server -config /config/config.hcl -dev &
+
+sleep 5
 
 /bin/sh /usr/local/bin/config_path.sh

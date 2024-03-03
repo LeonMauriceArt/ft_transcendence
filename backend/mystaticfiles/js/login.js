@@ -51,8 +51,6 @@ function submitRegistrationForm(){
         messages.push('The nickname(login) has to be longer than 4 characters');
     if (password.length < 6)
         messages.push('The password has to be at least 6 characters');
-    if (!hasSpecialorNumber(password))
-        messages.push('The password has to contain at least one number, one special character and a letter');
     if (password != repassword)
         messages.push('Passwords do not match');
     if (messages.length > 0){

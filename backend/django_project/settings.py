@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import vault_db
 from pathlib import Path
 import os
 
@@ -96,12 +97,16 @@ import os
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': os.environ.get('HOST'),
-        'PORT': 5432,
+        'ENGINE': 'vault_db',
+        'NAME': os.getenv('POSTGRES_NAME'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        # 'USER': os.getenv('POSTGRES_USER'),
+        # 'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'VAULT_ADDR': os.getenv('WEB_VAULT_ADDR'),
+        # 'VAULT_TOKEN': os.getenv('VAULT_DEV_ROOT_TOKEN_ID'),
+        'VAULT_ROLE_NAME': os.getenv('VAULT_ROLE'),
+        'VAULT_DB_MOUNT_POINT': os.getenv('VAULT_DB_MOUNT_POINT'),
     }
 }
 
