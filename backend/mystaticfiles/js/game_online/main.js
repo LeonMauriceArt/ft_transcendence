@@ -13,14 +13,16 @@ var game_running, camera, orbitcontrols, renderer, player_one,
 player_two, ball, scene, 
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
-// powerup_manage
 
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
 
-let first_launch = true;
-
 const keys = {};
+
+var firstLaunch = true;
+var endScreen = false
+
+let container
 
 var position = null;
 
@@ -36,17 +38,46 @@ fontlLoader.load(droid,
 	
 var id = null;
 
-
 export function start()
 {
-	wss = new WebSocket(wssurl);
-	if (first_launch)
+	console.log('JE CLIQUE COMME UN MONGOLE SUR START')
+	if (wss && wss.readyState === WebSocket.OPEN)
 	{
-		initDisplay();
-		first_launch = false;
+		if (!game_running)
+			console.log('Waiting for opponent')
+		else 
+		{
+			game_running = false
+			console.log('Just left a game during play. Looking for another opponent.')
+			sendMessageToServer({type: 'player_left', player: position})
+			wss.close();
+			resetArena();
+			newSocket();
+		}
 	}
-	delete_scene_objs()
-	initArena();
+	else if (firstLaunch)
+	{
+		console.log('Initiating game for first time.')
+		initDisplay();
+		firstLaunch = false
+		initArena();
+		newSocket();
+	}
+	else
+	{
+		wss.close()
+		resetArena();
+		newSocket();
+		endScreen = false
+	}
+	if (id !==null)
+		cancelAnimationFrame(id);
+	animate();
+}
+
+function newSocket()
+{	
+	wss = new WebSocket(wssurl);
 	wss.onopen = () => {
 		console.log('Websocket connection established.');
 	}
@@ -72,7 +103,6 @@ export function start()
 		if (data.type === 'game_end')
 		{
 			game_running = false;
-			console.log('GAME IS ENDING AND SOMEONE WON')
 			display_winner(data.winner)
 			wss.close()
 		}
@@ -80,10 +110,7 @@ export function start()
 	wss.onclose = () => 
 	{
 		console.log('Websocket connection closed.');
-	};
-	if (id !==null)
-	cancelAnimationFrame(id);
-	animate();
+	};	
 }
 
 function delete_scene_objs(){
@@ -92,6 +119,7 @@ function delete_scene_objs(){
 		scene.remove(child);
 	});
 	scene.traverse(obj => {
+		console.log(obj)
 		if (obj.material) {
 			obj.material.dispose();
 		}
@@ -102,6 +130,11 @@ function delete_scene_objs(){
 			obj.texture.dispose();
 		}
 	});
+	player_one, 
+	player_two, ball, 
+	player_one_score_text, player_two_score_text, winning_text,
+	player_one_goal, player_two_goal = undefined
+	
 }
 
 function updateGameState(data)
@@ -132,12 +165,30 @@ function initDisplay()
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
 	
-	var container = document.getElementById('canvas');
+	container = document.createElement('div');
+	
+	container.id = 'canvas';
+	container.style.width = '800px';
+    container.style.height = '600px';
+    container.style.imageRendering = 'crisp-edges';
+    container.style.boxSizing = 'border-box';
+    container.style.border = '2px solid grey';
+	
+	document.body.appendChild(container);
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
 	renderer.setSize(w, h);
 	container.appendChild(renderer.domElement);
+}
+
+function removeContainer(container) {
+    if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
+    }
+}
 	
+function initArena()
+{
 	scene = new THREE.Scene();
 	scene.fog = new THREE.Fog( 0x00000, 5, 300 );
 	
@@ -147,17 +198,11 @@ function initDisplay()
 		0.1,
 		1000
 		);
-		camera.position.z = constants.CAMERA_STARTPOS_Z
-	}
+	camera.position.z = constants.CAMERA_STARTPOS_Z
+	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
+	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
+	scene.add(player_one.mesh, player_two.mesh)
 	
-	function initArena()
-	{
-		console.log('- creating Arena and 3D scene -')
-		console.log('camera :', camera.position.z)
-		player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
-		player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
-		scene.add(player_one.mesh, player_two.mesh)
-		
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
 	
@@ -187,7 +232,14 @@ function initDisplay()
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 		scene.add(player_one_score_text, player_two_score_text)
 		console.log('player:', player_one.mesh.position.x);
-	}
+}
+
+function resetArena()
+{
+	delete_scene_objs()
+	initArena();
+	camera.position.set(0, 0, constants.CAMERA_STARTPOS_Z)
+}
 	
 function handleKeyDown(event) {
 	if(game_running)
@@ -239,6 +291,7 @@ function handle_scores(player_scoring)
 
 function display_winner(winning_player)
 {
+	endScreen = true;
 	orbitcontrols.autoRotate = true;
 	ball.stop();
 	scene.remove(player_one_score_text)
@@ -269,7 +322,7 @@ function display_winner(winning_player)
 
 function sendMessageToServer(message)
 {
-	if (wss)
+	if (wss && wss.readyState === WebSocket.OPEN)
 		wss.send(JSON.stringify(message));
 }
 
@@ -288,36 +341,33 @@ function render(){
 }
 
 window.addEventListener('unload', function(){
-	if (wss)
+	if (wss && wss.readyState === WebSocket.OPEN)
 		sendMessageToServer({type: 'player_left', player: position})
 })
 
 function handlePageReload()
 {
-	if (wss)
+	if (wss && wss.readyState === WebSocket.OPEN)
+	{
 		sendMessageToServer({type: 'player_left', player: position})
+		wss.close()		
+	}
+
 }
 
 window.addEventListener('beforeunload', function(){
 	handlePageReload();
 })
 
-
-const navbarButtons = document.querySelectorAll('#btnContainer a');
-
-navbarButtons.forEach(button => {
-	button.addEventListener('click', function(event){
-		if (wss)
-			sendMessageToServer({type: 'player_left', player: position})
-	})
-})
-
-const leaveButton = document.getElementById('leaveGame');
-
-if (leaveButton) 
-{
-	leaveButton.addEventListener('click', function(event) {
-		if(wss)
-			sendMessageToServer({type: 'player_left', player: position})
-	});
-}
+window.addEventListener('page_change', function(event) {
+	if (wss && wss.readyState === WebSocket.OPEN)
+	{
+		sendMessageToServer({type: 'player_left', player: position})
+		wss.close()
+		console.log('Quiting game.');
+	}
+	removeContainer(container)
+	endScreen = false
+	game_running = false
+	firstLaunch = true
+});

@@ -41,6 +41,7 @@ class GameManager:
 				print('---PLAYER :', player_id, 'REMOVED FROM', room_name)
 				self.game_rooms[room_name]['players'].remove(player_id)
 				if (self.room_len(room_name) == 0):
+					print('>>>>>>>>>>>ROOM', room_name, 'DELETED<<<<<<<<<<<')
 					del self.game_rooms[room_name]
 					return True
 		return False
@@ -64,8 +65,6 @@ class GameManager:
 
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
-	game_room = None
-	game = None
 	update_lock = None
 
 	async def connect(self):
@@ -170,7 +169,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'key': event.get('value')
 		}))
 	async def game_state(self, event):
-		print('PLAYER', self.player_id, ' | RECEVING BALL_X:', event.get('ball_x'))
 		await self.send(text_data=json.dumps({
 			'type': event.get('type'),
 			'player_one_pos_y': event.get('player_one_pos_y'),
