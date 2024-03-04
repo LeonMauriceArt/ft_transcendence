@@ -124,6 +124,8 @@ const loadPage = (page) => {
     
     updateHistory(baseUrl + page);
     loadContent(page, 'content');
+    const customEvent = new Event('page_change');
+    window.dispatchEvent(customEvent)
 }
 
 function loadContent(path, elementId){

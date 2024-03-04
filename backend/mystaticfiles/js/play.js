@@ -31,7 +31,6 @@ function loadOnline()
         const navbarContent = doc.querySelector('#content');
         const navbarContainer = document.getElementById('content');
         navbarContainer.innerHTML = navbarContent.innerHTML;
-        startPongOnline();
     })
     .catch(error => {
         console.error('Error fetching page content:', error);
