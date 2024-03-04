@@ -14,7 +14,7 @@ class DatabaseWrapper(base.DatabaseWrapper):
 
     _hvac = None
 
-    vault_token_file = '/run/secrets/keys/skey'
+    vault_token_file = '/run/secrets/key'
 
     def _get_hvac_client(self):
         if self._hvac is None:

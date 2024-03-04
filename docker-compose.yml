@@ -13,13 +13,12 @@ services:
     volumes:
       - daphne-sock:/usr/src/daphne_sock
       # - static_volume:/code/mystaticfiles
-      - vault_data:/run/secrets/keys:ro
+      - vault_data_web:/run/secrets:ro
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - db
       - vault
 
   db:
@@ -56,17 +55,17 @@ services:
 
   vault:
     container_name: vault
+    user: '0:0'
     networks:
       - ft_trans
     build:
       context: vault
-    environment:
-      - VAULT_API_ADDR=http://0.0.0.0:8200
     ports:
       - "8200:8200"
     env_file:
       - .env
     volumes:
+      - vault_data_web:/vault/data/skey
       - vault_data:/vault/data
     depends_on:
       - db
@@ -75,6 +74,7 @@ services:
     command: /bin/sh /start_up.sh
 
 volumes:
+  vault_data_web:
   postgres-data:
   daphne-sock:
   static_volume:
