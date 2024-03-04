@@ -143,4 +143,5 @@ def accept_friend_request(request, friendship_id):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-
+def username(request):
+    return JsonResponse(request.user.username, safe=False)

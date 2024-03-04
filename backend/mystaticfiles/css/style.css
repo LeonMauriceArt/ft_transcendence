@@ -327,3 +327,7 @@ button {
 .profile-content button:hover {
     background-color: #555; /* Assombrir le bouton lors du survol */
 }
+
+.owner {
+    background-color: red;
+}

@@ -38,6 +38,7 @@ class TournamentManager():
             if len(current_room['players']) == 0:
                 print(f'REMOVING ROOM CAUSE NOW EMPTY...')
                 del self.rooms[roomId]
+                return
             elif player == current_room.get('owner'):
                 current_room['owner'] = current_room['players'][0]
 
@@ -65,7 +66,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             await self.accept()
         else:
             await self.close()
-
+        
         await self.send_players_update()
 
     async def disconnect(self, close_code):
@@ -84,8 +85,27 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        # Handle received data as needed
-        await self.send(text_data=json.dumps({'message': 'Received message'}))
+
+        await self.parse_receive(data)
+
+    # ON EVENTS
+
+    async def parse_receive(self, data):
+        if 'event' in data:
+            if data['event'] == 'load_lobby':
+                await self.on_load_lobby()
+            else:
+                print('NO SUCH EVENT')
+        else:
+            print('Missing "event" key in data dictionary')
+
+    async def on_load_lobby(self):
+        tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+        
+        await self.send(text_data=json.dumps({
+            'type': 'load_lobby',
+            'arg': self.tournament_manager.get_room(tournament_id)
+        }))
 
     # EMIT EVENTS 
 
@@ -97,7 +117,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             tournament_id,
             {
                 'type': 'players_update',
-                'arg': self.tournament_manager.get_room(tournament_id),
+                'arg': self.tournament_manager.get_room(tournament_id)
             }
         )
 

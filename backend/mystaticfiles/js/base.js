@@ -1,3 +1,5 @@
+const page_change = new Event('page_change')
+
 function attachEventListeners() {
     // Attach existing event listeners
     attachFriendRequestEventListeners();
@@ -118,6 +120,8 @@ function attachFriendAcceptEventListeners() {
 const loadPage = (page) => {
     const baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
 
+    window.dispatchEvent(page_change)
+    
     updateHistory(baseUrl + page);
     loadContent(page, 'content');
 }
