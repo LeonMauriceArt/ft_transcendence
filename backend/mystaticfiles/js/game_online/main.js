@@ -38,6 +38,27 @@ fontlLoader.load(droid,
 	
 var id = null;
 
+export function startTournamentOnline()
+{
+	if (firstLaunch)
+	{
+		firstLaunch = false
+		console.log('Initiating game for first time.')
+		initDisplay()
+		initArena()
+	}
+	else
+	{
+		resetArena()
+		firstLaunch = false
+	}
+
+	if (id != null)
+		cancelAnimationFrame(id)
+
+	animate()
+}
+
 export function start()
 {
 	console.log('JE CLIQUE COMME UN MONGOLE SUR START')
@@ -371,3 +392,23 @@ window.addEventListener('page_change', function(event) {
 	game_running = false
 	firstLaunch = true
 });
+
+// TOURNAMENTS EVENTS ( meant to be on bind on another socket )
+
+const on_set_position = () => {
+	console.log('on_set_position')
+}
+
+const on_game_start = () => {
+	console.log('on_game_start')
+}
+
+const on_game_state = () => {
+	console.log('on_game_state')
+}
+
+const on_game_end = () => {
+	console.log('on_game_end')
+}
+
+export { on_set_position, on_game_start, on_game_state, on_game_end}

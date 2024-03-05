@@ -1,7 +1,7 @@
-
 // VARIABLES ------------------------------------
 
 const base_wssurl = 'ws://' + window.location.host + '/ws/tournament/'
+
 let g_socket = {}
 let g_tournament_id = ''
 let g_username = ''
@@ -27,6 +27,7 @@ const create_owner_btns = () => {
 
     div.innerHTML = `
         <button onclick="loadContent('/tournament/invite_page', 'content')">INVITE</button>
+        <button onclick="start_online_tournament()">START</button>
     `
 
     return div
@@ -36,8 +37,6 @@ const update_lobby_ui = (room) => {
     const lobby_container = document.getElementById('lobby-container')
 
     lobby_container.innerHTML = ''
-
-    console.log(room)
 
     room.players.forEach((player) => {
         const is_owner = player === room.owner
@@ -65,15 +64,31 @@ const on_load_lobby = (arg) => {
     update_lobby_ui(arg)
 }
 
+const on_tournament_start = (arg) => {
+    load_playground().then(() => {
+        window.startTournamentOnline()
+    })
+}
+
+const a = window.tournamentEvents
+
 const on_message_handlers = [
     { type: 'players_update', handler: on_players_update },
-    { type: 'load_lobby', handler: on_load_lobby }
+    { type: 'load_lobby', handler: on_load_lobby },
+    { type: 'tournament_start', handler: on_tournament_start },
+
+    // { type: 'set_position', handler: on_set_position },
+    // { type: 'game_start', handler: on_game_start },
+    // { type: 'game_state', handler: on_game_state },
+    // { type: 'game_end', handler: on_game_end }
 ]
 
 // PAGE LOADING ---------------------------------
 
 const load_create_online = () => {
-    loadContent('/tournament/create_online_page', 'content')
+    console.log(a)
+
+    return loadContent('/tournament/create_online_page', 'content')
     .then(set_g_username)
     .then(fetch_new_tournament_id)
     .then(connect_socket)
@@ -81,14 +96,18 @@ const load_create_online = () => {
 }
 
 const load_tournament_requests = () => {
-    loadContent('/tournament/tournament_requests_page', 'content')
+    return loadContent('/tournament/tournament_requests_page', 'content')
 }
 
 const load_lobby = () => {
-    loadContent('/tournament/create_online_page', 'content')
+    return loadContent('/tournament/create_online_page', 'content')
     .then(() => {
         g_socket.send(JSON.stringify({ event: 'load_lobby' }))
     })
+}
+
+const load_playground = () => {
+    return loadContent('/tournament/playground_page', 'content')
 }
 
 // SERVER COMMUNICATIONS ------------------------
@@ -116,7 +135,7 @@ const fetch_new_tournament_id = () => {
 
 const connect_socket = ({ tournament_id }) => {
     g_tournament_id = tournament_id
-    g_socket = new WebSocket(base_wssurl + tournament_id)
+    g_socket = new WebSocket(base_wssurl + 'd')
 
     g_socket.onopen = function(event) {
         console.log("WebSocket connection opened:", event)
@@ -124,19 +143,20 @@ const connect_socket = ({ tournament_id }) => {
 
     g_socket.onmessage = function(event) {
         const message = JSON.parse(event.data)
+
         on_message(message)
     }
 
     g_socket.onclose = function(event) {
         console.log("WebSocket connection closed:", event)
         socket = {}
+        loadPage('/tournament/')
     }
 
     const on_page_change = () => {
         g_socket.close()
         window.removeEventListener('page_change', on_page_change)
         g_socket = {}
-        loadPage('/tournament/')
     }
 
     window.addEventListener('page_change', on_page_change)
@@ -185,4 +205,9 @@ const accept_tournament_request = (tournament_id) => {
 const deny_tournament_request = (tournament_id) => {
     delete_tournament_request(tournament_id)
     .then(load_tournament_requests)
+}
+
+const start_online_tournament = () => {
+    console.log('START TOURNAMENT...')
+    g_socket.send(JSON.stringify({ event: 'tournament_start' }))
 }

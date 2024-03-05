@@ -8,6 +8,7 @@ urlpatterns = [
     path('create_online_page/', views.create_online_page),
     path('tournament_requests_page/', views.tournament_requests_page),
     path('invite_page/', views.invite_page),
+    path('playground_page/', views.playground_page),
 
     path('api/create_tournament/', views.create_tournament),
     path('api/tournament_requests/', views.tournament_requests)
