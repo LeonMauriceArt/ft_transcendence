@@ -37,25 +37,24 @@ fontlLoader.load(droid,
 	});
 	
 var id = null;
-
-var infoElement = null
+	
+var searchButton = null;
+var infoElement = null;
 
 export function start()
 {
-	if (!infoElement)
-		infoElement = document.getElementById('gameInfo')
-	infoElement.innerHTML = 'Searching for match . . .'
+	infoElement = document.getElementById('gameInfo')
+	searchButton = document.getElementById('startGame')
+	infoElement.innerHTML = 'Waiting for opponent'
 	if (wss && wss.readyState === WebSocket.OPEN)
 	{
 		if (!game_running)
 		{
 			infoElement.innerHTML = 'Waiting for opponent'
-			console.log('Waiting for opponent')
 		}
-		else 
+		else //LEFT THE GAME DURING PLAY
 		{
 			game_running = false
-			console.log('Just left a game during play. Looking for another opponent.')
 			sendMessageToServer({type: 'player_left', player: position})
 			wss.close()
 			resetArena();
@@ -98,8 +97,11 @@ function newSocket()
 		}
 		if (data.type === 'game_start')
 		{
+			console.log(searchButton);
+			searchButton.disabled = true;
+			searchButton.style.display = 'none';
 			console.log('Starting game . . .');
-			infoElement.innerHTML = 'PLAYER_ONE_NAME VS PLAYER_TWO_NAME'
+			infoElement.innerHTML = '<span style="color: cyan;">' + data.player_one_name + '</span> VS <span style="color: red;">' + data.player_two_name + '</span>';
 			game_running = true;
 			ball.get_update(0, 0, 1, 0, 0xffffff)
 			initControls();
@@ -110,6 +112,9 @@ function newSocket()
 		} 
 		if (data.type === 'game_end')
 		{
+			console.log('someone won !')
+			searchButton.disabled = false;
+			searchButton.style.display = 'inline-block';
 			game_running = false;
 			display_winner(data.winner)
 			wss.close()
@@ -175,9 +180,10 @@ function initDisplay()
 	container.id = 'canvas';
 	container.style.width = '800px';
     container.style.height = '600px';
-    container.style.imageRendering = 'crisp-edges';
+    container.style.imageRendering = 'pixelated';
     container.style.boxSizing = 'border-box';
     container.style.border = '2px solid grey';
+	container.style.display = 'inline-block'
 	
 	document.body.appendChild(container);
 	var w = container.offsetWidth;

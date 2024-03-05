@@ -6,6 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .gamelogic import GameState
+from users.models import UserProfile
 
 tick_rate = 60
 tick_duration = 1 / tick_rate
@@ -24,21 +25,17 @@ class GameManager:
 			'players':[],
 			'game_state': GameState()
 		}
-		print('>>>>>>>>>>>ROOM', new_room, 'CREATED<<<<<<<<<<<')
 		return new_room
 
 	def add_player_to_room(self, room_name, player_id):
 		if room_name in self.game_rooms:
 			if len(self.game_rooms[room_name]['players']) < 2:
-				print('>>>>>>>>>>>PLAYER', player_id, 'JOINING', room_name,'<<<<<<<<<<<')
 				self.game_rooms[room_name]['players'].append(player_id)
 
 	def remove_room(self, room_name):
 		if room_name in self.game_rooms:
 			for player_id in self.game_rooms[room_name]['players']:
-				print('>>>>>>>>>>>PLAYER', player_id, 'REMOVED FROM', room_name,'<<<<<<<<<<<')
 				self.game_rooms[room_name]['players'].remove(player_id)
-			print('>>>>>>>>>>>ROOM', room_name, 'DELETED<<<<<<<<<<<')
 			del self.game_rooms[room_name]
 					
 	def players_in_room(self, room_name):
@@ -56,11 +53,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 	update_lock = None
 
 	async def connect(self):
-		if not hasattr(self, 'owner'):
-			self.owner = self.scope['user']
-			print(self.owner)
-
-		self.player_id = self.owner
+		if not hasattr(self, 'username'):
+			self.username = self.scope['user'].username
+		self.player_id = self.username
 		await self.accept()
 		await self.join_game()
 
@@ -83,26 +78,29 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.position = 1
 			await self.send(text_data=json.dumps({
 				'type':'set_position',
-				'value':'player_one'
+				'value':'player_one',
+				'user': self.username
 			}))
 		else:
 			self.position = 2
 			await self.send(text_data=json.dumps({
 				'type':'set_position',
-				'value':'player_two'
+				'value':'player_two',
+				'user': self.username
 			}))
-		print('>>>>>>>',self.owner, 'JOINING CHANNEL GROUP',self.game_room, '<<<<<<<<<')
 		await self.channel_layer.group_add(
 			self.game_room, self.channel_name
 		)
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
-			self.game.is_running = True
 			await self.channel_layer.group_send(
 				self.game_room,
 				{
 					'type': 'game_start',
+					'player_one_name': self.game_manager.game_rooms[self.game_room]['players'][0],
+					'player_two_name': self.game_manager.game_rooms[self.game_room]['players'][1]
 				}
 			)
+			self.game.is_running = True
 			self.game.ball.x_vel = self.game.ball.speed
 			asyncio.create_task(self.game_loop())
 
@@ -130,7 +128,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 #-------HANDLING CHANNEL MESSAGES--------
 	async def game_start(self, event):
 		await self.send(text_data=json.dumps({
-			'type':'game_start'
+			'type':'game_start',
+			'player_one_name': event.get('player_one_name'),
+			'player_two_name': event.get('player_two_name')
 		}))
 
 	async def player_key_down(self, event):
@@ -205,6 +205,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 
 	async def send_game_end(self, winner):
+		await self.save_history(winner)
 		await self.channel_layer.group_send(self.game_room,
 		{
 			'type': 'game_end',
@@ -216,8 +217,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if default_winner == 'get_winner':
 			game_winner = None
 			if self.game.players[0].score >= self.game.winning_score:
+				game_winner_username = self.game_manager.game_rooms[self.game_room]['players'][0]
 				game_winner = 'player_one'
 			elif self.game.players[1].score >= self.game.winning_score:
+				game_winner_username = self.game_manager.game_rooms[self.game_room]['players'][1]
 				game_winner = 'player_two'
 			await self.send_game_end(game_winner)
 		else:
@@ -231,3 +234,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await asyncio.sleep(tick_duration)
 			if (self.game.someone_won == True):
 				await self.end_game('get_winner')
+
+	async def save_history(self, winner):
+		user = UserProfile.objects.get(username=self.game_manager.game_rooms[self.game_room]['players'][0])
+
+		match = MatchHistory.objects.create(
+			player_one=self.game_manager.game_rooms[self.game_room]['players'][0],
+			player_two=self.game_manager.game_rooms[self.game_room]['players'][1],
+			player_one_score = self.game.players[0].score,
+			player_two_score = self.game.players[1].score,
+			winner = winner
+		)
+		user_one.matchHistory.add(match)
+		user_two.matchHistory.add(match)
+	# player_one = models.CharField(max_length=255, default="player_one")
+	# player_two = models.CharField(max_length=255, default="player_two")
+	# player_one_score = models.IntegerField(default=0)
+	# player_two_score = models.IntegerField(default=0)
+	# winner = models.CharField(max_length=255, default="winner")
