@@ -15,36 +15,31 @@ class GameManager:
 		self.game_rooms = {}
 
 	def find_or_create_game_room(self):
-		print('checking for available room ...')
 		for room, data in self.game_rooms.items():
 			if len(data['players']) < 2:
 				print('Room available')
 				return room
-		print('no available room, creating one...')
 		new_room = f"room_{len(self.game_rooms) + 1}"
 		self.game_rooms[new_room] = {
 			'players':[],
 			'game_state': GameState()
 		}
-		print(new_room, 'created')
+		print('>>>>>>>>>>>ROOM', new_room, 'CREATED<<<<<<<<<<<')
 		return new_room
 
 	def add_player_to_room(self, room_name, player_id):
 		if room_name in self.game_rooms:
 			if len(self.game_rooms[room_name]['players']) < 2:
-				print('---PLAYER :', player_id, 'IS JOINING', room_name)
+				print('>>>>>>>>>>>PLAYER', player_id, 'JOINING', room_name,'<<<<<<<<<<<')
 				self.game_rooms[room_name]['players'].append(player_id)
 
-	def remove_player_from_room(self, room_name, player_id):
+	def remove_room(self, room_name):
 		if room_name in self.game_rooms:
-			if player_id in self.game_rooms[room_name]['players']:
-				print('---PLAYER :', player_id, 'REMOVED FROM', room_name)
+			for player_id in self.game_rooms[room_name]['players']:
+				print('>>>>>>>>>>>PLAYER', player_id, 'REMOVED FROM', room_name,'<<<<<<<<<<<')
 				self.game_rooms[room_name]['players'].remove(player_id)
-				if (self.room_len(room_name) == 0):
-					print('>>>>>>>>>>>ROOM', room_name, 'DELETED<<<<<<<<<<<')
-					del self.game_rooms[room_name]
-					return True
-		return False
+			print('>>>>>>>>>>>ROOM', room_name, 'DELETED<<<<<<<<<<<')
+			del self.game_rooms[room_name]
 					
 	def players_in_room(self, room_name):
 		if room_name in self.game_rooms:
@@ -56,13 +51,6 @@ class GameManager:
 			return len(self.game_rooms[room_name]['players'])
 		return 0
 
-	def display_all_rooms(self):
-		for room, data in self.game_rooms.items():
-					players = ', '.join(data['players'])
-					print('-----GAME MANAGER------', f"Room: {room}, Players: {players}")
-
-
-
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
 	update_lock = None
@@ -71,24 +59,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if not hasattr(self, 'owner'):
 			self.owner = self.scope['user']
 			print(self.owner)
-			# self.players.append(self.scope['user'])
 
-		self.player_id = str(uuid.uuid4())
+		self.player_id = self.owner
 		await self.accept()
 		await self.join_game()
 
 	async def disconnect(self, close_code):
 		if hasattr(self, 'game_room'):
-				room_removed = self.game_manager.remove_player_from_room(self.game_room, self.player_id)
-				if room_removed:
-					await self.channel_layer.group_send(
-						self.game_room,
-						{
-							'type': 'player_left',
-							'player': self.position,
-						})
-					await self.channel_layer.group_discard(self.game_room, self.channel_name)
-					self.game_room = None
+				await self.channel_layer.group_send(
+					self.game_room,
+					{
+						'type': 'player_left',
+						'player': self.position,
+					})
+				self.game_manager.remove_room(self.game_room)
+				await self.channel_layer.group_discard(self.game_room, self.channel_name)
 
 	async def join_game(self):
 		self.game_room = self.game_manager.find_or_create_game_room()
@@ -106,10 +91,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 				'type':'set_position',
 				'value':'player_two'
 			}))
+		print('>>>>>>>',self.owner, 'JOINING CHANNEL GROUP',self.game_room, '<<<<<<<<<')
 		await self.channel_layer.group_add(
 			self.game_room, self.channel_name
 		)
-		
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
 			self.game.is_running = True
 			await self.channel_layer.group_send(
@@ -118,7 +103,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 					'type': 'game_start',
 				}
 			)
-			print('#GAMECONSUMER# Room', self.game_room, 'full, can start game')
 			self.game.ball.x_vel = self.game.ball.speed
 			asyncio.create_task(self.game_loop())
 
@@ -187,10 +171,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'type': event.get('type'),
 			'winner': event.get('winner'),
 		}))
-		await self.channel_layer.group_discard(
-			self.game_room, self.channel_name
-		)
+		self.disconnect(42)
 
+	async def player_left(self, event):
+		await self.send(text_data=json.dumps({
+			'type': event.get('type'),
+			'winner': event.get('winner'),
+		}))
+		self.disconnect(42)
+		
 #--------END HANDLERS---------
 
 	async def get_update_lock(self):
@@ -222,9 +211,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'winner': winner,
 		})
 
-	async def end_game(self, winner):
+	async def end_game(self, default_winner):
 		self.game.is_running = False
-		if not winner :
+		if default_winner == 'get_winner':
 			game_winner = None
 			if self.game.players[0].score >= self.game.winning_score:
 				game_winner = 'player_one'
@@ -232,7 +221,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				game_winner = 'player_two'
 			await self.send_game_end(game_winner)
 		else:
-			await self.send_game_end(winner)
+			await self.send_game_end(default_winner)
 
 	async def game_loop(self):
 		async with await self.get_update_lock():
@@ -240,4 +229,5 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.game.update();
 				await self.send_game_state()
 				await asyncio.sleep(tick_duration)
-			await self.end_game(None)
+			if (self.game.someone_won == True):
+				await self.end_game('get_winner')
