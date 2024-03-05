@@ -1,6 +1,19 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from enum import Enum
+
+class TournamentState(Enum):
+    LOBBY = "LOBBY"
+    DEMI_FINALS = "DEMIFINALS"
+    FINALS = "FINALS"
+
+class PlayerState(Enum):
+    PENDING = "PENDING"
+    WINNER = "WINNER" 
+    LOSER = "LOSER"
+    LEFT = "LEFT"
+
 class TournamentManager():
     def __init__(self):
         self.rooms = {}
@@ -15,8 +28,10 @@ class TournamentManager():
         if not current_room:
             print('CREATION OF THE ROOM')
             current_room = {
+                'state': TournamentState.LOBBY.name,
                 'owner': player,
                 'players': [player],
+                'players_state': [PlayerState.PENDING.name, PlayerState.PENDING.name, PlayerState.PENDING.name, PlayerState.PENDING.name]
             }
             self.rooms[roomId] = current_room
         else:
@@ -48,6 +63,19 @@ class TournamentManager():
 
     def get_room(self, roomId):
         return self.rooms.get(roomId, [])
+
+    def start_tournament(self, roomId):
+        room = self.get_room(roomId)
+
+        if room and len(room.get('players', [])) != 4:
+            print('Cann\'ot start tournament , there is not 4 player in the lobby')
+            return False
+        
+        print('TOURNAMENT WILL START XD')
+
+        room['state'] = TournamentState.DEMI_FINALS.name
+
+        return True
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     tournament_manager = TournamentManager()
@@ -94,6 +122,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         if 'event' in data:
             if data['event'] == 'load_lobby':
                 await self.on_load_lobby()
+            elif data['event'] == 'tournament_start':
+                await self.on_tournament_start()
             else:
                 print('NO SUCH EVENT')
         else:
@@ -107,12 +137,20 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             'arg': self.tournament_manager.get_room(tournament_id)
         }))
 
+    async def on_tournament_start(self):
+        tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+        
+        print('TOURNAMENT STARTING...')
+        
+        if self.tournament_manager.start_tournament(tournament_id):
+            await self.send_tournament_start()
+
+
     # EMIT EVENTS 
 
     async def send_players_update(self):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         
-        # Broadcast the current players list to all clients in the group
         await self.channel_layer.group_send(
             tournament_id,
             {
@@ -126,4 +164,21 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'players_update',
             'arg': event['arg'],
+        }))
+
+    async def send_tournament_start(self):
+        tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+       
+        await self.channel_layer.group_send(
+            tournament_id,
+            {
+                'type': 'tournament_start',
+                'arg': self.tournament_manager.get_room(tournament_id)
+            }
+        )
+    
+    async def tournament_start(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'tournament_start',
+            'arg': event['arg']
         }))

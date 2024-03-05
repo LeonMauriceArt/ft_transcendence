@@ -4,10 +4,11 @@
 
 {% block navbar_content %}
 <div id="tournament">
-    <li onclick="load_create_local()">CREATE LOCAL TOURNAMENT</li>
+    <h2>OPTIONS</h2>
+    <li onclick="load_create_local()"><a>Create Local Tournament</a></li>
         {% if user.is_authenticated %}
-    <li onclick="load_create_online()">CREATE ONLINE TOURNAMENT</li>
-    <li onclick="load_tournament_requests()">TOURNAMENT REQUESTS</li>
+    <li onclick="load_create_online()"><a>Create Online Tournament</a></li>
+    <li onclick="load_tournament_requests()"><a>Tournament Requests</a></li>
         {% endif %}
 </div>
 {% endblock %}

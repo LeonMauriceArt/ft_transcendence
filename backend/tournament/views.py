@@ -42,6 +42,9 @@ def invite_page(request):
 
     return render(request, 'invite_page.html', {'friends': friend_list})
 
+def playground_page(request):
+    return render(request, 'playground_page.html')
+    
 # API
 
 def create_tournament(request):
