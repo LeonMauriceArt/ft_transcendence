@@ -38,26 +38,32 @@ fontlLoader.load(droid,
 	
 var id = null;
 
+var infoElement = null
+
 export function start()
 {
-	console.log('JE CLIQUE COMME UN MONGOLE SUR START')
+	if (!infoElement)
+		infoElement = document.getElementById('gameInfo')
+	infoElement.innerHTML = 'Searching for match . . .'
 	if (wss && wss.readyState === WebSocket.OPEN)
 	{
 		if (!game_running)
+		{
+			infoElement.innerHTML = 'Waiting for opponent'
 			console.log('Waiting for opponent')
+		}
 		else 
 		{
 			game_running = false
 			console.log('Just left a game during play. Looking for another opponent.')
 			sendMessageToServer({type: 'player_left', player: position})
-			wss.close();
+			wss.close()
 			resetArena();
 			newSocket();
 		}
 	}
 	else if (firstLaunch)
 	{
-		console.log('Initiating game for first time.')
 		initDisplay();
 		firstLaunch = false
 		initArena();
@@ -65,6 +71,7 @@ export function start()
 	}
 	else
 	{
+		console.log('Looking for game after ending of previous match.')
 		wss.close()
 		resetArena();
 		newSocket();
@@ -92,6 +99,7 @@ function newSocket()
 		if (data.type === 'game_start')
 		{
 			console.log('Starting game . . .');
+			infoElement.innerHTML = 'PLAYER_ONE_NAME VS PLAYER_TWO_NAME'
 			game_running = true;
 			ball.get_update(0, 0, 1, 0, 0xffffff)
 			initControls();
@@ -115,11 +123,9 @@ function newSocket()
 
 function delete_scene_objs(){
 	scene.children.forEach(child => {
-		console.log('removing', child, '...')
 		scene.remove(child);
 	});
 	scene.traverse(obj => {
-		console.log(obj)
 		if (obj.material) {
 			obj.material.dispose();
 		}
@@ -161,7 +167,6 @@ function updateGameState(data)
 
 function initDisplay()
 {
-	console.log('Init ThreeJS')
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
 	
@@ -231,7 +236,6 @@ function initArena()
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 		scene.add(player_one_score_text, player_two_score_text)
-		console.log('player:', player_one.mesh.position.x);
 }
 
 function resetArena()
@@ -291,6 +295,7 @@ function handle_scores(player_scoring)
 
 function display_winner(winning_player)
 {
+	infoElement.innerHTML = 'A PLAYER WON !'
 	endScreen = true;
 	orbitcontrols.autoRotate = true;
 	ball.stop();
@@ -364,7 +369,6 @@ window.addEventListener('page_change', function(event) {
 	{
 		sendMessageToServer({type: 'player_left', player: position})
 		wss.close()
-		console.log('Quiting game.');
 	}
 	removeContainer(container)
 	endScreen = false

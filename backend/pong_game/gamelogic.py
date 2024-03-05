@@ -93,6 +93,7 @@ class GameState:
 		self.players = [self.Player(1), self.Player(2)]
 		self.is_running = False
 		self.winning_score = 3
+		self.someone_won = None
 
 	async def set_player_movement(self, player_pos, is_moving, direction):
 		if player_pos == 'player_one' :
@@ -118,6 +119,7 @@ class GameState:
 
 		if self.players[0].score >= self.winning_score or self.players[1].score >= self.winning_score :
 			self.is_running = False
+			self.someone_won = True
 
 	async def update(self):
 		await self.players[0].move()

@@ -1,6 +1,9 @@
 
 DOCKER_COMPOSE = ./docker-compose.yml
 
+up: 
+	docker compose -f $(DOCKER_COMPOSE) up --build
+
 build: down
 	docker compose -f $(DOCKER_COMPOSE) build
 
@@ -15,9 +18,6 @@ status:
 
 logs:
 	docker compose -f $(DOCKER_COMPOSE) logs -f
-
-up: 
-	docker compose -f $(DOCKER_COMPOSE) up --build
 
 detached:
 	docker compose -f $(DOCKER_COMPOSE) up -d
