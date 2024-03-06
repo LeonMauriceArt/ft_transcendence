@@ -94,6 +94,7 @@ class GameState:
 		self.is_running = False
 		self.winning_score = 3
 		self.someone_won = None
+		self.winning_player = None
 
 	async def set_player_movement(self, player_pos, is_moving, direction):
 		if player_pos == 'player_one' :

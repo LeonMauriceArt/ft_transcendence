@@ -53,7 +53,7 @@ class Friendship(models.Model):
 
 class MatchHistory(models.Model):
 	user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='match_history')
-	match_date = models.DateTimeField(default=timezone.now)
+	date = models.DateTimeField(default=timezone.now)
 	player_one = models.CharField(max_length=255, default="player_one")
 	player_two = models.CharField(max_length=255, default="player_two")
 	player_one_score = models.IntegerField(default=0)

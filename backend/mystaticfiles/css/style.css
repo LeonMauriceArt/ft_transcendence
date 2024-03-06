@@ -332,3 +332,26 @@ button {
 .owner {
     background-color: red;
 }
+
+.match_history{
+    color: grey;
+    padding: 5px 0;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 5px;
+    border: 2px solid grey;
+}
+
+.match_history li{
+    color: grey;
+    padding: 5px 0;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 15px;
+}

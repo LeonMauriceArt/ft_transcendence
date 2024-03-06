@@ -4,9 +4,9 @@ import asyncio
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from .gamelogic import GameState
-from users.models import UserProfile
+from users.models import MatchHistory, UserProfile
 
 tick_rate = 60
 tick_duration = 1 / tick_rate
@@ -34,6 +34,8 @@ class GameManager:
 
 	def remove_room(self, room_name):
 		if room_name in self.game_rooms:
+			if len(self.game_rooms[room_name]['players']) == 2:
+				self.record_match_history(room_name)
 			for player_id in self.game_rooms[room_name]['players']:
 				self.game_rooms[room_name]['players'].remove(player_id)
 			del self.game_rooms[room_name]
@@ -47,6 +49,28 @@ class GameManager:
 		if room_name in self.game_rooms:
 			return len(self.game_rooms[room_name]['players'])
 		return 0
+
+	def record_match_history(self, room_name, winner):
+		user_one = self.game_rooms[room_name]['players'][0]
+		user_two = self.game_rooms[room_name]['players'][1]
+		match = MatchHistory.objects.create(
+			user = user_one,
+			player_one=self.game_rooms[room_name]['players'][0],
+			player_two=self.game_rooms[room_name]['players'][1],
+			player_one_score = self.game_rooms[room_name]['players'][0].score,
+			player_two_score = self.game_rooms[room_name]['players'][1].score,
+			winner = self.game_rooms[room_name]['game_state'].winning_player
+		)
+		match.save()
+		match = MatchHistory.objects.create(
+			user = user_two,
+			player_one=self.game_rooms[room_name]['players'][0],
+			player_two=self.game_rooms[room_name]['players'][1],
+			player_one_score = self.game_rooms[room_name]['players'][0].score,
+			player_two_score = self.game_rooms[room_name]['players'][1].score,
+			winner = self.game_rooms[room_name]['game_state'].winning_player
+		)
+		match.save()
 
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
@@ -114,7 +138,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await self.game.set_player_movement(data.get("player", ""), False, False)
 		if data_type == 'player_left':
 			if self.game.is_running == True:
-				print('PLAYER', data.get("player", ""), 'LEFT')
 				if data.get("player", "") == 'player_one':
 					await self.end_game('player_two')
 				elif data.get("player", "") == 'player_two':
@@ -205,7 +228,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 
 	async def send_game_end(self, winner):
-		await self.save_history(winner)
 		await self.channel_layer.group_send(self.game_room,
 		{
 			'type': 'game_end',
@@ -218,9 +240,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 			game_winner = None
 			if self.game.players[0].score >= self.game.winning_score:
 				game_winner_username = self.game_manager.game_rooms[self.game_room]['players'][0]
+				self.game_manager.game_rooms[self.game_room]['game_state'].winning_player = game_winner_username
 				game_winner = 'player_one'
 			elif self.game.players[1].score >= self.game.winning_score:
 				game_winner_username = self.game_manager.game_rooms[self.game_room]['players'][1]
+				self.game_manager.game_rooms[self.game_room]['game_state'].winning_player = game_winner_username
 				game_winner = 'player_two'
 			await self.send_game_end(game_winner)
 		else:
@@ -236,17 +260,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.end_game('get_winner')
 
 	async def save_history(self, winner):
-		user = UserProfile.objects.get(username=self.game_manager.game_rooms[self.game_room]['players'][0])
-
-		match = MatchHistory.objects.create(
+		usergettingmatch = await sync_to_async(UserProfile.objects.get)(username=self.player_id)
+		match = await sync_to_async(MatchHistory.objects.create)(
+			user = usergettingmatch,
 			player_one=self.game_manager.game_rooms[self.game_room]['players'][0],
 			player_two=self.game_manager.game_rooms[self.game_room]['players'][1],
 			player_one_score = self.game.players[0].score,
 			player_two_score = self.game.players[1].score,
 			winner = winner
 		)
-		user_one.matchHistory.add(match)
-		user_two.matchHistory.add(match)
+		await sync_to_async(match.save)()
 	# player_one = models.CharField(max_length=255, default="player_one")
 	# player_two = models.CharField(max_length=255, default="player_two")
 	# player_one_score = models.IntegerField(default=0)

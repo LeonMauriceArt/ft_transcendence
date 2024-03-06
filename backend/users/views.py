@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from .forms import RegistrationForm, LoginForm, ModifyForm
-from .models import UserProfile, Friendship
+from .models import UserProfile, Friendship, MatchHistory
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta

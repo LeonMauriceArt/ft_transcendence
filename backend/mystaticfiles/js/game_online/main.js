@@ -23,6 +23,8 @@ var firstLaunch = true;
 var endScreen = false
 
 let container
+var infoElement
+var searchButton
 
 var position = null;
 
