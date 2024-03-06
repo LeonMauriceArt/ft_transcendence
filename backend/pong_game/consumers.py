@@ -253,7 +253,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def game_loop(self):
 		async with await self.get_update_lock():
 			while self.game.is_running == True:
-				await self.game.update();
+				await self.game.update()
 				await self.send_game_state()
 				await asyncio.sleep(tick_duration)
 			if (self.game.someone_won == True):
