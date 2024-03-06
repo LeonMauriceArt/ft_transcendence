@@ -70,24 +70,15 @@ const on_tournament_start = (arg) => {
     })
 }
 
-const a = window.tournamentEvents
-
-const on_message_handlers = [
+let on_message_handlers = [
     { type: 'players_update', handler: on_players_update },
     { type: 'load_lobby', handler: on_load_lobby },
     { type: 'tournament_start', handler: on_tournament_start },
-
-    // { type: 'set_position', handler: on_set_position },
-    // { type: 'game_start', handler: on_game_start },
-    // { type: 'game_state', handler: on_game_state },
-    // { type: 'game_end', handler: on_game_end }
 ]
 
 // PAGE LOADING ---------------------------------
 
 const load_create_online = () => {
-    console.log(a)
-
     return loadContent('/tournament/create_online_page', 'content')
     .then(set_g_username)
     .then(fetch_new_tournament_id)
@@ -107,6 +98,12 @@ const load_lobby = () => {
 }
 
 const load_playground = () => {
+    on_message_handlers = [...on_message_handlers,
+        { type: 'set_position', handler: window.tournamentEvents.on_set_position },
+        { type: 'game_start', handler: window.tournamentEvents.on_game_start },
+        { type: 'game_state', handler: window.tournamentEvents.on_game_state },
+        { type: 'game_end', handler: window.tournamentEvents.on_game_end }
+    ]
     return loadContent('/tournament/playground_page', 'content')
 }
 

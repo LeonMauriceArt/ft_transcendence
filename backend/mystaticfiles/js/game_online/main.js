@@ -17,14 +17,14 @@ player_one_goal, player_two_goal
 const wssurl = 'ws://' + window.location.host + '/ws/game/';
 let wss;
 
-const keys = {};
+const keys = {}
 
-var firstLaunch = true;
+var firstLaunch = true
 var endScreen = false
 
 let container
 
-var position = null;
+var position = null
 
 var screenShake = ScreenShake()
 
@@ -34,9 +34,9 @@ const fontlLoader = new FontLoader();
 fontlLoader.load(droid,
 	function (loadedFont){
 		droidFont = loadedFont;
-	});
+	})
 	
-var id = null;
+var id = null
 
 export function startTournamentOnline()
 {
@@ -75,23 +75,23 @@ export function start()
 			game_running = false
 			sendMessageToServer({type: 'player_left', player: position})
 			wss.close()
-			resetArena();
-			newSocket();
+			resetArena()
+			newSocket()
 		}
 	}
 	else if (firstLaunch)
 	{
-		initDisplay();
+		initDisplay()
 		firstLaunch = false
-		initArena();
-		newSocket();
+		initArena()
+		newSocket()
 	}
 	else
 	{
 		console.log('Looking for game after ending of previous match.')
 		wss.close()
-		resetArena();
-		newSocket();
+		resetArena()
+		newSocket()
 		endScreen = false
 	}
 	if (id !==null)
@@ -276,7 +276,7 @@ function handleKeyDown(event) {
 		{
 			var up = false;
 			if (event.code == 'KeyW')
-			up = true;
+				up = true;
 			keys[event.code] = true;
 			sendMessageToServer({type: 'player_key_down', player: position,  direction: up})
 		}
@@ -294,9 +294,40 @@ function handleKeyUp(event) {
 	}
 }
 
+const t_handle_key_down = (event) => {
+	console.log('key_down')
+	if (game_running)
+	{
+		if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
+		{
+			var up = false;
+			if (event.code == 'KeyW')
+				up = true;
+			keys[event.code] = true;
+			console.log('key_down')
+			g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: up}))
+		}
+	}
+}
+
+const t_handle_key_up = (event) => {
+	console.log('key_up')
+	if (game_running)
+	{
+		if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
+		{
+			keys[event.code] = false;
+			console.log('key_up')
+			g_socket.send(JSON.stringify({event: 'player_key_up', player: position,  direction: up}))
+		}
+	}
+}
+
 function initControls(){
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
+	window.addEventListener('keydown', t_handle_key_down);
+	window.addEventListener('keyup', t_handle_key_up)
 }
 
 function handle_scores(player_scoring)
@@ -402,16 +433,27 @@ window.addEventListener('page_change', function(event) {
 
 // TOURNAMENTS EVENTS ( meant to be on bind on another socket )
 
-const on_set_position = () => {
-	console.log('on_set_position')
+const on_set_position = (arg) => {
+	console.log('on_set_position', arg)
+
+	if (arg[0] === g_username)
+		position = 1
+	if (arg[1] === g_username)
+		position = 2
+
+	console.log("MY POSITION : " + position)
+
+	game_running = true;
+	ball.get_update(0, 0, 1, 0, 0xffffff)
+	initControls();
 }
 
 const on_game_start = () => {
 	console.log('on_game_start')
 }
 
-const on_game_state = () => {
-	console.log('on_game_state')
+const on_game_state = (arg) => {
+	updateGameState(arg)
 }
 
 const on_game_end = () => {
