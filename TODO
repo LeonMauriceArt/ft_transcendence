@@ -1,13 +1,14 @@
 TODO:
 
 [] Change the websockets from ws:// to wss://
-[] Finish Quickmatch (match history left)
+[X] Finish Quickmatch (match history left)
 [] Finish Tournament
 [] Merge the Firewall / hashicorp vault branch
 [] Add a is_connected element to users to prevent multiple clients to connect to the same user (5 guys can connect to the same account)
 [] Switch the project to production mode
 
 [] Check if we have all modules needed, if not, we need to do an additional minor module
+[] Checking a user profile in the online user page is not single page, it is an href
 
 ---------------------------------
 

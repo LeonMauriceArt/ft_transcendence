@@ -328,8 +328,8 @@ const t_handle_key_up = (event) => {
 function initControls(){
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
-	window.addEventListener('keydown', t_handle_key_down);
-	window.addEventListener('keyup', t_handle_key_up)
+	// window.addEventListener('keydown', t_handle_key_down);
+	// window.addEventListener('keyup', t_handle_key_up)
 }
 
 function handle_scores(player_scoring)

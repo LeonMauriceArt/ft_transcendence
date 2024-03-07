@@ -23,8 +23,10 @@ class GameManager:
 		new_room = f"room_{len(self.game_rooms) + 1}"
 		self.game_rooms[new_room] = {
 			'players':[],
-			'game_state': GameState()
+			'game_state': GameState(),
+			'match_saved': False
 		}
+		print('----ROOM', new_room, 'CREATED-------')
 		return new_room
 
 	def add_player_to_room(self, room_name, player_id):
@@ -32,13 +34,21 @@ class GameManager:
 			if len(self.game_rooms[room_name]['players']) < 2:
 				self.game_rooms[room_name]['players'].append(player_id)
 
-	def remove_room(self, room_name):
+	async def remove_player_from_room(self, username, room_name):
 		if room_name in self.game_rooms:
-			if len(self.game_rooms[room_name]['players']) == 2:
-				self.record_match_history(room_name)
-			for player_id in self.game_rooms[room_name]['players']:
-				self.game_rooms[room_name]['players'].remove(player_id)
+			players_copy = list(self.game_rooms[room_name]['players'])
+			if username in players_copy:
+				if self.game_rooms[room_name]['match_saved'] == True:
+					await self.record_match_history(username, room_name)
+				self.game_rooms[room_name]['players'].remove(username)
+			if len(self.game_rooms[room_name]['players']) == 0:
+				await self.remove_room(room_name)
+	
+	async def remove_room(self, room_name):
+		if room_name in self.game_rooms:
 			del self.game_rooms[room_name]
+			print('----ROOM', room_name, 'DELETED-------')
+
 					
 	def players_in_room(self, room_name):
 		if room_name in self.game_rooms:
@@ -50,27 +60,24 @@ class GameManager:
 			return len(self.game_rooms[room_name]['players'])
 		return 0
 
-	def record_match_history(self, room_name, winner):
-		user_one = self.game_rooms[room_name]['players'][0]
-		user_two = self.game_rooms[room_name]['players'][1]
-		match = MatchHistory.objects.create(
-			user = user_one,
-			player_one=self.game_rooms[room_name]['players'][0],
-			player_two=self.game_rooms[room_name]['players'][1],
-			player_one_score = self.game_rooms[room_name]['players'][0].score,
-			player_two_score = self.game_rooms[room_name]['players'][1].score,
-			winner = self.game_rooms[room_name]['game_state'].winning_player
+	async def record_match_history(self, username, room_name):
+		print('----SAVING MATCH HISTORY FOR', username, '-------')
+		player_one_id = self.game_rooms[room_name]['players'][0]
+		player_two_id = self.game_rooms[room_name]['players'][1]
+		player_one_score = self.game_rooms[room_name]['game_state'].players[0].score
+		player_two_score = self.game_rooms[room_name]['game_state'].players[1].score
+		winner = self.game_rooms[room_name]['game_state'].winning_player
+
+		player_profile = await sync_to_async(UserProfile.objects.get)(username=username)
+		match = await sync_to_async(MatchHistory.objects.create)(
+			user=player_profile,
+			player_one=player_one_id,
+			player_two=player_two_id,
+			player_one_score=player_one_score,
+			player_two_score=player_two_score,
+			winner=winner
 		)
-		match.save()
-		match = MatchHistory.objects.create(
-			user = user_two,
-			player_one=self.game_rooms[room_name]['players'][0],
-			player_two=self.game_rooms[room_name]['players'][1],
-			player_one_score = self.game_rooms[room_name]['players'][0].score,
-			player_two_score = self.game_rooms[room_name]['players'][1].score,
-			winner = self.game_rooms[room_name]['game_state'].winning_player
-		)
-		match.save()
+		await sync_to_async(match.save)()
 
 class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = GameManager()
@@ -91,7 +98,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 						'type': 'player_left',
 						'player': self.position,
 					})
-				self.game_manager.remove_room(self.game_room)
+				await self.game_manager.remove_player_from_room(self.player_id, self.game_room)
 				await self.channel_layer.group_discard(self.game_room, self.channel_name)
 
 	async def join_game(self):
@@ -116,6 +123,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game_room, self.channel_name
 		)
 		if len(self.game_manager.players_in_room(self.game_room)) == 2:
+			self.game_manager.game_rooms[self.game_room]['match_saved'] = True
 			await self.channel_layer.group_send(
 				self.game_room,
 				{
@@ -139,8 +147,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if data_type == 'player_left':
 			if self.game.is_running == True:
 				if data.get("player", "") == 'player_one':
+					self.game_manager.game_rooms[self.game_room]['game_state'].winning_player = self.game_manager.game_rooms[self.game_room]['players'][1]
 					await self.end_game('player_two')
 				elif data.get("player", "") == 'player_two':
+					self.game_manager.game_rooms[self.game_room]['game_state'].winning_player = self.game_manager.game_rooms[self.game_room]['players'][0]
 					await self.end_game('player_one')
 			else :
 				await self.send(text_data=json.dumps({
@@ -258,20 +268,3 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await asyncio.sleep(tick_duration)
 			if (self.game.someone_won == True):
 				await self.end_game('get_winner')
-
-	async def save_history(self, winner):
-		usergettingmatch = await sync_to_async(UserProfile.objects.get)(username=self.player_id)
-		match = await sync_to_async(MatchHistory.objects.create)(
-			user = usergettingmatch,
-			player_one=self.game_manager.game_rooms[self.game_room]['players'][0],
-			player_two=self.game_manager.game_rooms[self.game_room]['players'][1],
-			player_one_score = self.game.players[0].score,
-			player_two_score = self.game.players[1].score,
-			winner = winner
-		)
-		await sync_to_async(match.save)()
-	# player_one = models.CharField(max_length=255, default="player_one")
-	# player_two = models.CharField(max_length=255, default="player_two")
-	# player_one_score = models.IntegerField(default=0)
-	# player_two_score = models.IntegerField(default=0)
-	# winner = models.CharField(max_length=255, default="winner")
