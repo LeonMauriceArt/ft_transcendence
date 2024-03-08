@@ -41,7 +41,7 @@ services:
       context: nginx
     restart: always
     ports:
-     - "8433:8433"
+     - "8433:433"
     depends_on:
      - db
     volumes:
