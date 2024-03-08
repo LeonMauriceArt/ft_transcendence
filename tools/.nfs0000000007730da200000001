@@ -1,9 +1,0 @@
-cat <<EOF | vault policy write my-policy -
-path "secret/*" {
-  capabilities = ["read", "write"]
-}
-EOF
-
-vault kv enable -path=secret kv
-
-

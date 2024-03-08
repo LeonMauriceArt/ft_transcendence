@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y -f \
     libtool autoconf automake autotools-dev zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo "net.ipv4.ip_unprivileged_port_start=443" >> /etc/sysctl.conf
+
 # RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity
 
 # RUN cd /etc/modsecurity \
