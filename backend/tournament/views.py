@@ -1,69 +1,79 @@
 import json
+import uuid
+
 from django.shortcuts import render
-from django.http import JsonResponse
-from .models import Tournament, TournamentPlayer
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 
-def play_tournament(request):
-    return render(request, 'play_tournament.html')
+from django.http import JsonResponse
+from django.utils.timezone import now, timedelta
 
-def create_local(request):
-    return render(request, 'create_local.html')
+from users.models import UserProfile, Friendship
+from .models import TournamentRequest
 
-def current_state(request):
-    return render(request, 'current_state.html')
+# TEMPLATES
 
-def create_online(request):
-    return render(request, 'create_online.html')
+def tournament_page(request):
+    return render(request, 'tournament_page.html')
 
-def join_online(request):
-    return render(request, 'join_online.html')
+def create_local_page(request):
+    return render(request, 'create_local_page.html')
 
-def pre_lobby(request):
-    return render(request, 'pre_lobby.html')
+def create_online_page(request):
+    return render(request, 'create_online_page.html')
 
-def lobby(request):
-    return render(request, 'lobby.html')
+def tournament_requests_page(request):
+    invitations = TournamentRequest.objects.filter(receiver=request.user)
 
-@csrf_exempt
-def api_tournament(request):
-    if request.method == 'GET':
-        tournaments = Tournament.objects.all()
-        tournament_list = [tournament.to_dict() for tournament in tournaments]
-        return JsonResponse(tournament_list, safe=False)
-    elif request.method == 'POST':
-        data = json.loads(request.body)
-        try:
-            tournament = Tournament.objects.create(
-                name=data['tournament_name']
-            )
-            return JsonResponse({'id': tournament.id}, status=201)
-        except KeyError:
-            return JsonResponse({'error': 'invalid format'}, status=400)
-    elif request.method == 'DELETE':
-        try:
-            Tournament.objects.all().delete()
-            return JsonResponse({'success': True, 'message': 'All tournaments deleted successfully.'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Error deleting tournaments: {str(e)}'}, status=500)
+    return render(request, 'tournament_requests_page.html', {'invitations': invitations })
 
-@csrf_exempt
-def api_tournament_arg(request, tournament_id):
-    if request.method == 'PUT':
-        data = json.loads(request.body)
-        try:
-            tournament = Tournament.objects.get(id=tournament_id)
-            player = TournamentPlayer.objects.create(
-                name=data['aliase']
-            )
-            if player not in tournament.players.all() and tournament.players.count() < 4:
-                tournament.players.add(player)
-                return JsonResponse({ 'success': True, 'message': 'Player joined the lobby'})
-            else:
-                return JsonResponse({ 'success': False, 'message': 'Lobby full'}, status=400)
-        except (Tournament.DoesNotExist, KeyError):
-            return JsonResponse({'error': 'cant join tournament'}, status=400)
-    elif request.method == 'GET':
-        tournament = get_object_or_404(Tournament, id=tournament_id)
-        return JsonResponse(tournament.to_dict(), safe=False)
+def invite_page(request):
+    friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
+    other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
+    
+    friend_list = []
+    
+    for friendship in friends:
+        avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
+        friend_list.append((friendship.friend.username, avatar_url))
+    
+    for friendship in other_friends:
+            avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
+            friend_list.append((friendship.creator.username, avatar_url))
+
+    return render(request, 'invite_page.html', {'friends': friend_list})
+
+def playground_page(request):
+    return render(request, 'playground_page.html')
+    
+# API
+
+def create_tournament(request):
+    tournament_id = str(uuid.uuid4())
+
+    return JsonResponse({ 'tournament_id': tournament_id })
+
+def tournament_requests(request):
+    data = json.loads(request.body.decode('utf-8'))
+
+    if (request.method == 'POST'):
+        to_invite = data.get('to_invite')
+        tournament_id = data.get('tournament_id')
+        sender = request.user
+
+        receiver = get_object_or_404(UserProfile, username=to_invite)
+
+        existing_request = TournamentRequest.objects.filter(sender=sender, receiver=receiver, tournament_id=tournament_id).first()
+
+        if existing_request:
+            return JsonResponse({'status': 'error', 'message': 'Invitation already sent for this tournament'})
+
+        TournamentRequest.objects.create(sender=sender, receiver=receiver, tournament_id=tournament_id)
+
+        return JsonResponse({'status': 'success', 'message': 'Invitation sent successfully'})
+    if (request.method == 'DELETE'):
+        tournament_id = data.get('tournament_id')
+        
+        tournament_requests = TournamentRequest.objects.filter(receiver=request.user, tournament_id=tournament_id)
+        tournament_requests.delete()
+
+        return JsonResponse({'status': 'success', 'message': 'Requests were succesfully deleted '})

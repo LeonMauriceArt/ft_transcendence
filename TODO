@@ -1,0 +1,41 @@
+TODO:
+
+[] Change the websockets from ws:// to wss://
+[X] Finish Quickmatch (match history left)
+[] Finish Tournament
+[] Merge the Firewall / hashicorp vault branch
+[] Add a is_connected element to users to prevent multiple clients to connect to the same user (5 guys can connect to the same account)
+[] Switch the project to production mode
+
+[] Check if we have all modules needed, if not, we need to do an additional minor module
+[] Checking a user profile in the online user page is not single page, it is an href
+
+---------------------------------
+
+TOTEST:
+
+[] Connection to the same project on multiple computers, using ip of the machine in url
+[] Play a shitons of games and see if everything works (The game, disconnections, match_history, tournament leaving ...)
+[] Use Postman to test requests on the website and check for any problem
+[] Bash your head against the keyboard and see if the project still works
+
+---------------------------------
+
+MODULE LIST:
+
+Major:
+
+1 - [x] Framework as backend (Django)
+2 - [x] User Management
+3 - [x] Remote players (playing on multiple computers)
+4 - [x] AI opponent
+5 - [x] WAF/ModSecurity and Hashicorp Vault
+6 - [x] 3D - ThreeJS
+7 - [] Server-side Pong (THIS ONE IS NOT 100% VALID, NEED TO ADD SOME FEATURES)
+
+Minor:
+
+1 - [x] PostGreSQL
+2 - [x] Expanding Browser Compatibility (Seems valid ???)
+3 - [] GDPR (we could do that)
+4 - [] Localization : have at least 3 languages (We could do that using some django functionnality)

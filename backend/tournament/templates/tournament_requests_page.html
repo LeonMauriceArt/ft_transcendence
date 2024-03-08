@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block navbar_content %}
+
+<div >
+    TOURNAMENT REQUESTS PAGE
+     <div class="requests-content">
+            <ul>
+            {% for invitation in invitations %}
+                <li>
+                    {{ invitation.sender }}'s tournament
+                    <button 
+                        onclick="accept_tournament_request('{{ invitation.tournament_id }}')"
+                    >
+                        Accept
+                    </button>
+                    <button 
+                        onclick="deny_tournament_request('{{ invitation.tournament_id }}')"
+                    >
+                        Deny
+                    </button>
+                </li>
+            {% empty %}
+                <p>No friend request.</p>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

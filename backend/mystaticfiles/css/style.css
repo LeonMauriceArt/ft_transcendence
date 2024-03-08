@@ -10,10 +10,38 @@
 }
 
 /* Reset some default styles */
-body, h1, h2, h3, p, ul, li {
+body, p, ul, li {
     margin: 0;
     padding: 0;
     font-family: 'PixelMix', sans-serif;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+}
+
+h1 {
+    color: white;
+    font-family: 'PixelMix', sans-serif;
+    font-weight: bold;
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: white;
+    font-weight: bold;
+    font-family: 'PixelMix', sans-serif;
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+h3 {
+    color: white;
+    font-weight: bold;
+    font-family: 'PixelMix', sans-serif;
+    font-size: 28px;
+    margin-bottom: 25px;
 }
 
 body {
@@ -22,45 +50,63 @@ body {
 }
 
 p {
-	margin-top : 20px;
+    color: grey; 
+	margin-top : 10px;
+    width: 100%;
+    text-align: center;
 }
 
 nav {
     color: grey;
-    padding: 10px 0;
+    padding: 5px 0;
 	text-align: center;
 	margin: 0 auto;
 	margin-left: 40px;
 	margin-right: 40px;
+    margin-top: 10px;
     border: 2px solid grey;
 }
 
 ul {
-    list-style: none;
+    list-style-type: none; 
+    padding: 0; 
+    margin: 0 auto; 
+    width: 80%; 
+    max-width: 600px; 
 }
 
 li {
-    border: 2px solid grey;
-    display: inline-block;
-    padding: 20px;
-	margin-left: 30px;
-    transition: color 0.3s ease, border-color 0.3s ease; /* Added transition for border color */
+    color: grey; 
+    padding: 10px; 
+    display: flex; 
+    justify-content: space-between; 
 }
 
 li a {
-    color: grey;
+    color: grey; ;
     text-decoration: none;
+    font-size: 14px;
     transition: color 0.3s ease;
+    cursor: pointer;
 }
 
 li:hover a {
     color: white;
 }
 
+li:empty {
+    text-align: center;
+    color: #666;
+}
+
 a {
+    color: #007bff;
     text-decoration: none;
-    color: grey;
-    font-weight: bold;
+    font-size: 16px;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 #content {
@@ -71,16 +117,47 @@ a {
 }
 
 #projectname {
-    margin: 20px;
+    margin: 20px 0 40px;
     font-size: 60px;
+    text-align: center; 
+    font-family: 'PixelDogica', sans-serif; 
+    color: white;
+    font-weight: bold;
+    position: relative; 
+    top: 0; 
+    width: 100%;
+}
+
+.navbar {
+    background-color: black; 
+    padding: 10px 0;
     text-align: center;
-    font-family: 'PixelDogica', sans-serif;
-    color: grey;
+    width: 100%;
+}
+
+.navbar nav {
+    margin: 0 auto;
+    display: inline-block;
+}
+
+.navbar ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    list-style-type: none;
+}
+
+
+.navbar ul li {
+    margin: 0 10px;
 }
 
 .navbar ul li a {
     color: grey;
+    padding: 5px 10px;
     transition: color 0.3s ease;
+    text-decoration: none;
 }
 
 .navbar ul li:hover a {
@@ -89,7 +166,11 @@ a {
 
 .navbar ul li:hover {
     border-color: white;
-    color: white; /* Added to change the text color on li hover */
+}
+
+.navbar ul li.active a {
+    color: white; 
+    border-bottom: 2px solid white;
 }
 
 .gamemodes li {
@@ -105,4 +186,172 @@ a {
     image-rendering: crisp-edges;
     box-sizing: border-box;
     border: 2px solid grey;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid grey;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute; 
+    top: 0;
+    left: -10px;
+    width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
+}
+
+.username {
+    color: white;
+    margin-left: 10px;
+    font-family: 'PixelMix', sans-serif;
+}
+
+.logout-link {
+    color: red;
+    margin-left: auto;
+    text-decoration: none; 
+    font-family: 'PixelMix', sans-serif;
+}
+
+.user-logout {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.profile-grid {
+    margin: 0 auto;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-areas:
+        "profile-title friends-title requests-title history-title"
+        "profile-content friends-content requests-content history-content";
+    gap: 20px 100px;
+    justify-content: center;
+}
+
+.profile-title { grid-area: profile-title; }
+.friends-title { grid-area: friends-title; }
+.requests-title { grid-area: requests-title; }
+.history-title { grid-area: history-title; }
+
+.profile-content { grid-area: profile-content; }
+.friends-content { grid-area: friends-content; }
+.requests-content { grid-area: requests-content; }
+.history-content { grid-area: history-content; }
+
+.profile-content, .friends-content, .requests-content, .history-content {
+    margin-top: -20px;
+}
+
+.friend-content ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.status-online {
+    min-width: 15px;
+    height: 15px;
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.status-offline {
+    min-width: 15px;
+    height: 15px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.friend-content li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.friend-content img.avatar {
+    min-width: 30px; 
+    max-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid grey;
+    margin-right: 5px; 
+}
+
+.requests-content ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.requests-content li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.profile-content p {
+    color: white; 
+    font-size: 15px; 
+    margin-bottom: 5px; 
+}
+
+button {
+    font-family: 'PixelMix', sans-serif;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.profile-content button:hover {
+    background-color: #555; /* Assombrir le bouton lors du survol */
+}
+
+.owner {
+    background-color: red;
+}
+
+.match_history{
+    color: grey;
+    padding: 5px 0;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 5px;
+    border: 2px solid grey;
+}
+
+.match_history li{
+    color: grey;
+    padding: 5px 0;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 15px;
 }

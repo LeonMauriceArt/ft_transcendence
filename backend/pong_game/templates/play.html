@@ -1,12 +1,9 @@
 {% extends 'base.html' %}
 {% block navbar_content %}
 <div id="gamemodes">
-    <h1>GameModes : choose what type of game you want to play !</h1>
-	<li onclick="loadOnline()"><a>QuickMatch Classic</a></li>
-	<li onclick="loadForm('/play/join_game/', 'dynamicContent')"><a>Join Game</a></li>
-	<li onclick="loadForm('/play/create_game/', 'dynamicContent')"><a>Create Game</a></li>
-	<li onclick="loadLocal()"><a>Local Play</a></li>
-	<li onclick="loadPractice()"><a>Play vs AI</a></li>
+    <h2>GameModes</h2>
+	<li><a href="#" onclick="loadOnline(); return false">QuickMatch Classic</a></li>
+	<li><a href="#" onclick="loadLocal(); return false">Local Play</a></li>
+	<li><a href="#" onclick="loadPractice(); return false">Play vs AI</a></li>
 </div>
-<div id="dynamicContent"><p>GAME INFO HERE</p></div>
 {% endblock %}
