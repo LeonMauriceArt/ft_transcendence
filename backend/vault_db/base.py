@@ -101,3 +101,4 @@ class DatabaseWrapper(base.DatabaseWrapper):
         conn_params['password'] = password
 
         return conn_params
+

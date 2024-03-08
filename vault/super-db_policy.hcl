@@ -2,6 +2,10 @@ path "database/creds/my-role" {
  capabilities = ["create", "read", "update", "delete"]
 }
 
+path "kv/env-vars/*" {
+  capabilities = ["read"]
+}
+
 path "sys/mounts/database" {
  capabilities = ["read", "create", "update"]
 }

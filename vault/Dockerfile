@@ -7,6 +7,7 @@ COPY config.hcl /config/config.hcl
 COPY start_vault.sh start_up.sh
 COPY config_path.sh /usr/local/bin/config_path.sh
 COPY super-db_policy.hcl /policy.hcl
+COPY env-var.json /env-vars.json
 
 RUN chmod +x start_up.sh
 

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import vault_db
+from vault_env import get_env
 from pathlib import Path
 import os
 
@@ -104,12 +105,12 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'vault_db',
-        'NAME': os.getenv('POSTGRES_NAME'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-        'VAULT_ADDR': os.getenv('WEB_VAULT_ADDR'),
-        'VAULT_ROLE_NAME': os.getenv('VAULT_ROLE'),
-        'VAULT_DB_MOUNT_POINT': os.getenv('VAULT_DB_MOUNT_POINT'),
+        'NAME': get_env.get_env_variable('POSTGRES_NAME'),
+        'HOST': get_env.get_env_variable('DB_HOST'),
+        'PORT': get_env.get_env_variable('DB_PORT'),
+        'VAULT_ADDR': get_env.get_env_variable('WEB_VAULT_ADDR'),
+        'VAULT_ROLE_NAME': get_env.get_env_variable('VAULT_ROLE'),
+        'VAULT_DB_MOUNT_POINT': get_env.get_env_variable('VAULT_DB_MOUNT_POINT'),
     }
 }
 
