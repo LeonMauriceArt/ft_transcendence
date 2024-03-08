@@ -24,7 +24,7 @@ def registration_view(request):
           if form.is_valid():
                form.save()
                raw_password = form.cleaned_data.get('password1')
-               user_name = form.cleaned_data.get('username')   
+               user_name = form.cleaned_data.get('username')
                user = authenticate(username=user_name, password=raw_password)
                if user is not None:
                     login(request, user)
@@ -123,7 +123,7 @@ def list_users_online(request):
 	users_online = UserProfile.objects.filter(last_active__gte=time_threshold)
 	return render(request, 'online.html', {'users_online': users_online})
 
-def send_friend_request(request, user_id):  
+def send_friend_request(request, user_id):
     target_user = get_object_or_404(UserProfile, id=user_id)
     if request.user != target_user and not Friendship.objects.filter(creator=request.user, friend=target_user).exists() and not Friendship.objects.filter(creator=target_user, friend=request.user).exists():
         Friendship.objects.create(creator=request.user, friend=target_user, status='pending')

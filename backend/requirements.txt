@@ -4,3 +4,4 @@ daphne==4.0.0
 channels==4.0.0
 django-bootstrap4==3.0.1
 pillow==10.2.0
+hvac
