@@ -3,7 +3,7 @@ TODO:
 [] Change the websockets from ws:// to wss://
 [X] Finish Quickmatch (match history left)
 [] Finish Tournament
-[] Merge the Firewall / hashicorp vault branch
+[X] Merge the Firewall / hashicorp vault branch
 [] Add a is_connected element to users to prevent multiple clients to connect to the same user (5 guys can connect to the same account)
 [] Switch the project to production mode
 

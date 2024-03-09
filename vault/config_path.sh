@@ -16,8 +16,8 @@ vault write database/roles/my-role \
         GRANT CREATE ON SCHEMA public TO \"{{name}}\"; \
         GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\"; \
         GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"{{name}}\";" \
-    default_ttl="1h" \
-    max_ttl="24h"
+    default_ttl="999h" \
+    max_ttl="999h"
 
 vault policy write super-db /policy.hcl
 

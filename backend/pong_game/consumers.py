@@ -1,13 +1,14 @@
 import json
 import uuid
 import asyncio
+import gc
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync, sync_to_async
 from .gamelogic import GameState
 from users.models import MatchHistory, UserProfile
-# from pong_game.management.game_manager import game_manager_instance
+from pong_game.management.game_manager import game_manager_instance
 
 tick_rate = 60
 tick_duration = 1 / tick_rate
@@ -25,14 +26,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		if hasattr(self, 'game_room'):
-				await self.channel_layer.group_send(
-					self.game_room,
-					{
-						'type': 'player_left',
-						'player': self.position,
-					})
 				await self.game_manager.remove_player_from_room(self.player_id, self.game_room)
 				await self.channel_layer.group_discard(self.game_room, self.channel_name)
+				# await self.channel_layer.group_send(
+				# 	self.game_room,
+				# 	{
+				# 		'type': 'player_left',
+				# 		'player': self.position,
+				# 	})
 
 	async def join_game(self):
 		self.game_room = self.game_manager.find_or_create_game_room()
@@ -85,11 +86,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 				elif data.get("player", "") == 'player_two':
 					self.game_manager.game_rooms[self.game_room]['game_state'].winning_player = self.game_manager.game_rooms[self.game_room]['players'][0]
 					await self.end_game('player_one')
-			else :
-				await self.send(text_data=json.dumps({
-					'type': 'game_end',
-					'winner': 'player_one',
-				}))
+			# else :
+			# 	await self.send(text_data=json.dumps({
+			# 		'type': 'game_end',
+			# 		'winner': 'player_one',
+			# 	}))
 
 #-------HANDLING CHANNEL MESSAGES--------
 	async def game_start(self, event):
@@ -137,14 +138,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 			'type': event.get('type'),
 			'winner': event.get('winner'),
 		}))
-		self.disconnect(42)
 
-	async def player_left(self, event):
-		await self.send(text_data=json.dumps({
-			'type': event.get('type'),
-			'winner': event.get('winner'),
-		}))
-		self.disconnect(42)
+	# async def player_left(self, event):
+	# 	await self.send(text_data=json.dumps({
+	# 		'type': event.get('type'),
+	# 		'winner': event.get('winner'),
+	# 	}))
 		
 #--------END HANDLERS---------
 
@@ -201,3 +200,4 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await asyncio.sleep(tick_duration)
 			if (self.game.someone_won == True):
 				await self.end_game('get_winner')
+

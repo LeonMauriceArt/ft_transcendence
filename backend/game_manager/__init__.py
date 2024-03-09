@@ -1,1 +1,0 @@
-from pong_game.management.game_manager import game_manager_instance

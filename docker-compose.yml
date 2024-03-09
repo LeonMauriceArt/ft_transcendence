@@ -9,7 +9,8 @@ services:
       context: backend
       dockerfile: Dockerfile
     # command: daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: sh -c "for i in $(seq 1 7); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
+    # command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/code
       - daphne-sock:/usr/src/daphne_sock
