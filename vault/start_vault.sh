@@ -1,6 +1,6 @@
 vault server -config /config/config.hcl &
 
-sleep 2
+sleep 3
 
 if [ -f /vault/data/core/.vault_keys_unseal_key ]; then
     export VAULT_UNSEAL_KEY=$(cat /vault/data/core/.vault_keys_unseal_key)
@@ -18,5 +18,4 @@ else
     export VAULT_TOKEN=$VAULT_ROOT_TOKEN
     /bin/sh /usr/local/bin/config_path.sh
 fi
-
 

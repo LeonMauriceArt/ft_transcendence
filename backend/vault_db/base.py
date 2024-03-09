@@ -2,10 +2,6 @@ import hvac
 import requests
 
 from django.core.exceptions import ImproperlyConfigured
-from django.db import (
-    InternalError,
-    OperationalError,
-)
 
 from django.db.backends.postgresql import base
 
@@ -19,25 +15,9 @@ class DatabaseWrapper(base.DatabaseWrapper):
     def _get_hvac_client(self):
         if self._hvac is None:
             vault_url, vault_token = self._get_vault_login_credentials()
-
-            if vault_url is None:
-                raise ImproperlyConfigured(
-                    "settings.DATABASES is improperly configured. "
-                    "Please supply a valid Vault URL in VAULT_ADDR.")
-
             self._hvac = hvac.Client(url=vault_url)
-
             if vault_token is not None:
                 self._hvac.token = vault_token
-                try:
-                    if not self._hvac.is_authenticated():
-                        raise ImproperlyConfigured(
-                            "settings.DATABASES is improperly configured. "
-                            "Please supply a valid Vault token in VAULT_TOKEN.")
-                except hvac.exceptions.VaultError as e:
-                    msg = e.args[0]
-                    raise OperationalError(msg)
-
         return self._hvac
 
     def _get_vault_login_credentials(self):
@@ -52,9 +32,7 @@ class DatabaseWrapper(base.DatabaseWrapper):
 
         if not client.is_authenticated():
             raise RuntimeError("Not authenticated to Vault.")
-
         settings_dict = self.settings_dict
-
         vault_role_name = settings_dict.get('VAULT_ROLE_NAME', None)
         vault_db_mount_point = settings_dict.get('VAULT_DB_MOUNT_POINT', None)
 
@@ -65,18 +43,7 @@ class DatabaseWrapper(base.DatabaseWrapper):
             'name': vault_role_name,
             'mount_point': vault_db_mount_point,
         }
-        try:
-            creds = client.secrets.database.generate_credentials(**params)
-        except requests.exceptions.MissingSchema as e:
-            exc_msg = e.args[0]
-            raise ImproperlyConfigured(msg)
-        except hvac.exceptions.Forbidden as e:
-            msg = e.args[0]
-            raise InternalError(msg)
-        except hvac.exceptions.VaultError as e:
-            msg = e.args[0]
-            raise OperationalError(msg)
-
+        creds = client.secrets.database.generate_credentials(**params)
         return creds
 
     def _get_username_password_from_vault(self):
@@ -101,3 +68,4 @@ class DatabaseWrapper(base.DatabaseWrapper):
         conn_params['password'] = password
 
         return conn_params
+

@@ -19,6 +19,12 @@ vault write database/roles/my-role \
     default_ttl="999h" \
     max_ttl="999h"
 
+vault secrets enable -version=1 kv
+
+envsubst < env-vars.json > env-var.json
+
+vault kv put -format=json kv/env-vars @env-var.json
+
 vault policy write super-db /policy.hcl
 
 vault token create -policy=super-db -format=json > token.json
