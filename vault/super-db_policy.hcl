@@ -2,7 +2,7 @@ path "database/creds/my-role" {
  capabilities = ["create", "read", "update", "delete"]
 }
 
-path "kv/env-vars/*" {
+path "kv/env-vars" {
   capabilities = ["read"]
 }
 

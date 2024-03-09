@@ -21,7 +21,9 @@ vault write database/roles/my-role \
 
 vault secrets enable -version=1 kv
 
-vault kv put -format=json kv/env-vars @env-vars.json
+envsubst < env-vars.json > env-var.json
+
+vault kv put -format=json kv/env-vars @env-var.json
 
 vault policy write super-db /policy.hcl
 
