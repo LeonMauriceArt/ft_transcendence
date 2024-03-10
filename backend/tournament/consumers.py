@@ -102,30 +102,37 @@ class TournamentManager():
             players.append(room['players'][0])
             players.append(room['players'][1])
         if (room['state'] == TournamentState.DEMI_FINALS2.name):
+            players = []
             players.append(room['players'][2])
             players.append(room['players'][3])
         if (room['state'] == TournamentState.FINALS.name):
+            players = []
             for (index, value) in enumerate(room['players_state']):
-                if value == PlayerState.WINNER.name
-                    players.append(room['players'][])
+                if value == PlayerState.WINNER.name:
+                    players.append(room['players'][index])
 
         return players
 
     def next_turn(self, roomId, winnerIdx, looserIdx):
         room = self.get_room(roomId)
 
+        if room['state'] == TournamentState.FINALS.name:
+            return False
+        
         if room['state'] == TournamentState.DEMI_FINALS1.name:
             room['players_state'][winnerIdx] = PlayerState.WINNER.name
             room['players_state'][looserIdx] = PlayerState.LOSER.name
 
             room['state'] = TournamentState.DEMI_FINALS2.name
             room['game_state'] = GameState()
-        if room['state'] == TournamentState.DEMI_FINALS2.name:
+        elif room['state'] == TournamentState.DEMI_FINALS2.name:
             room['players_state'][winnerIdx + 2] = PlayerState.WINNER.name
             room['players_state'][looserIdx + 2] = PlayerState.LOSER.name
 
             room['state'] = TournamentState.FINALS.name
             room['game_state'] = GameState()
+
+        return True
 
 
 class TournamentConsumer(AsyncWebsocketConsumer):
@@ -206,7 +213,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         players = self.tournament_manager.get_players_turn(tournament_id)
 
-        await self.send_set_position(players)
+        await self.send_set_position(players, self.tournament_manager.get_room(tournament_id)['state'])
 
     async def on_game_start(self):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
@@ -269,14 +276,17 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             'arg': event['arg']
         }))
 
-    async def send_set_position(self, players):
+    async def send_set_position(self, players, state):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
 
         await self.channel_layer.group_send(
             tournament_id,
             {
                 'type': 'set_position',
-                'arg': players
+                'arg': {
+                    'players': players,
+                    'state': state
+                }
             }
         )
 
@@ -381,14 +391,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         game.is_running = False
 
         if game.players[0].score >= game.winning_score:
-            self.tournament_manager.next_turn(tournament_id, 0, 1)
+            keep = self.tournament_manager.next_turn(tournament_id, 0, 1)
             await self.send_game_end(players[0], players[1])
         elif game.players[1].score >= game.winning_score:
-            self.tournament_manager.next_turn(tournament_id, 1, 0)
+            keep = self.tournament_manager.next_turn(tournament_id, 1, 0)
             await self.send_game_end(players[1], players[0])
         
-        players = self.tournament_manager.get_players_turn(tournament_id)
-        await self.send_set_position(players)
+        if keep:
+            players = self.tournament_manager.get_players_turn(tournament_id)
+            await self.send_set_position(players, self.tournament_manager.get_room(tournament_id)['state'])
         
         
         

@@ -299,13 +299,10 @@ function handleKeyUp(event) {
 let g_pressed = false;
 
 const t_handle_key_down = (event) => {
-	console.log('game running', game_running)
 	if (!game_running && (event.code != 'KeyW' && event.code != 'KeyS'))
 		return
 	if (g_pressed)
 		return 
-
-	console.log('key_down')
 
 	if (event.code == 'KeyW')
 		g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: true}))
@@ -317,7 +314,6 @@ const t_handle_key_down = (event) => {
 const t_handle_key_up = (event) => {
 	if (game_running && (event.code == 'KeyW' || event.code == 'KeyS'))
 	{
-		console.log('key_up')
 		g_pressed = false;
 		g_socket.send(JSON.stringify({event: 'player_key_up', player: position}))
 	}
@@ -433,17 +429,17 @@ window.addEventListener('page_change', function(event) {
 
 const on_set_position = (arg) => {
 	console.log('on_set_position', arg)
-
-	if (arg[0] === g_username)
+	position = null
+	if (arg.players[0] === g_username)
 		position = 'player_one' 
-	if (arg[1] === g_username)
+	if (arg.players[1] === g_username)
 		position = 'player_two'
 
 	console.log("MY POSITION : " + position)
 
-	console.log("GAME WILL START IN 3 SEC, IT WILL BE ", arg[0], " VS ", arg[1])
+	console.log("GAME WILL START IN 3 SEC, IT WILL BE ", arg.players[0], " VS ", arg.players[1], "FOR ", arg.state)
 	setTimeout(() => {
-		if (arg[0] === g_username)
+		if (arg.players[0] === g_username)
     		g_socket.send(JSON.stringify({ event: 'game_start' }))
 	}, 3 * 1000)
 }
