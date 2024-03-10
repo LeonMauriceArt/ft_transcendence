@@ -99,6 +99,7 @@ def profile(request):
 
     return render(request, 'profile.html', context)
 
+@login_required
 def edit_profile(request):
     if request.method == 'POST':
         print('Edit profile view')
@@ -117,6 +118,7 @@ def edit_profile(request):
         return JsonResponse({'html': html})
 
     return render(request, 'edit_profile.html', {'form': form})
+    pass
 
 def list_users_online(request):
 	time_threshold = now() - timedelta(minutes=5)
