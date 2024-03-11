@@ -72,7 +72,11 @@ def login_view(request):
 
 def user_profile(request, user_id):
     user_profile = get_object_or_404(UserProfile, pk=user_id)
-    return render(request, 'user_profile.html', {'user_profile': user_profile})
+    match_history = MatchHistory.objects.filter(user=user_profile)
+    return render(request, 'user_profile.html', {
+        'user_profile': user_profile,
+        'match_history': match_history
+    })
 
 @login_required
 def profile(request):
@@ -84,11 +88,13 @@ def profile(request):
     for friendship in friends:
         is_online = now() - friendship.friend.last_active < timedelta(seconds=30)
         avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
-        friend_list.append((friendship.friend.username, is_online, avatar_url))
+        friend_id = friendship.friend.id
+        friend_list.append((friendship.friend.username, is_online, avatar_url, friend_id))
     for friendship in other_friends:
         is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
         avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
-        friend_list.append((friendship.creator.username, is_online, avatar_url))
+        friend_id = friendship.creator.id 
+        friend_list.append((friendship.creator.username, is_online, avatar_url, friend_id))
 
     context = {
         'user': request.user,

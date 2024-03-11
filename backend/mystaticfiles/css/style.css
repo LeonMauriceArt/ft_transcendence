@@ -203,7 +203,7 @@ a:hover {
     position: absolute; 
     top: 0;
     left: -10px;
-    width: 100%; /* Assurez-vous que le conteneur s'étend sur toute la largeur */
+    width: 100%;
 }
 
 .username {
@@ -247,13 +247,49 @@ a:hover {
 .requests-content { grid-area: requests-content; }
 .history-content { grid-area: history-content; }
 
-.profile-content, .friends-content, .requests-content, .history-content {
+.profile-content, .friends-content, .requests-content{
     margin-top: -20px;
 }
 
-.friend-content ul {
-    padding: 0;
+.history-content .match_history {
+    color: grey;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 10px;
+    margin-top: -50px;
+    border: none;
     list-style-type: none;
+    padding: 0;
+}
+
+.match_history span {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.history-content .match_history li {
+    color: grey;
+    padding: 5px 0;
+	text-align: center;
+	margin: 0 auto;
+	margin-left: 40px;
+	margin-right: 40px;
+    margin-top: 10px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    white-space: nowrap; 
+    text-overflow: ellipsis;
+}
+
+.history-content .match_history li:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+    align-items: center;
+    padding-bottom: 10px; 
+    margin-bottom: 10px; 
 }
 
 .status-online {
@@ -276,12 +312,24 @@ a:hover {
     margin-right: 5px;
 }
 
+.friend-content ul {
+    margin-top: -60px;
+    padding: 0;
+    list-style-type: none;
+    max-width: 100%; 
+}
+
 .friend-content li {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 10px 0;
+    padding: 5px 0;
+}
+
+.friend-content a {
+    margin-top: 0px;
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
 }
 
 .friend-content img.avatar {
@@ -326,32 +374,30 @@ button {
 }
 
 .profile-content button:hover {
-    background-color: #555; /* Assombrir le bouton lors du survol */
+    background-color: #555;
 }
 
 .owner {
     background-color: red;
 }
 
-.match_history{
-    color: grey;
-    padding: 5px 0;
-	text-align: center;
-	margin: 0 auto;
-	margin-left: 40px;
-	margin-right: 40px;
-    margin-top: 10px;
-    font-size: 5px;
-    border: 2px solid grey;
+.user-profile-link, .send-friend-request {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.match_history li{
-    color: grey;
-    padding: 5px 0;
-	text-align: center;
-	margin: 0 auto;
-	margin-left: 40px;
-	margin-right: 40px;
-    margin-top: 10px;
-    font-size: 15px;
+.send-friend-request {
+    margin-left: auto;
+}
+
+.profile-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+#profile-info-history h3 {
+    margin-bottom: 75px;
 }

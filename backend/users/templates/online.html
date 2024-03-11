@@ -10,8 +10,8 @@
         {% for user in users_online %}
             {% if user.id != request.user.id %}
             <li>
-                <a href="{% url 'user_profile' user_id=user.id %}">{{ user.username }}</a>
-                - <button class="send-friend-request" data-user-id="{{ user.id }}">Send Friend Request</button>
+                <a class="user-profile-link" data-user-id="{{ user.id }}">{{ user.username }}</a>
+                <button class="send-friend-request" data-user-id="{{ user.id }}">Send Friend Request</button>
             </li>
             {% endif %}
         {% empty %}

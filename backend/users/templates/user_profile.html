@@ -5,17 +5,30 @@
 {% endblock %}
 
 {% block navbar_content %}
-    <h2>{{ user_profile.username }}'s Profile</h2>
-    <p>Username: {{ user_profile.username }}</p>
+    <div class="profile-container">
+        <div class="profile-info">
+            <h2>{{ user_profile.username }}'s Profile</h2>
+            <p>Username: {{ user_profile.username }}</p>
+        </div>
 
-    <h3>Match History</h3>
-    {% if match_history %}
-        <ul>
-            {% for match in match_history %}
-                <li>{{ match.date }} - {{ match.outcome }} against {{ match.opponent }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No match history.</p>
-    {% endif %}
+        <div class="history-content" id="profile-info-history">
+            {% if match_history %}
+                <h3>Match History</h3>
+                <ul class="match_history">
+                    {% for match in match_history %}
+                        <li>
+                            {{ match.date|date:"Y-m-d" }} |
+                            {% if match.winner == match.player_one %}
+                                <span style="color: green;"> {{ match.player_one }} </span> {{ match.player_one_score }} - {{ match.player_two_score }} <span style="color: red;">{{ match.player_two }}</span>
+                            {% else %}
+                                <span style="color: red;"> {{ match.player_one }} </span> {{ match.player_one_score }} - {{ match.player_two_score }} <span style="color: green;">{{ match.player_two }}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No match history.</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

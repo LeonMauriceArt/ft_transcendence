@@ -98,6 +98,7 @@ export class Ball
 					var reduction_factor = (constants.PADDLE_HEIGHT / 2) / this.speed
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
+					this.shouldPredict = true
 				}
 			}
 		}
@@ -114,7 +115,6 @@ export class Ball
 					var reduction_factor = (constants.PADDLE_HEIGHT / 2) / this.speed
 					var new_y_vel = difference_in_y / reduction_factor
 					this.y_vel = -1 * new_y_vel
-					this.shouldPredict = true
 				}
 			}
 		}

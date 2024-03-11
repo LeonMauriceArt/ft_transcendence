@@ -2,8 +2,6 @@ const page_change = new Event('page_change')
 
 function attachEventListeners() {
     // Attach existing event listeners
-    attachFriendRequestEventListeners();
-    attachFriendAcceptEventListeners();
     const editProfileForm = document.getElementById('editProfileForm');
     if (editProfileForm) {
         editProfileForm.addEventListener('submit', submitProfileForm);
@@ -99,20 +97,10 @@ function submitProfileForm(event) {
     });
 }
 
-function attachFriendRequestEventListeners() {
-    document.querySelectorAll('.send-friend-request').forEach(button => {
+function attachProfileLinkEventListeners() {
+    document.querySelectorAll('.user-profile-link').forEach(button => {
         button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            sendFriendRequest(userId);
-        });
-    });
-}
-
-function attachFriendAcceptEventListeners() {
-    document.querySelectorAll('.accept-friend-request').forEach(button => {
-        button.addEventListener('click', function() {
-            const friendshipId = this.getAttribute('data-friendship-id');
-            acceptFriendRequest(friendshipId);
+            console.log("click detected");
         });
     });
 }

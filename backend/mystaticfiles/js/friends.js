@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Attache les événements aux boutons ou liens appropriés
     attachEventListeners();
 });
 
 function attachEventListeners() {
-    // Attache l'événement d'envoi de demande d'ami
     const sendFriendRequestButtons = document.querySelectorAll('.send-friend-request');
     sendFriendRequestButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -20,10 +18,17 @@ function attachEventListeners() {
             acceptFriendRequest(friendshipId);
         });
     });
+
+    const userProfileLinks = document.querySelectorAll('.user-profile-link');
+    userProfileLinks.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            loadPage(`/user/user_profile/${userId}/`);
+        });
+    });
 }
 
 function sendFriendRequest(userId) {
-    // Assurez-vous que l'URL est correctement formée
     fetch(`/user/send_friend_request/${userId}/`, {method: 'GET'})
     .then(response => {
         if (!response.ok) {
@@ -38,21 +43,32 @@ function sendFriendRequest(userId) {
 }
 
 function acceptFriendRequest(friendshipId) {
-    fetch(`/user/accept_friend_request/${friendshipId}/`, {method: 'POST'})
-        .then(response =>{
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert(data.message);
-        })
-        .catch(error => console.error('Error:', error));
+    const csrfToken = getCookie('csrftoken');
+    fetch(`/user/accept_friend_request/${friendshipId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const messageContainer = document.getElementById('message-container');
+        messageContainer.innerHTML = `<p>${data.message}</p>`;
+        messageContainer.style.display = 'block';
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 5000);
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function getCSRFToken() {
-    // Récupère le token CSRF depuis le cookie
     let csrftoken = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');

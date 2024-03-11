@@ -20,18 +20,18 @@
     </div>
     <div class="friend-content">
             <ul>
-            {% for friend_username, is_online, avatar_url in friends %}
-            <li>
-                {% if avatar_url %}
+                {% for friend_username, is_online, avatar_url, friend_id in friends %}
+                <li>
+                    {% if avatar_url %}
                     <img src="{{ avatar_url }}" alt="Avatar" class="avatar">
-                {% endif %}
-                {{ friend_username }}
-                {% if is_online %}
-                <span class="status-online" title="Online"></span>
-                {% else %}
-                <span class="status-offline" title="Offline"></span>
-                {% endif %}
-            </li>
+                    {% endif %}
+                    <a href="#" class="user-profile-link" data-user-id="{{ friend_id }}">{{ friend_username }}</a>
+                    {% if is_online %}
+                    <span class="status-online" title="Online"></span>
+                    {% else %}
+                    <span class="status-offline" title="Offline"></span>
+                    {% endif %}
+                </li>
             {% empty %}
             <p>No friend.</p>
             {% endfor %}
@@ -45,6 +45,7 @@
             {% for request in friend_requests %}
                 <li>
                     {{ request.creator.username }}
+                    <div id="message-container"></div>
                     <button class="accept-friend-request" data-friendship-id="{{ request.id }}">Accept</button>
                 </li>
             {% empty %}
@@ -57,13 +58,18 @@
     </div>
     <div class="history-content">
         {% if match_history %}
-            {% for match in match_history %}
-            <ul class = "match_history">
-                <li>{{ match.date }}</li>
-                <li>{{ match.player_one }} {{match.player_one_score}} | {{match.player_two_score}} {{ match.player_two }}</li>
-                <li>Winner : {{match.winner}}</li>
+            <ul class="match_history">
+                {% for match in match_history %}
+                    <li>
+                        {{ match.date|date:"Y-m-d" }} |
+                        {% if match.winner == match.player_one %}
+                            <span style="color: green;"> {{ match.player_one }} </span> {{ match.player_one_score }} - {{ match.player_two_score }} <span style="color: red;">{{ match.player_two }}</span>
+                        {% else %}
+                            <span style="color: red;"> {{ match.player_one }} </span> {{ match.player_one_score }} - {{ match.player_two_score }} <span style="color: green;">{{ match.player_two }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
             </ul>
-            {% endfor %}
         {% else %}
             <p>No match history.</p>
         {% endif %}
