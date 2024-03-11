@@ -18,6 +18,17 @@ player_one_goal, player_two_goal
 
 const keys = {};
 
+const playerOneWonEvent = {
+	player: 'player_one'
+}
+
+const playerTwoWonEvent = {
+	player: 'player_two'
+}
+
+const playerOneWon = new CustomEvent('playerOneWon', {detail: playerOneWonEvent});
+const playerTwoWon = new CustomEvent('playerTwoWon', {detail: playerTwoWonEvent});
+
 var screenShake = ScreenShake()
 
 game_running = false
@@ -44,6 +55,11 @@ export function start()
 		cancelAnimationFrame(id);
 	initGame();
 	animate();
+}
+
+export function resetLocalGame()
+{
+	resetArena()
 }
 
 function initGame()
@@ -73,6 +89,29 @@ function initGame()
 		
 	initArena()
 	initControls()
+}
+
+function delete_scene_objs(){
+	scene.children.forEach(child => {
+		scene.remove(child);
+	});
+	scene.traverse(obj => {
+		if (obj.material) {
+			obj.material.dispose();
+		}
+		if (obj.geometry) {
+			obj.geometry.dispose();
+		}
+		if (obj.texture) {
+			obj.texture.dispose();
+		}
+	});
+	delete(player_one, player_two, ball),
+	player_one, 
+	player_two, ball, 
+	player_one_score_text, player_two_score_text, winning_text,
+	player_one_goal, player_two_goal = undefined
+	
 }
 
 function initArena()
@@ -111,6 +150,13 @@ function initArena()
 	player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 	player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 	scene.add(player_one_score_text, player_two_score_text)
+}
+
+function resetArena()
+{
+	delete_scene_objs()
+	initArena();
+	camera.position.set(0, 0, constants.CAMERA_STARTPOS_Z)
 }
 
 function initControls(){
@@ -155,12 +201,11 @@ function winning()
 	ball.stop();
 	scene.remove(player_one_score_text)
 	scene.remove(player_two_score_text)
-	// if (powerup_manager.array[0])
-	// 	scene.remove(powerup_manager.array[0].mesh, powerup_manager.array[0].light)
 	var light1;
 	var light2;
 	if (player_one.score == constants.WINNING_SCORE)
 	{
+		window.dispatchEvent(playerOneWon);
 		winning_text = createTextMesh(droidFont, "PLAYER 1 WIN", player_one_score_text, 0, 0, 0, 0xffffff, 13)
 		winning_text.material.emissiveIntensity = 0.5
 		light1 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
@@ -170,6 +215,7 @@ function winning()
 	}
 	else
 	{
+		window.dispatchEvent(playerTwoWon);
 		winning_text = createTextMesh(droidFont, "PLAYER 2 WIN", player_two_score_text, 0, 0, 0, 0xffffff, 13)
 		winning_text.material.emissiveIntensity = 0.5
 		light1 = new THREE.PointLight(constants.PLAYER_2_COLOR, 20000, 300);

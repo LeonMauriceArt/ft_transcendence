@@ -64,8 +64,8 @@
 			<ul id="btnContainer">
 				<li><a href="#" onclick="loadPage('/'); return false;">Home</a></li>
 				<li><a href="#" onclick="loadPage('/play'); return false;">PLAY</a></li>
-				<li><a href="#" onclick="loadPage('/tournament/'); return false;">TOURNAMENT</a></li>
 				{% if user.is_authenticated %}
+					<li><a href="#" onclick="loadPage('/tournament/'); return false;">TOURNAMENT</a></li>
 					<li><a href="#" onclick="loadPage('/user/online/'); return false;">Online users</a></li>
 				{% else %}
 					<li><a href="#" onclick="loadPage('/user/'); return false;">Login</a></li>

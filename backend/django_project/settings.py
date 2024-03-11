@@ -90,7 +90,7 @@ CHANNEL_LAYERS = {
 	}
 }
 
-ASGI_APPLICATION = 'django_project.asgi.application'
+ASGI_APPLICATION = 'pong_game.routing.application'
 
 WSGI_APPLICATION = 'django_project.wsgi.application'
 
