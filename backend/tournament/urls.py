@@ -10,8 +10,8 @@ urlpatterns = [
     path('invite_page/', views.invite_page),
     path('playground_page/', views.playground_page),
 
-    path('api/create_tournament/', views.create_tournament),
-    path('api/tournament_requests/', views.tournament_requests)
+    path('create_tournament/', views.create_tournament),
+    path('tournament_requests/', views.tournament_requests)
 ]
 
 tournament_websocket_urlpatterns = [

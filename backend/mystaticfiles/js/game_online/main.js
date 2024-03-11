@@ -9,12 +9,12 @@ import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
 
-var game_running, camera, orbitcontrols, renderer, player_one, 
-player_two, ball, scene, 
+var game_running, camera, orbitcontrols, renderer, player_one,
+player_two, ball, scene,
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
 
-const wssurl = 'ws://' + window.location.host + '/ws/game/';
+const wssurl = 'wss://' + window.location.host + '/ws/game/';
 let wss;
 
 const keys = {}
@@ -37,7 +37,7 @@ fontlLoader.load(droid,
 	function (loadedFont){
 		droidFont = loadedFont;
 	})
-	
+
 var id = null
 
 export function startTournamentOnline()
@@ -102,12 +102,12 @@ export function start()
 }
 
 function newSocket()
-{	
+{
 	wss = new WebSocket(wssurl);
 	wss.onopen = () => {
 		console.log('Websocket connection established.');
 	}
-	wss.onmessage = (event) => 
+	wss.onmessage = (event) =>
 	{
 		const data = JSON.parse(event.data);
 		if (data.type === 'set_position')
@@ -129,7 +129,7 @@ function newSocket()
 		if (data.type === 'game_state')
 		{
 			updateGameState(data);
-		} 
+		}
 		if (data.type === 'game_end')
 		{
 			console.log('someone won !')
@@ -140,10 +140,10 @@ function newSocket()
 			wss.close()
 		}
 	};
-	wss.onclose = () => 
+	wss.onclose = () =>
 	{
 		console.log('Websocket connection closed.');
-	};	
+	};
 }
 
 function delete_scene_objs(){
@@ -161,11 +161,11 @@ function delete_scene_objs(){
 			obj.texture.dispose();
 		}
 	});
-	player_one, 
-	player_two, ball, 
+	player_one,
+	player_two, ball,
 	player_one_score_text, player_two_score_text, winning_text,
 	player_one_goal, player_two_goal = undefined
-	
+
 }
 
 function updateGameState(data)
@@ -194,9 +194,9 @@ function initDisplay()
 {
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-	
+
 	container = document.createElement('div');
-	
+
 	container.id = 'canvas';
 	container.style.width = '800px';
     container.style.height = '600px';
@@ -204,7 +204,7 @@ function initDisplay()
     container.style.boxSizing = 'border-box';
     container.style.border = '2px solid grey';
 	container.style.display = 'inline-block'
-	
+
 	document.body.appendChild(container);
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
@@ -217,14 +217,14 @@ function removeContainer(container) {
         container.parentNode.removeChild(container);
     }
 }
-	
+
 function initArena()
 {
 	scene = new THREE.Scene();
 	scene.fog = new THREE.Fog( 0x00000, 5, 300 );
-	
+
 	camera = new THREE.PerspectiveCamera(
-		45, 
+		45,
 		constants.WIN_WIDTH / constants.WIN_HEIGHT,
 		0.1,
 		1000
@@ -233,20 +233,20 @@ function initArena()
 	player_one = new Player(1, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_1_COLOR)
 	player_two = new Player(2, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
 	scene.add(player_one.mesh, player_two.mesh)
-	
+
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
-	
+
 	orbitcontrols = new OrbitControls( camera, renderer.domElement );
 	orbitcontrols.enableDamping = true;
 	orbitcontrols.dampingFactor = 0.05;
 	orbitcontrols.enabled = false
 	orbitcontrols.screenSpacePanning = true;
-	
+
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
 	var lower_wall = new Wall(constants.GAME_AREA_HEIGHT * -1, 300, material.wallMaterial)
 	scene.add(upper_wall.mesh, lower_wall.mesh)
-	
+
 	player_one_goal = new THREE.Mesh(
 		new THREE.PlaneGeometry(20, constants.GAME_AREA_HEIGHT * 2, 1, 4),
 		material.wallMaterial)
@@ -258,7 +258,7 @@ function initArena()
 		player_two_goal.rotation.y = (Math.PI / 2) * -1
 		player_two_goal.position.x = constants.GAME_AREA_WIDTH
 		scene.add(player_one_goal, player_two_goal)
-		
+
 		player_one_score_text = createTextMesh(droidFont, player_one.score.toString(), player_one_score_text, (constants.GAME_AREA_WIDTH / 2) * -1, 0,-80, constants.PLAYER_1_COLOR, 50);
 		player_two_score_text = createTextMesh(droidFont, player_two.score.toString(), player_two_score_text, constants.GAME_AREA_WIDTH / 2, 0,-80, constants.PLAYER_2_COLOR, 50);
 		scene.add(player_one_score_text, player_two_score_text)
@@ -270,7 +270,7 @@ function resetArena()
 	initArena();
 	camera.position.set(0, 0, constants.CAMERA_STARTPOS_Z)
 }
-	
+
 function handleKeyDown(event) {
 	if(game_running)
 	{
@@ -302,7 +302,7 @@ const t_handle_key_down = (event) => {
 	if (!game_running && (event.code != 'KeyW' && event.code != 'KeyS'))
 		return
 	if (g_pressed)
-		return 
+		return
 
 	if (event.code == 'KeyW')
 		g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: true}))
@@ -404,7 +404,7 @@ function handlePageReload()
 	if (wss && wss.readyState === WebSocket.OPEN)
 	{
 		sendMessageToServer({type: 'player_left', player: position})
-		wss.close()		
+		wss.close()
 	}
 
 }
@@ -431,7 +431,7 @@ const on_set_position = (arg) => {
 	console.log('on_set_position', arg)
 	position = null
 	if (arg.players[0] === g_username)
-		position = 'player_one' 
+		position = 'player_one'
 	if (arg.players[1] === g_username)
 		position = 'player_two'
 
@@ -446,7 +446,7 @@ const on_set_position = (arg) => {
 
 const on_game_start = () => {
 	console.log('on_game_start')
-	
+
 	game_running = true;
 	ball.get_update(0, 0, 1, 0, 0xffffff)
 	if (position)

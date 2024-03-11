@@ -9,15 +9,16 @@ services:
       context: backend
       dockerfile: Dockerfile
     # Production command
-    # command: >
-    #  sh -c "for i in $(seq 1 7); do echo 'Waiting for all containers to be done...'; sleep 1; done; daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application"
+    command: >
+     sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application"
     # Development command
     command: >
-      sh -c "for i in $(seq 1 7); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
+      sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/code
       - daphne-sock:/usr/src/daphne_sock
-      # - static_volume:/code/mystaticfiles
+      - static_volume:/code/mystaticfiles
+      - media_volume:/code/media
       - vault_data_web:/run/secrets:ro
     ports:
       - "8000:8000"
@@ -48,12 +49,9 @@ services:
     depends_on:
      - db
     volumes:
-     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-     - ./nginx/modsecurity.conf:/etc/nginx/modsec/modsecurity.conf
-     - ./nginx/startup.sh:/startup.sh
-     - ./nginx/main.conf:/etc/nginx/modsec/main.conf
      - daphne-sock:/usr/src/daphne_sock
-    #  - static_volume:/code/mystaticfiles:ro
+     - static_volume:/code/mystaticfiles:ro
+     - media_volume:/code/media
     command: /bin/bash /startup.sh
 
   vault:
@@ -77,6 +75,7 @@ services:
     command: /bin/sh /start_up.sh
 
 volumes:
+  media_volume:
   vault_data_web:
   postgres-data:
   daphne-sock:

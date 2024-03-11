@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y -f \
     libtool autoconf automake autotools-dev zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo "net.ipv4.ip_unprivileged_port_start=443" >> /etc/sysctl.conf
-
-# RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity
+RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity
 
 # RUN cd /etc/modsecurity \
 #     && git submodule init \
@@ -38,9 +36,13 @@ RUN git init && git submodule add https://github.com/SpiderLabs/owasp-modsecurit
     && cd /etc/modsecurity/crs && git submodule update --init
 
 COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY startup.sh .
+COPY main.conf /etc/nginx/modsec/main.conf
 
 RUN cp /etc/modsecurity/crs/crs-setup.conf.example /etc/modsecurity/crs/crs-setup.conf \
     && cp /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
 
-RUN mkdir /etc/nginx/modsec \
-    # && cp /etc/modsecurity/unicode.mapping /etc/nginx/modsec
+# RUN cp /etc/modsecurity/unicode.mapping /etc/nginx/modsec
+
+COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf

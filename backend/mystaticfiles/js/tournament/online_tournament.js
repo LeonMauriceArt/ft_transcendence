@@ -18,7 +18,7 @@ const create_player_div = (player, is_owner) => {
         <h3>PLAYER: ${player}</h3>
         <div>AKA aliase</div>
     `
-    
+
     return div
 }
 
@@ -121,7 +121,7 @@ const set_g_username = () => {
 }
 
 const fetch_new_tournament_id = () => {
-    return fetch('/tournament/api/create_tournament', {
+    return fetch('/tournament/create_tournament', {
         method: 'GET',
         headers: {
             'Content-Type': 'application.json'
@@ -160,7 +160,7 @@ const connect_socket = ({ tournament_id }) => {
 }
 
 const send_tournament_invite = (friend_username) => {
-    fetch ('/tournament/api/tournament_requests/',
+    fetch ('/tournament/tournament_requests/',
     {
         method: 'POST',
         headers: {

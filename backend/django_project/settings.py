@@ -25,12 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_env.get_env_variable('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
 
 
 # Application definition
