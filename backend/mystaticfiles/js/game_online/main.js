@@ -296,40 +296,32 @@ function handleKeyUp(event) {
 	}
 }
 
+let g_pressed = false;
+
 const t_handle_key_down = (event) => {
-	console.log('key_down')
-	if (game_running)
-	{
-		if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
-		{
-			var up = false;
-			if (event.code == 'KeyW')
-				up = true;
-			keys[event.code] = true;
-			console.log('key_down')
-			g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: up}))
-		}
-	}
+	if (!game_running && (event.code != 'KeyW' && event.code != 'KeyS'))
+		return
+	if (g_pressed)
+		return 
+
+	if (event.code == 'KeyW')
+		g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: true}))
+	if (event.code == 'KeyS')
+		g_socket.send(JSON.stringify({event: 'player_key_down', player: position,  direction: false}))
+	g_pressed = true;
 }
 
 const t_handle_key_up = (event) => {
-	console.log('key_up')
-	if (game_running)
+	if (game_running && (event.code == 'KeyW' || event.code == 'KeyS'))
 	{
-		if (!keys[event.code] && (event.code == 'KeyW' || event.code == 'KeyS'))
-		{
-			keys[event.code] = false;
-			console.log('key_up')
-			g_socket.send(JSON.stringify({event: 'player_key_up', player: position,  direction: up}))
-		}
+		g_pressed = false;
+		g_socket.send(JSON.stringify({event: 'player_key_up', player: position}))
 	}
 }
 
 function initControls(){
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
-	// window.addEventListener('keydown', t_handle_key_down);
-	// window.addEventListener('keyup', t_handle_key_up)
 }
 
 function handle_scores(player_scoring)
@@ -437,29 +429,41 @@ window.addEventListener('page_change', function(event) {
 
 const on_set_position = (arg) => {
 	console.log('on_set_position', arg)
-
-	if (arg[0] === g_username)
-		position = 1
-	if (arg[1] === g_username)
-		position = 2
+	position = null
+	if (arg.players[0] === g_username)
+		position = 'player_one' 
+	if (arg.players[1] === g_username)
+		position = 'player_two'
 
 	console.log("MY POSITION : " + position)
 
-	game_running = true;
-	ball.get_update(0, 0, 1, 0, 0xffffff)
-	initControls();
+	console.log("GAME WILL START IN 3 SEC, IT WILL BE ", arg.players[0], " VS ", arg.players[1], "FOR ", arg.state)
+	setTimeout(() => {
+		if (arg.players[0] === g_username)
+    		g_socket.send(JSON.stringify({ event: 'game_start' }))
+	}, 3 * 1000)
 }
 
 const on_game_start = () => {
 	console.log('on_game_start')
+	
+	game_running = true;
+	ball.get_update(0, 0, 1, 0, 0xffffff)
+	if (position)
+	{
+		window.addEventListener('keydown', t_handle_key_down)
+		window.addEventListener('keyup', t_handle_key_up)
+	}
 }
 
 const on_game_state = (arg) => {
 	updateGameState(arg)
 }
 
-const on_game_end = () => {
-	console.log('on_game_end')
+const on_game_end = (arg) => {
+	console.log('on_game_end', arg)
+	game_running = false;
+	resetArena()
 }
 
 export { on_set_position, on_game_start, on_game_state, on_game_end}

@@ -203,7 +203,7 @@ function predictBallPosition()
 {
 	let projectedPosition = {x : ball.mesh.position.x, y : ball.mesh.position.y};
 	let velocity = { x: ball.x_vel, y: ball.y_vel };
-	while(projectedPosition.x > (constants.GAME_AREA_WIDTH * -1) + 10) {
+	while(projectedPosition.x < (constants.GAME_AREA_WIDTH - 10)) {
 		projectedPosition.y += velocity.y;
 		projectedPosition.x += velocity.x;
 		if (projectedPosition.y + constants.BALL_RADIUS > constants.GAME_AREA_HEIGHT)
@@ -220,10 +220,10 @@ function predictBallPosition()
 	return projectedPosition;
 }
 
-function AIplayer1(player_one, projectedPosition)
+function AIplayer1(player_two, projectedPosition)
 {
 	const ballPositionY = projectedPosition.y;
-	const AiPaddlePositionY = player_one.mesh.position.y;
+	const AiPaddlePositionY = player_two.mesh.position.y;
 	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
 
 	if(Math.abs(distanceFromAiPaddle) < 2) {
@@ -249,13 +249,13 @@ function handle_input(player_one, player_two)
 		ball.shouldPredict = false
 	}
 	if (predictedBallPosition)
-		AIplayer1(player_one, predictedBallPosition)
+		AIplayer1(player_two, predictedBallPosition)
 	switch(lastAImove) {
 		case 0:
-			player_one.move(true);
+			player_two.move(true);
 			break;
 		case 1:
-			player_one.move(false);
+			player_two.move(false);
 			break;
 		case 2:
 			break;
@@ -274,10 +274,6 @@ function handle_input(player_one, player_two)
 	// 	default:
 	// 		console.error("Action non reconnue pour le joueur 1");
 	// }
-	if (keys['ArrowUp'])
-		player_two.move(true);
-	if (keys['ArrowDown'])
-		player_two.move(false);
 	if (keys['KeyW'])
 		player_one.move(true);
 	if (keys['KeyS'])
