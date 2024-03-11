@@ -46,12 +46,6 @@ def auth_status(request):
      else:
         return JsonResponse({'authenticated': False})
 
-def delete_users(request):
-     if (request.user.is_authenticated):
-          logout(request.user)
-     UserProfile.objects.all().delete()
-     return user(request)
-
 def login_view(request):
     context = {}
     if request.method == 'POST':

@@ -29,6 +29,8 @@ services:
     networks:
       - ft_trans
     image: postgres
+    env_file: 
+      - .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
