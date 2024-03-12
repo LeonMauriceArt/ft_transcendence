@@ -400,8 +400,3 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         if keep:
             players = self.tournament_manager.get_players_turn(tournament_id)
             await self.send_set_position(players, self.tournament_manager.get_room(tournament_id)['state'])
-        
-        
-        
-
-        

@@ -428,6 +428,9 @@ window.addEventListener('page_change', function(event) {
 // TOURNAMENTS EVENTS ( meant to be on bind on another socket )
 
 const on_set_position = (arg) => {
+	infoElement = document.getElementById('gameInfo')
+	console.log('zeub', infoElement)
+
 	console.log('on_set_position', arg)
 	position = null
 	if (arg.players[0] === g_username)
@@ -437,7 +440,8 @@ const on_set_position = (arg) => {
 
 	console.log("MY POSITION : " + position)
 
-	console.log("GAME WILL START IN 3 SEC, IT WILL BE ", arg.players[0], " VS ", arg.players[1], "FOR ", arg.state)
+	infoElement.innerHTML = "GAME WILL START IN 3 SEC, IT WILL BE " + arg.players[0] + " VS " + arg.players[1] + "FOR " + arg.state
+
 	setTimeout(() => {
 		if (arg.players[0] === g_username)
     		g_socket.send(JSON.stringify({ event: 'game_start' }))
@@ -462,6 +466,7 @@ const on_game_state = (arg) => {
 
 const on_game_end = (arg) => {
 	console.log('on_game_end', arg)
+	display_winner('player_one')
 	game_running = false;
 	resetArena()
 }
