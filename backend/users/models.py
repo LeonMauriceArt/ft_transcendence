@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+from django.contrib.sessions.models import Session as BaseSession
 
 DEFAULT = "-"
 
@@ -37,6 +38,12 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     def has_perm(self, perm, obj=None):
         return self.is_admin
+
+class CustomSession(BaseSession):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='sessions')
+
+    class Meta:
+        db_table = 'session_table'
 
 class Friendship(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
