@@ -226,13 +226,13 @@ function AIplayer1(player_two, projectedPosition)
 	const AiPaddlePositionY = player_two.mesh.position.y;
 	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
 
-	if(Math.abs(distanceFromAiPaddle) < 2) {
+	if(Math.abs(distanceFromAiPaddle) < 9) {
 		lastAImove = 2;
 	}
     else if (distanceFromAiPaddle > 0) {
-        lastAImove = 0; // Move up
+        lastAImove = 0;
     } else {
-        lastAImove = 1; // Move down
+        lastAImove = 1;
     }
 }
 
@@ -290,7 +290,7 @@ function animate() {
 	{
 		ball.update(player_one, player_two);
 		if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
-		handle_scores()
+			handle_scores()
 		handle_input(player_one, player_two);
 	}
 	else
