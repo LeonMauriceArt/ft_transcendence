@@ -4,7 +4,7 @@ TODO:
 [] TOURNAMENT : Finish Tournament
 [] TOURNAMENT : add Aliases field in user model that is changeable and is used in tournaments
 [] Add a is_connected element to users to prevent multiple clients to connect to the same user (5 guys can connect to the same account)
-[] Fix and debug some issues with the AI, needs to be beatable
+[X] Fix and debug some issues with the AI, needs to be beatable
 
 ---------------------------------
 

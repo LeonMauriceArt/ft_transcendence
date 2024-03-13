@@ -8,8 +8,6 @@ import {Wall} from './Arena.js'
 import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
-import { train } from './train.js';
-import { Player as AI} from './NeatJS/player.js';
 
 var game_running, camera, orbitcontrols, renderer, player_one,
 player_two, ball, scene,
@@ -17,7 +15,6 @@ player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
 
 const keys = {};
-var PongAI = new AI();
 var screenShake = ScreenShake()
 
 game_running = false
@@ -37,13 +34,6 @@ function handleKeyUp(event) {
 }
 
 var id = null;
-
-var aiPong;
-
-async function initAI() {
-    aiPong = await train();
-}
-
 
 export function start()
 {
@@ -182,21 +172,6 @@ function winning()
 	scene.add(winning_text, light1, light2)
 	game_running = true
 }
-
-function getCurrentState() {
-	const ballPositionY = ball.mesh.position.y;
-	const AiPaddlePositionY = player_two.mesh.position.y;
-	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
-
-	const currentState = [
-		ballPositionY,
-		AiPaddlePositionY, distanceFromAiPaddle
-	];
-	return currentState;
-}
-
-let lastDecisionTime = 0;
-let lastDecision = 0;
 let lastAImove = 2;
 
 function predictBallPosition()
@@ -224,9 +199,12 @@ function AIplayer1(player_two, projectedPosition)
 {
 	const ballPositionY = projectedPosition.y;
 	const AiPaddlePositionY = player_two.mesh.position.y;
-	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
+	const errorMargin = 50;
+	const error = (Math.random() - 0.5) * 2 * errorMargin;
+	const targetPositionY = ballPositionY + error;
+	const distanceFromAiPaddle = targetPositionY - AiPaddlePositionY;
 
-	if(Math.abs(distanceFromAiPaddle) < 9) {
+	if(Math.abs(distanceFromAiPaddle) == 0) {
 		lastAImove = 2;
 	}
     else if (distanceFromAiPaddle > 0) {
@@ -240,10 +218,6 @@ let predictedBallPosition = null
 
 function handle_input(player_one, player_two)
 {
-	// const currentState = getCurrentState();
-	// aiPong.setInputs(currentState);
-	// aiPong.think();
-    // let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
 	if (ball.shouldPredict == true){
 		predictedBallPosition = predictBallPosition();
 		ball.shouldPredict = false
@@ -262,18 +236,6 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
-	// switch(decisionIndex) {
-	// 	case 0:
-	// 		player_two.move(true);
-	// 		break
-	// 	case 1:
-	// 		player_two.move(false);
-	// 		break;
-	// 	case 2:
-	// 		break;
-	// 	default:
-	// 		console.error("Action non reconnue pour le joueur 1");
-	// }
 	if (keys['KeyW'])
 		player_one.move(true);
 	if (keys['KeyS'])

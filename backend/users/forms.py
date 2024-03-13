@@ -5,7 +5,7 @@ from .models import UserProfile
 class RegistrationForm(UserCreationForm):
     class Meta:
         model = UserProfile
-        fields = ("username", "password1", "password2", "first_name", "last_name", "avatar")
+        fields = ("username", "alias","password1", "password2", "first_name", "last_name", "avatar")
 
 class LoginForm(AuthenticationForm):
     class Meta:
@@ -15,4 +15,4 @@ class LoginForm(AuthenticationForm):
 class ModifyForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ("username", "first_name", "last_name", 'avatar')
+        fields = ("username", "alias","first_name", "last_name", 'avatar')
