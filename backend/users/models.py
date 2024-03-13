@@ -26,7 +26,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255, default="")
     last_name = models.CharField(max_length=255, default="")
     games_won = models.IntegerField(default=0)
-    nickName = models.CharField(max_length=255, default=username)
+    alias = models.CharField(max_length=255, default="")
 
     objects = CustomUserManager()
 
