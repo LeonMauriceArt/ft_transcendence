@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from .forms import RegistrationForm, LoginForm, ModifyForm
-from .models import UserProfile, Friendship, MatchHistory, CustomSession
+from .models import UserProfile, Friendship, MatchHistory, UserSession
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta
@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sessions.models import Session
+from django.views.decorators.csrf import csrf_protect
 
 def user(request):
      user_profiles = UserProfile.objects.all().values
@@ -19,6 +20,7 @@ def user(request):
      }
      return HttpResponse(template.render(context, request))
 
+@csrf_protect
 def registration_view(request):
      context = {}
      if request.method == 'POST':
@@ -42,9 +44,6 @@ def logout_view(request):
     logout(request)
     if 'user_id' in request.session:
         user_id = request.session['user_id']
-        CustomSession.objects.filter(user_id=user_id).delete()
-        del request.session['user_id']
-    Session.objects.filter(session_key=request.session.session_key).delete()
     return redirect('welcome')
 
 def auth_status(request):
@@ -61,8 +60,7 @@ def login_view(request):
         password = form.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            session_id = CustomSession.objects.filter(user=user)
-            if session_id is not None:
+            if UserSession.objects.filter(user=user).exists():
                 context['error'] = 'User already logged in.'
                 return render(request, 'login.html', context)
             request.session['user_id'] = user.id
