@@ -268,6 +268,7 @@ function animate() {
 	{
 		winning_text.lookAt(camera.position)
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+		game_running = false
 	}
 	render();
 	id = requestAnimationFrame( animate );
@@ -288,6 +289,5 @@ function removeContainer(container) {
 window.addEventListener('page_change', function(event) {
 
 	removeContainer(container)
-	game_running = false
 	firstLaunch = true
 });
