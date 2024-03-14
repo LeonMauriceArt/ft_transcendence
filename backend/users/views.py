@@ -84,7 +84,15 @@ def user_profile(request, user_id):
 
 @login_required
 def profile(request):
+    win_count = 0
+    loss_count = 0
     match_history = MatchHistory.objects.filter(user=request.user)
+    if match_history:
+        for match in match_history:
+            if match.winner == request.user.username:
+                win_count += 1
+            else:
+                loss_count += 1
     friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
@@ -104,7 +112,9 @@ def profile(request):
         'user': request.user,
         'friend_requests': friend_requests,
         'friends': friend_list,
-        'match_history': match_history
+        'match_history': match_history,
+        'win_count': win_count,
+        'loss_count': loss_count
     }
 
     return render(request, 'profile.html', context)
