@@ -225,10 +225,42 @@ function winning()
 }
 let lastAImove = 2;
 
-function predictBallPosition()
+function farestPointFromOpponent(oppenentPosition){
+    if (oppenentPosition.y > 0)
+        return -constants.GAME_AREA_HEIGHT + constants.BALL_RADIUS; 
+    else if (oppenentPosition.y < 0)
+        return constants.GAME_AREA_HEIGHT - constants.BALL_RADIUS; 
+	else
+		return constants.GAME_AREA_HEIGHT - constants.BALL_RADIUS; 
+
+}
+
+
+function newVelToReachPoint(farestPointFromOpponent, projectedPosition) {
+	let time = constants.GAME_AREA_WIDTH / constants.BALL_SPEED
+	let new_y_vel = (farestPointFromOpponent - projectedPosition.y) / time
+	console.log("new_y_vel", new_y_vel)
+	return new_y_vel
+}
+
+function calculateDesiredPaddleY(projectedBallY, new_y_vel) {
+    var reduction_factor = (constants.PADDLE_HEIGHT / 2) / constants.BALL_SPEED;
+	var desiredPaddleY = projectedBallY - (new_y_vel * reduction_factor);
+
+	if (desiredPaddleY > (constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2) || desiredPaddleY < ((constants.GAME_AREA_HEIGHT * -1) + constants.PADDLE_HEIGHT / 2)){
+		if (desiredPaddleY > (constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2))
+			desiredPaddleY = constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2
+		else
+			desiredPaddleY = ((constants.GAME_AREA_HEIGHT * -1) + constants.PADDLE_HEIGHT / 2)
+	}
+    return desiredPaddleY;
+}
+
+function predictPaddlePosition()
 {
 	let projectedPosition = {x : ball.mesh.position.x, y : ball.mesh.position.y};
 	let velocity = { x: ball.x_vel, y: ball.y_vel };
+	let oppenentPosition = player_one.mesh.position;
 	while(projectedPosition.x < (constants.GAME_AREA_WIDTH - 10)) {
 		projectedPosition.y += velocity.y;
 		projectedPosition.x += velocity.x;
@@ -243,17 +275,16 @@ function predictBallPosition()
 			velocity.y *= -1
 		}
 	}
-	return projectedPosition;
+	let farestPoint = farestPointFromOpponent(oppenentPosition)
+	let paddlePrediction = {x: player_one.mesh.position.x, y: calculateDesiredPaddleY(projectedPosition.y, newVelToReachPoint(farestPoint, projectedPosition))};
+	return paddlePrediction;
 }
 
 function AIplayer1(player_two, projectedPosition)
 {
-	const ballPositionY = projectedPosition.y;
+	const projectedPaddlePosition = projectedPosition.y;
 	const AiPaddlePositionY = player_two.mesh.position.y;
-	const errorMargin = 50;
-	const error = (Math.random() - 0.5) * 2 * errorMargin;
-	const targetPositionY = ballPositionY + error;
-	const distanceFromAiPaddle = targetPositionY - AiPaddlePositionY;
+	const distanceFromAiPaddle = projectedPaddlePosition - AiPaddlePositionY;
 
 	if(Math.abs(distanceFromAiPaddle) == 0) {
 		lastAImove = 2;
@@ -265,16 +296,16 @@ function AIplayer1(player_two, projectedPosition)
     }
 }
 
-let predictedBallPosition = null
+let predictedPaddlePosition = null
 
 function handle_input(player_one, player_two)
 {
 	if (ball.shouldPredict == true){
-		predictedBallPosition = predictBallPosition();
+		predictedPaddlePosition = predictPaddlePosition();
 		ball.shouldPredict = false
 	}
-	if (predictedBallPosition)
-		AIplayer1(player_two, predictedBallPosition)
+	if (predictedPaddlePosition)
+		AIplayer1(player_two, predictedPaddlePosition)
 	switch(lastAImove) {
 		case 0:
 			player_two.move(true);
