@@ -255,7 +255,9 @@ function animate() {
 	
 	screenShake.update(camera);
 	orbitcontrols.update();
-	
+
+	if (winning_text)
+		winning_text.lookAt(camera.position)
 	if (!game_running)
 	{
 		// powerup_manager.update(player_one, player_two, ball, scene)
@@ -266,7 +268,6 @@ function animate() {
 	}
 	else
 	{
-		winning_text.lookAt(camera.position)
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
 		game_running = false
 	}
