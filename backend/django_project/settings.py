@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Application definition
 

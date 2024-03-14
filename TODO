@@ -3,8 +3,7 @@ TODO:
 [X] Change the websockets from ws:// to wss://
 [] TOURNAMENT : Finish Tournament
 [] TOURNAMENT : add Aliases field in user model that is changeable and is used in tournaments
-[] Add a is_connected element to users to prevent multiple clients to connect to the same user (5 guys can connect to the same account)
-[X] Fix and debug some issues with the AI, needs to be beatable
+[] Fix user session staying when the user close his browser, preventing him from logging in again (huge problem)
 
 ---------------------------------
 
