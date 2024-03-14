@@ -88,6 +88,12 @@
 		{% endif %}
 		{% block navbar_content %}{% endblock %}
 	</div>
+	<script>
+		window.addEventListener("beforeunload", function(event) {
+		  var logoutUrl = "/user/logout/"; // Remplacez par le chemin de votre vue de déconnexion Django
+		  navigator.sendBeacon(logoutUrl);
+		});
+	  </script>
 <!-- <script>
 	window.addEventListener('load', updateNavbar);
 </script> -->

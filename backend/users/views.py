@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sessions.models import Session
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 def user(request):
      user_profiles = UserProfile.objects.all().values
@@ -40,6 +40,7 @@ def registration_view(request):
           context['registration_form'] = form
      return render(request, 'register.html', context)
 
+@csrf_exempt
 def logout_view(request):
     logout(request)
     if 'user_id' in request.session:
