@@ -36,7 +36,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				# 	})
 
 	async def join_game(self):
-		self.game_room = self.game_manager.find_or_create_game_room()
+		self.game_room = self.game_manager.find_or_create_game_room(self.player_id)
 		self.game_manager.add_player_to_room(self.game_room, self.player_id)
 		self.game = self.game_manager.game_rooms[self.game_room]['game_state']
 		if self.game_manager.room_len(self.game_room) == 1:

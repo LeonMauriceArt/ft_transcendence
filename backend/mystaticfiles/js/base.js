@@ -151,41 +151,8 @@ function updateNavbar()
         .catch(error => console.error('Error:', error));
 }
 
-
-//FIX HERE FOR LOGGING OUT SESSIONS
-
-// window.addEventListener('beforeunload', function(event) {
-//     // Prevent the default action
-//     event.preventDefault();
-//     // Send a POST request to the logout URL
-//     fetch('/logout/', {
-//         method: 'POST',
-//         headers: {
-//             'X-CSRFToken': getCookie('csrftoken') // Assuming you have a function to get CSRF token
-//         },
-//         credentials: 'include' // Include cookies in the request
-//     }).then(response => {
-//         if (!response.ok) {
-//             throw new Error('Network response was not ok');
-//         }
-//     }).catch(error => {
-//         console.error('There was a problem with the fetch operation:', error);
-//     });
-// });
-
-// // Function to get CSRF token from cookies
-// function getCookie(name) {
-//     let cookieValue = null;
-//     if (document.cookie && document.cookie !== '') {
-//         const cookies = document.cookie.split(';');
-//         for (let i = 0; i < cookies.length; i++) {
-//             const cookie = cookies[i].trim();
-//             // Does this cookie string begin with the name we want?
-//             if (cookie.substring(0, name.length + 1) === (name + '=')) {
-//                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-//                 break;
-//             }
-//         }
-//     }
-//     return cookieValue;
-// }
+window.addEventListener("beforeunload", function(event) {
+    event.preventDefault();
+    logoutUser();
+    updateNavbar();
+})
