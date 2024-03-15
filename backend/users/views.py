@@ -47,11 +47,11 @@ def logout_view(request):
         user_id = request.session['user_id']
     return redirect('welcome')
 
-def auth_status(request):
-     if (request.user.is_authenticated):
-          return JsonResponse({'authenticated':True, 'username':request.user.username})
-     else:
-        return JsonResponse({'authenticated': False})
+# def auth_status(request):
+#      if (request.user.is_authenticated):
+#           return JsonResponse({'authenticated':True, 'username':request.user.username})
+#      else:
+#         return JsonResponse({'authenticated': False})
 
 def login_view(request):
     context = {}
@@ -75,6 +75,7 @@ def login_view(request):
         context['login_form'] = form
     return render(request, 'login.html', context)
 
+@login_required
 def user_profile(request, user_id):
     user_profile = get_object_or_404(UserProfile, pk=user_id)
     match_history = MatchHistory.objects.filter(user=user_profile)
@@ -106,7 +107,7 @@ def profile(request):
     for friendship in other_friends:
         is_online = now() - friendship.creator.last_active < timedelta(seconds=30)
         avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
-        friend_id = friendship.creator.id 
+        friend_id = friendship.creator.id
         friend_list.append((friendship.creator.username, is_online, avatar_url, friend_id))
 
     context = {
@@ -141,11 +142,13 @@ def edit_profile(request):
     return render(request, 'edit_profile.html', {'form': form})
     pass
 
+@login_required
 def list_users_online(request):
 	time_threshold = now() - timedelta(minutes=5)
 	users_online = UserProfile.objects.filter(last_active__gte=time_threshold)
 	return render(request, 'online.html', {'users_online': users_online})
 
+@login_required
 def send_friend_request(request, user_id):
     target_user = get_object_or_404(UserProfile, id=user_id)
     if request.user != target_user and not Friendship.objects.filter(creator=request.user, friend=target_user).exists() and not Friendship.objects.filter(creator=target_user, friend=request.user).exists():
@@ -156,6 +159,7 @@ def send_friend_request(request, user_id):
         print('Cannot send friend request.')
         return JsonResponse({'status': 'error', 'message': 'Cannot send friend request.'})
 
+@login_required
 def accept_friend_request(request, friendship_id):
     if request.method == 'POST':
         friendship = get_object_or_404(Friendship, id=friendship_id, friend=request.user, status='pending')
@@ -165,5 +169,6 @@ def accept_friend_request(request, friendship_id):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
+@login_required
 def username(request):
     return JsonResponse(request.user.username, safe=False)

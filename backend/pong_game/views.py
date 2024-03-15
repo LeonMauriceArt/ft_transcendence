@@ -10,12 +10,6 @@ def quickmatch(request):
 	return render(request, 'quickmatch.html')
 	pass
 
-def join_game(request):
-	return render(request, 'join_game.html')
-
-def create_game(request):
-	return render(request, 'create_game.html')
-
 def practice(request):
 	return render(request, 'game_practice.html')
 

@@ -11,9 +11,9 @@ services:
     # Production command
     command: >
      sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application"
-    # Development command
-    command: >
-      sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
+    # # Development command
+    # command: >
+    #   sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/code
       - daphne-sock:/usr/src/daphne_sock

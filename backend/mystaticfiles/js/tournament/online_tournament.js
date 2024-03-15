@@ -1,6 +1,6 @@
 // VARIABLES ------------------------------------
 
-const base_wssurl = 'ws://' + window.location.host + '/ws/tournament/'
+const base_wssurl = 'wss://' + window.location.host + '/ws/tournament/'
 
 let g_socket = {}
 let g_tournament_id = ''

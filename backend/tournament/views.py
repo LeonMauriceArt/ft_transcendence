@@ -9,46 +9,51 @@ from django.utils.timezone import now, timedelta
 
 from users.models import UserProfile, Friendship
 from .models import TournamentRequest
+from django.contrib.auth.decorators import login_required
 
 # TEMPLATES
-
+@login_required
 def tournament_page(request):
     return render(request, 'tournament_page.html')
 
+@login_required
 def create_online_page(request):
     return render(request, 'create_online_page.html')
 
+@login_required
 def tournament_requests_page(request):
     invitations = TournamentRequest.objects.filter(receiver=request.user)
 
     return render(request, 'tournament_requests_page.html', {'invitations': invitations })
 
+@login_required
 def invite_page(request):
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
-    
+
     friend_list = []
-    
+
     for friendship in friends:
         avatar_url = friendship.friend.avatar.url if friendship.friend.avatar else None
         friend_list.append((friendship.friend.username, avatar_url))
-    
+
     for friendship in other_friends:
             avatar_url = friendship.creator.avatar.url if friendship.creator.avatar else None
             friend_list.append((friendship.creator.username, avatar_url))
 
     return render(request, 'invite_page.html', {'friends': friend_list})
 
+@login_required
 def playground_page(request):
     return render(request, 'playground_page.html')
-    
-# API
 
+@login_required
 def create_tournament(request):
     tournament_id = str(uuid.uuid4())
 
     return JsonResponse({ 'tournament_id': tournament_id })
 
+@login_required
 def tournament_requests(request):
     data = json.loads(request.body.decode('utf-8'))
 
@@ -69,7 +74,7 @@ def tournament_requests(request):
         return JsonResponse({'status': 'success', 'message': 'Invitation sent successfully'})
     if (request.method == 'DELETE'):
         tournament_id = data.get('tournament_id')
-        
+
         tournament_requests = TournamentRequest.objects.filter(receiver=request.user, tournament_id=tournament_id)
         tournament_requests.delete()
 

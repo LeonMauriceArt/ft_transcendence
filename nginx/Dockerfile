@@ -14,13 +14,13 @@ RUN apt-get update && apt-get install -y -f \
 
 RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity /etc/modsecurity
 
-# RUN cd /etc/modsecurity \
-#     && git submodule init \
-#     && git submodule update \
-#     && ./build.sh \
-#     && ./configure \
-#     && make \
-#     && make install
+RUN cd /etc/modsecurity \
+    && git submodule init \
+    && git submodule update \
+    && ./build.sh \
+    && ./configure \
+    && make \
+    && make install
 
 RUN apt-get update && apt-get install -y wget && wget http://nginx.org/download/nginx-1.25.4.tar.gz && tar -xzf nginx-1.25.4.tar.gz && rm nginx-1.25.4.tar.gz
 
@@ -43,6 +43,6 @@ COPY main.conf /etc/nginx/modsec/main.conf
 RUN cp /etc/modsecurity/crs/crs-setup.conf.example /etc/modsecurity/crs/crs-setup.conf \
     && cp /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /etc/modsecurity/crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
 
-# RUN cp /etc/modsecurity/unicode.mapping /etc/nginx/modsec
+RUN cp /etc/modsecurity/unicode.mapping /etc/nginx/modsec
 
 COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
