@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+from django.contrib.sessions.models import Session as BaseSession
 
 DEFAULT = "-"
 
@@ -14,7 +15,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=255, unique=True, default="")
+    username = models.CharField(max_length=10, unique=True, default="")
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -26,7 +27,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255, default="")
     last_name = models.CharField(max_length=255, default="")
     games_won = models.IntegerField(default=0)
-    nickName = models.CharField(max_length=255, default=username)
+    alias = models.CharField(max_length=255, default="")
 
     objects = CustomUserManager()
 
@@ -37,6 +38,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     def has_perm(self, perm, obj=None):
         return self.is_admin
+
+class UserSession(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=32)
 
 class Friendship(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)

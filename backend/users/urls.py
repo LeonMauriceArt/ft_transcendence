@@ -30,4 +30,4 @@ urlpatterns = [
     path('accept_friend_request/<int:friendship_id>/', accept_friend_request, name='accept_friend_request'),
     path('user_profile/<int:user_id>/', user_profile, name='user_profile'),
     path('username/', username)
-] 
+]

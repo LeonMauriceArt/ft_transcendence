@@ -4,9 +4,5 @@
 {% block title %}<title>Local Play</title>{% endblock %}
 {% block navbar_content %}
     <h1>Local Play</h1>
-	<script>document.addEventListener('DOMContentLoaded', function() {
-		startPongLocal();
-	});</script>
-	<div id="canvas"></div>
-	<button onclick="loadContent('/play/', 'content')"><a>Leave</a></button>
+	<button onclick="startPongLocal()">RESET</button>
 {% endblock %}

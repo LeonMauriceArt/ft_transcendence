@@ -39,7 +39,7 @@ const start_tournament = () => {
         loss: 0;
     })
 
-    loadContent('/tournament/current_state', 'content');
+    loadContent('/tournament/local_tournament', 'content');
 };
 
 const player_state_block = ({ username, win, loss }) => {

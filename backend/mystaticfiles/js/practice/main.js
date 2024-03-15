@@ -8,16 +8,15 @@ import {Wall} from './Arena.js'
 import {Ball} from './Ball.js'
 import { ScreenShake } from './ScreenShake.js';
 import * as constants from './Constants.js';
-import { train } from './train.js';
-import { Player as AI} from './NeatJS/player.js';
 
 var game_running, camera, orbitcontrols, renderer, player_one,
 player_two, ball, scene,
 player_one_score_text, player_two_score_text, droidFont, winning_text,
 player_one_goal, player_two_goal
+var firstLaunch = true
+let container
 
 const keys = {};
-var PongAI = new AI();
 var screenShake = ScreenShake()
 
 game_running = false
@@ -38,45 +37,78 @@ function handleKeyUp(event) {
 
 var id = null;
 
-var aiPong;
-
-async function initAI() {
-    aiPong = await train();
-}
-
-
 export function start()
 {
+	if (firstLaunch)
+	{
+		initDisplay();
+		firstLaunch = false;		
+	}
+	else
+	{
+		resetLocalGame();
+	}
 	if (id !==null)
 		cancelAnimationFrame(id);
-		initGame();
-		animate();
+	animate();
 }
 
-function initGame()
+export function resetLocalGame()
 {
-	//Renderer
+	resetArena()
+}
+
+function delete_scene_objs(){
+	scene.children.forEach(child => {
+		scene.remove(child);
+	});
+	scene.traverse(obj => {
+		if (obj.material) {
+			obj.material.dispose();
+		}
+		if (obj.geometry) {
+			obj.geometry.dispose();
+		}
+		if (obj.texture) {
+			obj.texture.dispose();
+		}
+	});
+	delete(player_one, player_two, ball),
+	player_one, 
+	player_two, ball, 
+	player_one_score_text, player_two_score_text, winning_text,
+	player_one_goal, player_two_goal = undefined
+	
+}
+
+function resetArena()
+{
+	delete_scene_objs()
+	initArena();
+	camera.position.set(0, 0, constants.CAMERA_STARTPOS_Z)
+}
+
+
+function initDisplay()
+{
 	renderer = new THREE.WebGLRenderer({alpha: false, antialias: false});
 	renderer.setPixelRatio(devicePixelRatio / 2);
-
-	var container = document.getElementById('canvas');
+	
+	container = document.createElement('div');
+	
+	container.id = 'canvas';
+	container.style.width = '800px';
+    container.style.height = '600px';
+    container.style.imageRendering = 'pixelated';
+    container.style.boxSizing = 'border-box';
+    container.style.border = '2px solid grey';
+	container.style.display = 'inline-block'
+	
+	document.body.appendChild(container);
 	var w = container.offsetWidth;
 	var h = container.offsetHeight;
 	renderer.setSize(w, h);
 	container.appendChild(renderer.domElement);
-
-	//Init Scene
-	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0x00000, 5, 300 );
-
-	//Camera
-	camera = new THREE.PerspectiveCamera(
-		45,
-		constants.WIN_WIDTH / constants.WIN_HEIGHT,
-		0.1,
-		1000
-		);
-		camera.position.z = constants.CAMERA_STARTPOS_Z
 
 	initArena()
 	initControls()
@@ -84,21 +116,33 @@ function initGame()
 
 function initArena()
 {
-	//Adding players
+	scene = new THREE.Scene();
+	scene.fog = new THREE.Fog( 0x00000, 5, 300 );
+	
+	camera = new THREE.PerspectiveCamera(
+		45, 
+		constants.WIN_WIDTH / constants.WIN_HEIGHT,
+		0.1,
+		1000
+		);
+		camera.position.z = constants.CAMERA_STARTPOS_Z
 	player_one = new Player((constants.GAME_AREA_WIDTH * -1) + 10, 0, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT,constants.PLAYER_1_COLOR)
 	player_two = new Player(constants.GAME_AREA_WIDTH - 10, 0, constants.PADDLE_WIDTH, constants.PADDLE_HEIGHT, constants.PLAYER_2_COLOR)
 	scene.add(player_one.mesh, player_two.mesh)
 
-	//Adding the ball
 	ball = new Ball()
 	scene.add(ball.mesh, ball.light)
 
-	//Adding the floor and roof
+	orbitcontrols = new OrbitControls( camera, renderer.domElement );
+	orbitcontrols.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+	orbitcontrols.dampingFactor = 0.05;
+	orbitcontrols.enabled = false
+	orbitcontrols.screenSpacePanning = true;
+
 	var upper_wall = new Wall(constants.GAME_AREA_HEIGHT, 300, material.wallMaterial)
 	var lower_wall = new Wall(constants.GAME_AREA_HEIGHT * -1, 300, material.wallMaterial)
 	scene.add(upper_wall.mesh, lower_wall.mesh)
-
-	//Creating and adding the two player goals
+	
 	player_one_goal = new THREE.Mesh(
 		new THREE.PlaneGeometry(20, constants.GAME_AREA_HEIGHT * 2, 1, 4),
 		material.wallMaterial)
@@ -117,13 +161,10 @@ function initArena()
 	scene.add(player_one_score_text, player_two_score_text)
 }
 
+
 function initControls(){
 	//Controls
-	orbitcontrols = new OrbitControls( camera, renderer.domElement );
-	orbitcontrols.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-	orbitcontrols.dampingFactor = 0.05;
-	orbitcontrols.enabled = false
-	orbitcontrols.screenSpacePanning = true;
+
 	window.addEventListener('keydown', handleKeyDown);
 	window.addEventListener('keyup', handleKeyUp);
 }
@@ -182,27 +223,44 @@ function winning()
 	scene.add(winning_text, light1, light2)
 	game_running = true
 }
-
-function getCurrentState() {
-	const ballPositionY = ball.mesh.position.y;
-	const AiPaddlePositionY = player_two.mesh.position.y;
-	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
-
-	const currentState = [
-		ballPositionY,
-		AiPaddlePositionY, distanceFromAiPaddle
-	];
-	return currentState;
-}
-
-let lastDecisionTime = 0;
-let lastDecision = 0;
 let lastAImove = 2;
 
-function predictBallPosition()
+function farestPointFromOpponent(oppenentPosition){
+    if (oppenentPosition.y > 0)
+        return -constants.GAME_AREA_HEIGHT + constants.BALL_RADIUS; 
+    else if (oppenentPosition.y < 0)
+        return constants.GAME_AREA_HEIGHT - constants.BALL_RADIUS; 
+	else
+		return constants.GAME_AREA_HEIGHT - constants.BALL_RADIUS; 
+
+}
+
+
+function newVelToReachPoint(farestPointFromOpponent, projectedPosition) {
+	let time = constants.GAME_AREA_WIDTH / constants.BALL_SPEED
+	let new_y_vel = (farestPointFromOpponent - projectedPosition.y) / time
+	console.log("new_y_vel", new_y_vel)
+	return new_y_vel
+}
+
+function calculateDesiredPaddleY(projectedBallY, new_y_vel) {
+    var reduction_factor = (constants.PADDLE_HEIGHT / 2) / constants.BALL_SPEED;
+	var desiredPaddleY = projectedBallY - (new_y_vel * reduction_factor);
+
+	if (desiredPaddleY > (constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2) || desiredPaddleY < ((constants.GAME_AREA_HEIGHT * -1) + constants.PADDLE_HEIGHT / 2)){
+		if (desiredPaddleY > (constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2))
+			desiredPaddleY = constants.GAME_AREA_HEIGHT - constants.PADDLE_HEIGHT / 2
+		else
+			desiredPaddleY = ((constants.GAME_AREA_HEIGHT * -1) + constants.PADDLE_HEIGHT / 2)
+	}
+    return desiredPaddleY;
+}
+
+function predictPaddlePosition()
 {
 	let projectedPosition = {x : ball.mesh.position.x, y : ball.mesh.position.y};
 	let velocity = { x: ball.x_vel, y: ball.y_vel };
+	let oppenentPosition = player_one.mesh.position;
 	while(projectedPosition.x < (constants.GAME_AREA_WIDTH - 10)) {
 		projectedPosition.y += velocity.y;
 		projectedPosition.x += velocity.x;
@@ -217,39 +275,37 @@ function predictBallPosition()
 			velocity.y *= -1
 		}
 	}
-	return projectedPosition;
+	let farestPoint = farestPointFromOpponent(oppenentPosition)
+	let paddlePrediction = {x: player_one.mesh.position.x, y: calculateDesiredPaddleY(projectedPosition.y, newVelToReachPoint(farestPoint, projectedPosition))};
+	return paddlePrediction;
 }
 
 function AIplayer1(player_two, projectedPosition)
 {
-	const ballPositionY = projectedPosition.y;
+	const projectedPaddlePosition = projectedPosition.y;
 	const AiPaddlePositionY = player_two.mesh.position.y;
-	const distanceFromAiPaddle = ballPositionY - AiPaddlePositionY;
+	const distanceFromAiPaddle = projectedPaddlePosition - AiPaddlePositionY;
 
-	if(Math.abs(distanceFromAiPaddle) < 2) {
+	if(Math.abs(distanceFromAiPaddle) == 0) {
 		lastAImove = 2;
 	}
     else if (distanceFromAiPaddle > 0) {
-        lastAImove = 0; // Move up
+        lastAImove = 0;
     } else {
-        lastAImove = 1; // Move down
+        lastAImove = 1;
     }
 }
 
-let predictedBallPosition = null
+let predictedPaddlePosition = null
 
 function handle_input(player_one, player_two)
 {
-	// const currentState = getCurrentState();
-	// aiPong.setInputs(currentState);
-	// aiPong.think();
-    // let decisionIndex = aiPong.decisions.indexOf(Math.max(...aiPong.decisions));
 	if (ball.shouldPredict == true){
-		predictedBallPosition = predictBallPosition();
+		predictedPaddlePosition = predictPaddlePosition();
 		ball.shouldPredict = false
 	}
-	if (predictedBallPosition)
-		AIplayer1(player_two, predictedBallPosition)
+	if (predictedPaddlePosition)
+		AIplayer1(player_two, predictedPaddlePosition)
 	switch(lastAImove) {
 		case 0:
 			player_two.move(true);
@@ -262,18 +318,6 @@ function handle_input(player_one, player_two)
 		default:
 			console.error("Action non reconnue pour le joueur 1");
 	}
-	// switch(decisionIndex) {
-	// 	case 0:
-	// 		player_two.move(true);
-	// 		break
-	// 	case 1:
-	// 		player_two.move(false);
-	// 		break;
-	// 	case 2:
-	// 		break;
-	// 	default:
-	// 		console.error("Action non reconnue pour le joueur 1");
-	// }
 	if (keys['KeyW'])
 		player_one.move(true);
 	if (keys['KeyS'])
@@ -286,17 +330,19 @@ function animate() {
 	screenShake.update(camera);
 	orbitcontrols.update();
 
+	if (winning_text)
+		winning_text.lookAt(camera.position)
 	if (!game_running)
 	{
 		ball.update(player_one, player_two);
 		if (ball.mesh.position.x < constants.GAME_AREA_WIDTH * -1 || ball.mesh.position.x > constants.GAME_AREA_WIDTH)
-		handle_scores()
+			handle_scores()
 		handle_input(player_one, player_two);
 	}
 	else
 	{
-		winning_text.lookAt(camera.position)
 		scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+		game_running = false
 	}
 	render();
 	id = requestAnimationFrame( animate );
@@ -307,3 +353,15 @@ function render(){
 	renderer.render( scene, camera );
 
 }
+
+function removeContainer(container) {
+    if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
+    }
+}
+
+window.addEventListener('page_change', function(event) {
+
+	removeContainer(container)
+	firstLaunch = true
+});

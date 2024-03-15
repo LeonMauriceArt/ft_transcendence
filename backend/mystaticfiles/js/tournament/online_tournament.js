@@ -64,15 +64,23 @@ const on_load_lobby = (arg) => {
     update_lobby_ui(arg)
 }
 
-const on_tournament_start = (arg) => {
+const on_load_playground = (arg) => {
+    console.log('on_load_playground')
+
     load_playground().then(() => {
-        window.startTournamentOnline()
+        g_socket.send(JSON.stringify({ event: 'tournament_start' }))
     })
+}
+
+const on_tournament_start = (arg) => {
+    console.log('on_tournament_start')
+    window.startTournamentOnline()
 }
 
 let on_message_handlers = [
     { type: 'players_update', handler: on_players_update },
     { type: 'load_lobby', handler: on_load_lobby },
+    { type: 'load_playground', handler: on_load_playground },
     { type: 'tournament_start', handler: on_tournament_start },
 ]
 
@@ -124,6 +132,7 @@ const fetch_new_tournament_id = () => {
     return fetch('/tournament/create_tournament', {
         method: 'GET',
         headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application.json'
         }
     }).then(response => response.json())
@@ -164,6 +173,7 @@ const send_tournament_invite = (friend_username) => {
     {
         method: 'POST',
         headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -183,6 +193,7 @@ const delete_tournament_request = (tournament_id) => {
     {
         method: 'DELETE',
         headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -206,5 +217,5 @@ const deny_tournament_request = (tournament_id) => {
 
 const start_online_tournament = () => {
     console.log('START TOURNAMENT...')
-    g_socket.send(JSON.stringify({ event: 'tournament_start' }))
+    g_socket.send(JSON.stringify({ event: 'load_playground' }))
 }

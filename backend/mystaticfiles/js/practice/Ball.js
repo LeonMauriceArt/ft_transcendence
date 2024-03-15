@@ -30,7 +30,7 @@ export class Ball
 	{
 		this.setcolor(0xffffff)
 		this.timer.start()
-		this.x_vel = 0
+		this.x_vel = constants.BALL_SPEED * -1
 		this.y_vel = 0
 		this.mesh.position.set(0,0,0)
 		this.light.position.set(0,0,0)
@@ -49,7 +49,7 @@ export class Ball
 	}
 	launch()
 	{
-		this.x_vel = constants.BALL_SPEED
+		this.x_vel = constants.BALL_SPEED * -1
 		this.timer.stop()
 	}
 	update(player_one, player_two)

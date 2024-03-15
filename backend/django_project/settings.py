@@ -29,6 +29,7 @@ SECRET_KEY = get_env.get_env_variable('DJANGO_SECRET_KEY')
 
 ALLOWED_HOSTS = ['*']
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Application definition
 
@@ -59,6 +60,8 @@ MIDDLEWARE = [
     'users.middleware.UpdateLastActivityMiddleware'
 ]
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 ROOT_URLCONF = 'django_project.urls'
 
 TEMPLATES = [
@@ -87,7 +90,7 @@ CHANNEL_LAYERS = {
 	}
 }
 
-ASGI_APPLICATION = 'django_project.asgi.application'
+ASGI_APPLICATION = 'pong_game.routing.application'
 
 WSGI_APPLICATION = 'django_project.wsgi.application'
 

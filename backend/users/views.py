@@ -2,13 +2,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from .forms import RegistrationForm, LoginForm, ModifyForm
-from .models import UserProfile, Friendship, MatchHistory
+from .models import UserProfile, Friendship, MatchHistory, UserSession
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta
+from django.utils import timezone
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.sessions.models import Session
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 def user(request):
      user_profiles = UserProfile.objects.all().values
@@ -17,6 +20,7 @@ def user(request):
      }
      return HttpResponse(template.render(context, request))
 
+@csrf_protect
 def registration_view(request):
      context = {}
      if request.method == 'POST':
@@ -36,9 +40,12 @@ def registration_view(request):
           context['registration_form'] = form
      return render(request, 'register.html', context)
 
+@csrf_exempt
 def logout_view(request):
-     logout(request)
-     return redirect('welcome')
+    logout(request)
+    if 'user_id' in request.session:
+        user_id = request.session['user_id']
+    return redirect('welcome')
 
 def auth_status(request):
      if (request.user.is_authenticated):
@@ -54,6 +61,10 @@ def login_view(request):
         password = form.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            if UserSession.objects.filter(user=user).exists():
+                context['error'] = 'User already logged in.'
+                return render(request, 'login.html', context)
+            request.session['user_id'] = user.id
             login(request, user)
             return redirect('welcome')
         else:
@@ -74,7 +85,15 @@ def user_profile(request, user_id):
 
 @login_required
 def profile(request):
+    win_count = 0
+    loss_count = 0
     match_history = MatchHistory.objects.filter(user=request.user)
+    if match_history:
+        for match in match_history:
+            if match.winner == request.user.username:
+                win_count += 1
+            else:
+                loss_count += 1
     friend_requests = Friendship.objects.filter(friend=request.user, status='pending')
     friends = Friendship.objects.filter(creator=request.user, status='accepted').select_related('friend')
     other_friends = Friendship.objects.filter(friend=request.user, status='accepted').select_related('creator')
@@ -94,7 +113,9 @@ def profile(request):
         'user': request.user,
         'friend_requests': friend_requests,
         'friends': friend_list,
-        'match_history': match_history
+        'match_history': match_history,
+        'win_count': win_count,
+        'loss_count': loss_count
     }
 
     return render(request, 'profile.html', context)

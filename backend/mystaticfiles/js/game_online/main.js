@@ -24,6 +24,7 @@ var endScreen = false
 
 let container
 var infoElement
+let playerField
 var searchButton
 
 var position = null
@@ -42,6 +43,9 @@ var id = null
 
 export function startTournamentOnline()
 {
+	infoElement = document.getElementById('gameInfo')
+	playerField = document.getElementById('playerField')
+
 	if (firstLaunch)
 	{
 		firstLaunch = false
@@ -425,9 +429,32 @@ window.addEventListener('page_change', function(event) {
 	firstLaunch = true
 });
 
+function display_t_winner(winner, state)
+{
+	infoElement.innerHTML = 'A PLAYER WON THE ' + state + '!'
+	endScreen = true;
+	orbitcontrols.autoRotate = true;
+	ball.stop();
+	scene.remove(player_one_score_text)
+	scene.remove(player_two_score_text)
+	scene.remove(player_one.mesh, player_two.mesh, player_one_goal, player_two_goal)
+	var light1;
+	var light2;
+
+	winning_text = createTextMesh(droidFont, winner + " WON", player_one_score_text, 0, 0, 0, 0xffffff, 13)
+	winning_text.material.emissiveIntensity = 0.5
+	light1 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
+	light1.position.set(constants.GAME_AREA_WIDTH / 3, constants.GAME_AREA_HEIGHT / 3)
+	light2 = new THREE.PointLight(constants.PLAYER_1_COLOR, 20000, 300);
+	light2.position.set(constants.GAME_AREA_WIDTH * -1 / 3, constants.GAME_AREA_HEIGHT * -1 / 3)
+
+	scene.add(winning_text, light1, light2)
+}
+
 // TOURNAMENTS EVENTS ( meant to be on bind on another socket )
 
 const on_set_position = (arg) => {
+	resetArena()
 	console.log('on_set_position', arg)
 	position = null
 	if (arg.players[0] === g_username)
@@ -437,16 +464,26 @@ const on_set_position = (arg) => {
 
 	console.log("MY POSITION : " + position)
 
-	console.log("GAME WILL START IN 3 SEC, IT WILL BE ", arg.players[0], " VS ", arg.players[1], "FOR ", arg.state)
-	setTimeout(() => {
-		if (arg.players[0] === g_username)
-    		g_socket.send(JSON.stringify({ event: 'game_start' }))
-	}, 3 * 1000)
+    infoElement.innerHTML = 'BE READY, ' + arg.state + ' WILL START IN 5'
+	playerField.innerHTML = '<span style="color: cyan;">' + arg.players[0] + '</span> VS <span style="color: red;">' + arg.players[1] + '</span>';
+
+	let count = 0
+    const intervalId = setInterval(() => {
+        infoElement.innerHTML = 'BE READY, ' + arg.state + ' WILL START IN ' + (5 - count)
+        count++
+
+        if (count === 5) {
+            clearInterval(intervalId)
+        	infoElement.innerHTML = 'GO !'
+            if (arg.players[0] === g_username) {
+                g_socket.send(JSON.stringify({ event: 'game_start' }))
+            }
+        }
+    }, 1000)
 }
 
 const on_game_start = () => {
 	console.log('on_game_start')
-
 	game_running = true;
 	ball.get_update(0, 0, 1, 0, 0xffffff)
 	if (position)
@@ -462,8 +499,8 @@ const on_game_state = (arg) => {
 
 const on_game_end = (arg) => {
 	console.log('on_game_end', arg)
+	display_t_winner(arg.winner, arg.state)
 	game_running = false;
-	resetArena()
 }
 
 export { on_set_position, on_game_start, on_game_state, on_game_end}

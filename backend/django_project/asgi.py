@@ -8,8 +8,8 @@ django_asgi_app = get_asgi_application()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
-from pong_game.routing import websocket_urlpatterns
-from tournament.urls import tournament_websocket_urlpatterns
+# from pong_game.routing import websocket_urlpatterns
+# from tournament.urls import tournament_websocket_urlpatterns
 
 
 application = ProtocolTypeRouter({
