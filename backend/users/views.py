@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from .forms import RegistrationForm, LoginForm, ModifyForm
-from .models import UserProfile, Friendship, MatchHistory, UserSession
+from .models import UserProfile, Friendship, MatchHistory
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import now, timedelta
@@ -10,7 +10,6 @@ from django.utils import timezone
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.sessions.models import Session
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 def user(request):
@@ -61,9 +60,9 @@ def login_view(request):
         password = form.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            if UserSession.objects.filter(user=user).exists():
-                context['error'] = 'User already logged in.'
-                return render(request, 'login.html', context)
+            # if UserSession.objects.filter(user=user).exists():
+            #     context['error'] = 'User already logged in.'
+            #     return render(request, 'login.html', context)
             request.session['user_id'] = user.id
             login(request, user)
             return redirect('welcome')
@@ -171,4 +170,7 @@ def accept_friend_request(request, friendship_id):
 
 @login_required
 def username(request):
-    return JsonResponse(request.user.username, safe=False)
+    return JsonResponse({
+        'username': request.user.username,
+        'alias': request.user.alias
+        }, safe=False)
