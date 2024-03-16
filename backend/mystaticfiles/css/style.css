@@ -312,8 +312,16 @@ a:hover {
     margin-right: 5px;
 }
 
+
 .friend-content ul {
     margin-top: -60px;
+    padding: 0;
+    list-style-type: none;
+    max-width: 100%; 
+}
+
+#friend-content-ul {
+    margin-top: 0px;
     padding: 0;
     list-style-type: none;
     max-width: 100%; 

@@ -37,6 +37,9 @@ const create_owner_btns = () => {
 const update_lobby_ui = (room) => {
     const lobby_container = document.getElementById('lobby-container')
 
+    if (!lobby_container)
+        return
+    
     lobby_container.innerHTML = ''
 
     room.players.forEach((player, i) => {
