@@ -31,3 +31,12 @@ Minor:
 
 1 - [x] PostGreSQL
 2 - [x] Expanding Browser Compatibility (Seems valid ???)
+
+
+ERRORS:
+ON TOURNAMENT LEAVE : 
+eb       | Traceback (most recent call last):
+web       |   File "/code/tournament/consumers.py", line 448, in game_loop
+web       |     await self.send_game_state()
+web       |   File "/code/tournament/consumers.py", line 408, in send_game_state
+web       |     game = self.tournament_manager.get_room(tournament_id)['game_state']
