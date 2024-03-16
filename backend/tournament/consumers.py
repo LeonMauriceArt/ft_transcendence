@@ -77,6 +77,9 @@ class TournamentManager():
 
     def get_room(self, roomId):
         return self.rooms.get(roomId, [])
+    
+    def remove_room(self, roomId):
+        del self.rooms[roomId]
 
     def get_printable_room(self, roomId):
         room = deepcopy(self.get_room(roomId))
@@ -164,11 +167,20 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         player = self.scope['user'].username
         alias = self.scope['user'].alias
+        room = self.tournament_manager.get_room(tournament_id)
 
-        if self.tournament_manager.get_room(tournament_id)['state'] == TournamentState.LOBBY.name:
-            self.tournament_manager.remove_player_from_room(tournament_id, player, alias)
-            await self.send_players_update()
-        
+        if room:
+            if room['state'] == TournamentState.LOBBY.name:
+                self.tournament_manager.remove_player_from_room(tournament_id, player, alias)
+                await self.send_players_update()
+            else:
+                idx = room['players'].index(player)
+                player_state = room['players_state'][idx]
+                print(f'SALUT {idx} | {player_state} ')
+                if player_state != PlayerState.LOSER.name:
+                    self.tournament_manager.remove_room(tournament_id)
+                    await self.send_tournament_end("Tournament has ended because a remaining player disconected :( )")
+
         # Leave room group
         await self.channel_layer.group_discard(
             tournament_id,
@@ -374,6 +386,23 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             'arg': event['arg']
         }))
 
+    async def send_tournament_end(self, message):
+        tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+
+        await self.channel_layer.group_send(
+            tournament_id,
+            {
+                'type': 'tournament_end',
+                'arg': message
+            }
+        )
+    
+    async def tournament_end(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'tournament_end',
+            'arg': event['arg']
+        }))
+
     async def send_game_state(self):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         game = self.tournament_manager.get_room(tournament_id)['game_state']
@@ -440,3 +469,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         if keep:
             players = self.tournament_manager.get_players_turn(tournament_id)
             await self.send_set_position(players, self.tournament_manager.get_room(tournament_id)['state'])
+        else:
+            self.tournament_manager.remove_room(tournament_id)
+            await self.send_tournament_end("Tournament has ended !")

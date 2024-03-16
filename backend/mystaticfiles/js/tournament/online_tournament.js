@@ -79,11 +79,18 @@ const on_tournament_start = (arg) => {
     window.startTournamentOnline()
 }
 
+const on_tournament_end = (arg) => {
+    console.log('on tournament end')
+    alert(arg)
+    g_socket.close()
+}
+
 let on_message_handlers = [
     { type: 'players_update', handler: on_players_update },
     { type: 'load_lobby', handler: on_load_lobby },
     { type: 'load_playground', handler: on_load_playground },
     { type: 'tournament_start', handler: on_tournament_start },
+    { type: 'tournament_end', handler: on_tournament_end }
 ]
 
 // PAGE LOADING ---------------------------------
@@ -112,7 +119,7 @@ const load_playground = () => {
         { type: 'set_position', handler: window.tournamentEvents.on_set_position },
         { type: 'game_start', handler: window.tournamentEvents.on_game_start },
         { type: 'game_state', handler: window.tournamentEvents.on_game_state },
-        { type: 'game_end', handler: window.tournamentEvents.on_game_end }
+        { type: 'game_end', handler: window.tournamentEvents.on_game_end },
     ]
     return loadContent('/tournament/playground_page', 'content')
 }
@@ -146,7 +153,7 @@ const fetch_new_tournament_id = () => {
 
 const connect_socket = ({ tournament_id }) => {
     g_tournament_id = tournament_id
-    g_socket = new WebSocket(base_wssurl + 'd')
+    g_socket = new WebSocket(base_wssurl + tournament_id)
 
     g_socket.onopen = function(event) {
         console.log("WebSocket connection opened:", event)
