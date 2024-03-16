@@ -175,11 +175,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 await self.send_players_update()
             else:
                 idx = room['players'].index(player)
-                player_state = room['players_state'][idx]
-                print(f'SALUT {idx} | {player_state} ')
-                if player_state != PlayerState.LOSER.name:
-                    self.tournament_manager.remove_room(tournament_id)
-                    await self.send_tournament_end("Tournament has ended because a remaining player disconected :( )")
+                if (idx > -1):
+                    player_state = room['players_state'][idx]
+                    print(f'SALUT {idx} | {player_state} ')
+                    if player_state != PlayerState.LOSER.name:
+                        self.tournament_manager.remove_room(tournament_id)
+                        await self.send_tournament_end("Tournament has ended because a remaining player disconected :( )")
 
         # Leave room group
         await self.channel_layer.group_discard(
