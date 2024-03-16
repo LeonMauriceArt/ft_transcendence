@@ -174,13 +174,16 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 self.tournament_manager.remove_player_from_room(tournament_id, player, alias)
                 await self.send_players_update()
             else:
-                idx = room['players'].index(player)
-                if (idx > -1):
+                try:
+                    idx = room['players'].index(player)
                     player_state = room['players_state'][idx]
                     print(f'SALUT {idx} | {player_state} ')
                     if player_state != PlayerState.LOSER.name:
+                        room['game_state'].is_running = false
                         self.tournament_manager.remove_room(tournament_id)
-                        await self.send_tournament_end("Tournament has ended because a remaining player disconected :( )")
+                        await self.send_tournament_end("Tournament has ended because a remaining player disconnected :( ")
+                except:
+                    print('Player not in the lobby')
 
         # Leave room group
         await self.channel_layer.group_discard(
