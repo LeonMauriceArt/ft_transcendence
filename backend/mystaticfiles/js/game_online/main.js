@@ -457,9 +457,9 @@ const on_set_position = (arg) => {
 	resetArena()	
 	console.log('on_set_position', arg)
 	position = null
-	if (arg.players[0] === g_username)
+	if (arg.players[0] === g_alias)
 		position = 'player_one' 
-	if (arg.players[1] === g_username)
+	if (arg.players[1] === g_alias)
 		position = 'player_two'
 
 	console.log("MY POSITION : " + position)
@@ -475,7 +475,7 @@ const on_set_position = (arg) => {
         if (count === 5) {
             clearInterval(intervalId)
         	infoElement.innerHTML = 'GO !'
-            if (arg.players[0] === g_username) {
+            if (arg.players[0] === g_alias) {
                 g_socket.send(JSON.stringify({ event: 'game_start' }))
             }
         }

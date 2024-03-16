@@ -5,10 +5,11 @@ const base_wssurl = 'ws://' + window.location.host + '/ws/tournament/'
 let g_socket = {}
 let g_tournament_id = ''
 let g_username = ''
+let g_alias = ''
 
 // UI changes -----------------------------------
 
-const create_player_div = (player, is_owner) => {
+const create_player_div = (player, alias, is_owner) => {
     const div = document.createElement('div')
 
     if (is_owner)
@@ -16,7 +17,7 @@ const create_player_div = (player, is_owner) => {
 
     div.innerHTML = `
         <h3>PLAYER: ${player}</h3>
-        <div>AKA aliase</div>
+        <div>AKA ${alias}</div>
     `
     
     return div
@@ -38,10 +39,10 @@ const update_lobby_ui = (room) => {
 
     lobby_container.innerHTML = ''
 
-    room.players.forEach((player) => {
+    room.players.forEach((player, i) => {
         const is_owner = player === room.owner
 
-        lobby_container.appendChild(create_player_div(player, is_owner))
+        lobby_container.appendChild(create_player_div(player, room.aliases[i], is_owner))
     })
 
     if (g_username === room.owner)
@@ -57,6 +58,7 @@ const on_message = (message) => {
 }
 
 const on_players_update = (arg) => {
+    console.log('on_players_update', arg)
     update_lobby_ui(arg)
 }
 
@@ -124,8 +126,11 @@ const set_g_username = () => {
             'Content-Type': 'application/json'
         }
     }).then(response => response.json())
-    .then((username) => g_username = username)
-    .catch(console.error)
+    .then((data) => {
+        console.log('set_user', data)
+        g_username = data.username
+        g_alias = data.alias
+    }).catch(console.error)
 }
 
 const fetch_new_tournament_id = () => {

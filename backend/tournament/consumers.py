@@ -27,7 +27,7 @@ class TournamentManager():
     def __init__(self):
         self.rooms = {}
     
-    def create_or_add_player_to_room(self, roomId, player):
+    def create_or_add_player_to_room(self, roomId, player, alias):
         current_room = self.rooms.get(roomId, {})
 
         if current_room and len(current_room.get('players', [])) >= 4:
@@ -41,6 +41,7 @@ class TournamentManager():
                 'state': TournamentState.LOBBY.name,
                 'owner': player,
                 'players': [player],
+                'aliases': [alias],
                 'players_state': [PlayerState.PENDING.name, PlayerState.PENDING.name, PlayerState.PENDING.name, PlayerState.PENDING.name],
                 'game_state': GameState()
             }
@@ -48,18 +49,20 @@ class TournamentManager():
         else:
             print('ADDING TO THE CURRENT ROOM')
             current_room['players'].append(player)
+            current_room['aliases'].append(alias)
             self.rooms[roomId] = current_room
 
         print(f'PLAYER ADDED TO ROOM, ROOM NOW {self.get_printable_room(roomId)}')
         return True
 
-    def remove_player_from_room(self, roomId, player):
+    def remove_player_from_room(self, roomId, player, alias):
         current_room = self.rooms.get(roomId, {})
 
         if current_room and player in current_room.get('players', []):
             print(f'REMOVING PLAYER {player} FROM ROOM {roomId}')
 
             current_room['players'].remove(player)
+            current_room['aliases'].remove(alias)
 
             if len(current_room['players']) == 0:
                 print(f'REMOVING ROOM CAUSE NOW EMPTY...')
@@ -100,17 +103,17 @@ class TournamentManager():
         room = self.get_room(roomId)
 
         if (room['state'] == TournamentState.DEMI_FINALS1.name):
-            players.append(room['players'][0])
-            players.append(room['players'][1])
+            players.append(room['aliases'][0])
+            players.append(room['aliases'][1])
         if (room['state'] == TournamentState.DEMI_FINALS2.name):
             players = []
-            players.append(room['players'][2])
-            players.append(room['players'][3])
+            players.append(room['aliases'][2])
+            players.append(room['aliases'][3])
         if (room['state'] == TournamentState.FINALS.name):
             players = []
             for (index, value) in enumerate(room['players_state']):
                 if value == PlayerState.WINNER.name:
-                    players.append(room['players'][index])
+                    players.append(room['aliases'][index])
 
         return players
 
@@ -143,14 +146,14 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         player = self.scope['user'].username
-
+        alias = self.scope['user'].alias
         # Join room group
         await self.channel_layer.group_add(
             tournament_id,
             self.channel_name
         )
 
-        if self.tournament_manager.create_or_add_player_to_room(tournament_id, player):
+        if self.tournament_manager.create_or_add_player_to_room(tournament_id, player, alias):
             await self.accept()
         else:
             await self.close()
@@ -160,10 +163,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         player = self.scope['user'].username
-        
-        self.tournament_manager.remove_player_from_room(tournament_id, player)
+        alias = self.scope['user'].alias
 
         if self.tournament_manager.get_room(tournament_id)['state'] == TournamentState.LOBBY.name:
+            self.tournament_manager.remove_player_from_room(tournament_id, player, alias)
             await self.send_players_update()
         
         # Leave room group
