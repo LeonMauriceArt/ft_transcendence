@@ -15,7 +15,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=10, unique=True, default="")
+    username = models.CharField(max_length=12, unique=True, default="")
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -24,10 +24,9 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(upload_to='avatars/', default='avatars/default.jpg')
 
     date_joined = models.DateTimeField(default=timezone.now)
-    first_name = models.CharField(max_length=255, default="")
-    last_name = models.CharField(max_length=255, default="")
-    games_won = models.IntegerField(default=0)
-    alias = models.CharField(max_length=255, default="")
+    first_name = models.CharField(max_length=25, default="")
+    last_name = models.CharField(max_length=25, default="")
+    alias = models.CharField(max_length=12, unique=True, default="")
 
     objects = CustomUserManager()
 

@@ -15,9 +15,9 @@ class GameManager:
 	def __init__(self):
 		self.game_rooms = {}
 
-	def find_or_create_game_room(self):
+	def find_or_create_game_room(self, playerid):
 		for room, data in self.game_rooms.items():
-			if len(data['players']) < 2:
+			if len(data['players']) < 2 and not data['players'][0] == playerid :
 				print('Room available')
 				return room
 		new_room = f"room_{len(self.game_rooms) + 1}"
