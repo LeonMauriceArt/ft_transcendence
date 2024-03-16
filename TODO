@@ -37,3 +37,8 @@ Minor:
 
 500 error - urls
 https://0.0.0.0:8433/tournament/tournament_requests_page/
+
+curl -k https://0.0.0.0:8433/comment?text=<script>alert('XSS')</script>
+curl -k https://0.0.0.0:8433/file?path=../../etc/passwd
+curl -k https://0.0.0.0:8433/user/login -d "username=admin' --&password=anything"
+
