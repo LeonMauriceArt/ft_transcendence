@@ -11,5 +11,7 @@ COPY config_path.sh /usr/local/bin/config_path.sh
 COPY super-db_policy.hcl /policy.hcl
 COPY env-var.json /env-vars.json
 
+EXPOSE 8200
+
 RUN chmod +x start_up.sh
 
