@@ -48,6 +48,8 @@ class TournamentManager():
             self.rooms[roomId] = current_room
         else:
             print('ADDING TO THE CURRENT ROOM')
+            if player in current_room['players']:
+                return False
             current_room['players'].append(player)
             current_room['aliases'].append(alias)
             self.rooms[roomId] = current_room
@@ -141,6 +143,12 @@ class TournamentManager():
 
         return True
 
+    def get_player_index(self, roomId, player):
+        try:
+            return self.get_room(roomId)['players'].index(player)
+        except:
+            return -1
+            
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     tournament_manager = TournamentManager()
@@ -174,12 +182,16 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 self.tournament_manager.remove_player_from_room(tournament_id, player, alias)
                 await self.send_players_update()
             else:
-                idx = room['players'].index(player)
-                player_state = room['players_state'][idx]
-                print(f'SALUT {idx} | {player_state} ')
-                if player_state != PlayerState.LOSER.name:
-                    self.tournament_manager.remove_room(tournament_id)
-                    await self.send_tournament_end("Tournament has ended because a remaining player disconected :( )")
+                idx = self.tournament_manager.get_player_index(tournament_id, player)
+                if idx > -1:
+                    player_state = room['players_state'][idx]
+                    print(f'SALUT {idx} | {player_state} ')
+                    if player_state != PlayerState.LOSER.name:
+                        room['game_state'].is_running = False
+                        self.tournament_manager.remove_room(tournament_id)
+                        await self.send_tournament_end("Tournament has ended because a remaining player disconnected :( ")
+                else:
+                    print(f'Player not in the lobby, {player}')
 
         # Leave room group
         await self.channel_layer.group_discard(
