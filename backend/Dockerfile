@@ -13,4 +13,6 @@ RUN pip install pillow
 
 ENV PYTHONPATH /code/vault_db
 
+EXPOSE 8000
+
 COPY . /code/

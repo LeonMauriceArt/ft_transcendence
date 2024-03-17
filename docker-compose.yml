@@ -20,8 +20,6 @@ services:
       - static_volume:/code/mystaticfiles
       - media_volume:/code/media
       - vault_data_web:/run/secrets:ro
-    ports:
-      - "8000:8000"
     depends_on:
       - vault
 
@@ -61,8 +59,6 @@ services:
       - ft_trans
     build:
       context: vault
-    ports:
-      - "8200:8200"
     env_file:
       - .env
     volumes:

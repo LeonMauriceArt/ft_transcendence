@@ -46,12 +46,6 @@ def logout_view(request):
         user_id = request.session['user_id']
     return redirect('welcome')
 
-# def auth_status(request):
-#      if (request.user.is_authenticated):
-#           return JsonResponse({'authenticated':True, 'username':request.user.username})
-#      else:
-#         return JsonResponse({'authenticated': False})
-
 def login_view(request):
     context = {}
     if request.method == 'POST':
@@ -60,9 +54,6 @@ def login_view(request):
         password = form.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # if UserSession.objects.filter(user=user).exists():
-            #     context['error'] = 'User already logged in.'
-            #     return render(request, 'login.html', context)
             request.session['user_id'] = user.id
             login(request, user)
             return redirect('welcome')
