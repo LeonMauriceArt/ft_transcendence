@@ -17,6 +17,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 	game_manager = game_manager_instance
 	update_lock = None
 
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.game_loop_task = None
+
 	async def connect(self):
 		if not hasattr(self, 'username'):
 			self.username = self.scope['user'].username
@@ -26,14 +30,19 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		if hasattr(self, 'game_room'):
+				await self.cancel_game_loop_task()
 				await self.game_manager.remove_player_from_room(self.player_id, self.game_room)
 				await self.channel_layer.group_discard(self.game_room, self.channel_name)
-				# await self.channel_layer.group_send(
-				# 	self.game_room,
-				# 	{
-				# 		'type': 'player_left',
-				# 		'player': self.position,
-				# 	})
+
+	async def cancel_game_loop_task(self):
+			if self.game_loop_task and not self.game_loop_task.done():
+				self.game_loop_task.cancel()
+				try:
+					await self.game_loop_task # Wait for the task to be cancelled
+				except asyncio.CancelledError:
+					print("Game loop task cancelled")
+				finally:
+					self.game_loop_task = None # Reset the task variable
 
 	async def join_game(self):
 		self.game_room = self.game_manager.find_or_create_game_room(self.player_id)
@@ -68,7 +77,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			)
 			self.game.is_running = True
 			self.game.ball.x_vel = self.game.ball.speed
-			asyncio.create_task(self.game_loop())
+			self.game_loop_task = asyncio.create_task(self.game_loop())
 
 	async def receive(self, text_data):
 		data = json.loads(text_data)

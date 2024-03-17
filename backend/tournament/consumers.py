@@ -31,11 +31,9 @@ class TournamentManager():
         current_room = self.rooms.get(roomId, {})
 
         if current_room and len(current_room.get('players', [])) >= 4:
-            print('ROOM FULL')
             return False
 
         if not current_room:
-            print('CREATION OF THE ROOM')
             current_room = {
                 'n_ready': 0,
                 'state': TournamentState.LOBBY.name,
@@ -47,35 +45,29 @@ class TournamentManager():
             }
             self.rooms[roomId] = current_room
         else:
-            print('ADDING TO THE CURRENT ROOM')
             if player in current_room['players']:
                 return False
             current_room['players'].append(player)
             current_room['aliases'].append(alias)
             self.rooms[roomId] = current_room
 
-        print(f'PLAYER ADDED TO ROOM, ROOM NOW {self.get_printable_room(roomId)}')
         return True
 
     def remove_player_from_room(self, roomId, player, alias):
         current_room = self.rooms.get(roomId, {})
 
         if current_room and player in current_room.get('players', []):
-            print(f'REMOVING PLAYER {player} FROM ROOM {roomId}')
 
             current_room['players'].remove(player)
             current_room['aliases'].remove(alias)
 
             if len(current_room['players']) == 0:
-                print(f'REMOVING ROOM CAUSE NOW EMPTY...')
                 del self.rooms[roomId]
                 return
             elif player == current_room.get('owner'):
                 current_room['owner'] = current_room['players'][0]
 
             self.rooms[roomId] = current_room
-
-            print(f'PLAYER REMOVED FROM ROOM, ROOM NOW => {self.get_printable_room(roomId)}')
 
     def get_room(self, roomId):
         return self.rooms.get(roomId, [])
@@ -94,13 +86,9 @@ class TournamentManager():
         room = self.get_room(roomId)
 
         if room and len(room.get('players', [])) != 4:
-            print('Cannot start tournament , there is not 4 player in the lobby')
             return False
         
-        print('TOURNAMENT WILL START XD')
-
         room['state'] = TournamentState.DEMI_FINALS1.name
-
         return True
     
     def get_players_turn(self, roomId):
@@ -185,13 +173,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 idx = self.tournament_manager.get_player_index(tournament_id, player)
                 if idx > -1:
                     player_state = room['players_state'][idx]
-                    print(f'SALUT {idx} | {player_state} ')
                     if player_state != PlayerState.LOSER.name:
                         room['game_state'].is_running = False
                         self.tournament_manager.remove_room(tournament_id)
                         await self.send_tournament_end("Tournament has ended because a remaining player disconnected :( ")
-                else:
-                    print(f'Player not in the lobby, {player}')
 
         # Leave room group
         await self.channel_layer.group_discard(
@@ -220,8 +205,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 await self.on_player_key_down(data)
             elif data['event'] == 'player_key_up':
                 await self.on_player_key_up(data)
-            else:
-                print('NO SUCH EVENT')
         else:
             print('Missing "event" key in data dictionary')
 
@@ -250,8 +233,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         if room['n_ready'] < 4:
             return
-
-        print('TOURNAMENT STARTING...')
         
         await self.send_tournament_start()
 
@@ -280,7 +261,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         game = self.tournament_manager.get_room(tournament_id)['game_state']
 
-        print(f'KEY UP {data}')
         await game.set_player_movement(data['player'], False, False)
 
     # EMIT EVENTS 

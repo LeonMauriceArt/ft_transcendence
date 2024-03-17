@@ -114,7 +114,6 @@ def profile(request):
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        print('Edit profile view')
         form = ModifyForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
@@ -125,7 +124,6 @@ def edit_profile(request):
         form = ModifyForm(instance=request.user)
 
     if request.is_ajax():
-        print('AJAX request')
         html = render_to_string('edit_profile.html', {'form': form}, request=request)
         return JsonResponse({'html': html})
 
@@ -143,10 +141,8 @@ def send_friend_request(request, user_id):
     target_user = get_object_or_404(UserProfile, id=user_id)
     if request.user != target_user and not Friendship.objects.filter(creator=request.user, friend=target_user).exists() and not Friendship.objects.filter(creator=target_user, friend=request.user).exists():
         Friendship.objects.create(creator=request.user, friend=target_user, status='pending')
-        print('Friend request sent!')
         return JsonResponse({'status': 'success', 'message': 'Friend request sent!'})
     else:
-        print('Cannot send friend request.')
         return JsonResponse({'status': 'error', 'message': 'Cannot send friend request.'})
 
 @login_required
