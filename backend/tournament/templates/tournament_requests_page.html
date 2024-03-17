@@ -5,7 +5,9 @@
 {% block navbar_content %}
 
 <div >
-    TOURNAMENT REQUESTS PAGE
+    <h2>
+        TOURNAMENT REQUESTS PAGE
+    </h2>
      <div class="requests-content">
             <ul>
             {% for invitation in invitations %}
@@ -23,7 +25,7 @@
                     </button>
                 </li>
             {% empty %}
-                <p>No friend request.</p>
+                <p>No tournament request.</p>
             {% endfor %}
         </ul>
     </div>

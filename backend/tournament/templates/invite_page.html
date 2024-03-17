@@ -5,10 +5,12 @@
 {% block navbar_content %}
 
 <div>
-    INVITE FRIEND TO TOURNAMENT
+    <h2>
+        INVITE FRIEND TO TOURNAMENT
+    </h2>
  
     <div class="friend-content">
-        <ul>
+        <ul id="friend-content-ul">
             {% for friend_username, avatar_url in friends %}
             <li>
                 {% if avatar_url %}
