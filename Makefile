@@ -1,7 +1,7 @@
 DOCKER_COMPOSE = ./docker-compose.yml
 MIGRATE_SCRIPT = ./proper_migration.sh
 
-up:all
+up:
 	docker compose -f $(DOCKER_COMPOSE) up --build
 
 build: down
@@ -38,6 +38,4 @@ prune:
 
 re:	down buildnocache
 
-all:
-	bash $(MIGRATE_SCRIPT) &
 

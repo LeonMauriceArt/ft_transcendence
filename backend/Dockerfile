@@ -14,3 +14,4 @@ RUN pip install pillow
 ENV PYTHONPATH /code/vault_db
 
 COPY . /code/
+RUN chmod +x ./start_up.sh

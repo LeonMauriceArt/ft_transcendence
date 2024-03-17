@@ -9,8 +9,7 @@ services:
       context: backend
       dockerfile: Dockerfile
     # Production command
-    command: >
-     sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; daphne -u /usr/src/daphne_sock/daphne.sock -p 8000 -b 0.0.0.0 django_project.asgi:application"
+    command: sh ./start_up.sh
     # # Development command
     # command: >
     #   sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
@@ -23,7 +22,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - vault
+      vault:
+        condition: service_healthy
 
   db:
     container_name: postgres
@@ -73,6 +73,11 @@ services:
     cap_add:
       - IPC_LOCK
     command: /bin/sh /start_up.sh
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   media_volume:
