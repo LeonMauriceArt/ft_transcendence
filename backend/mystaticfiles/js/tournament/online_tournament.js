@@ -204,7 +204,7 @@ const send_tournament_invite = (friend_username) => {
 }
 
 const delete_tournament_request = (tournament_id) => {
-    return fetch('/tournament/api/tournament_requests/',
+    return fetch('/tournament/tournament_requests/',
     {
         method: 'DELETE',
         headers: {
