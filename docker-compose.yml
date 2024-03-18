@@ -8,11 +8,7 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
-    # Production command
     command: sh ./start_up.sh
-    # # Development command
-    # command: >
-    #   sh -c "for i in $(seq 1 10); do echo 'Waiting for all containers to be done...'; sleep 1; done; python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/code
       - daphne-sock:/usr/src/daphne_sock
@@ -34,6 +30,11 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     container_name: nginx
@@ -45,7 +46,8 @@ services:
     ports:
      - "8433:433"
     depends_on:
-     - db
+      vault:
+        condition: service_healthy
     volumes:
      - daphne-sock:/usr/src/daphne_sock
      - static_volume:/code/mystaticfiles:ro
@@ -65,7 +67,8 @@ services:
       - vault_data_web:/vault/data/skey
       - vault_data:/vault/data
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     cap_add:
       - IPC_LOCK
     command: /bin/sh /start_up.sh
