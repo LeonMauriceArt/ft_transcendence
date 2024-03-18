@@ -294,7 +294,7 @@ function AIplayer1(player_two, projectedPosition)
     } else {
         lastAImove = 1;
     }
-	predictPaddlePosition = null
+	predictedPaddlePosition = null
 }
 
 let predictedPaddlePosition = null

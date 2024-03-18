@@ -142,6 +142,8 @@ function newSocket()
 			game_running = false;
 			display_winner(data.winner)
 			wss.close()
+			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
 		}
 	};
 	wss.onclose = () =>
@@ -303,6 +305,8 @@ function handleKeyUp(event) {
 let g_pressed = false;
 
 const t_handle_key_down = (event) => {
+	if (!g_socket)
+		return
 	if (!game_running && (event.code != 'KeyW' && event.code != 'KeyS'))
 		return
 	if (g_pressed)
@@ -316,6 +320,8 @@ const t_handle_key_down = (event) => {
 }
 
 const t_handle_key_up = (event) => {
+	if (!g_socket)
+		return
 	if (game_running && (event.code == 'KeyW' || event.code == 'KeyS'))
 	{
 		g_pressed = false;
@@ -500,6 +506,11 @@ const on_game_state = (arg) => {
 const on_game_end = (arg) => {
 	console.log('on_game_end', arg)
 	display_t_winner(arg.winner, arg.state)
+	if (position)
+	{
+		window.removeEventListener('keydown', t_handle_key_down)
+		window.removeEventListener('keyup', t_handle_key_up)
+	}
 	game_running = false;
 }
 

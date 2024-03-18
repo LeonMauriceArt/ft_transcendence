@@ -73,7 +73,8 @@ class TournamentManager():
         return self.rooms.get(roomId, [])
     
     def remove_room(self, roomId):
-        del self.rooms[roomId]
+        if self.get_room(roomId):
+            del self.rooms[roomId]
 
     def get_printable_room(self, roomId):
         room = deepcopy(self.get_room(roomId))
@@ -94,7 +95,8 @@ class TournamentManager():
     def get_players_turn(self, roomId):
         players = []
         room = self.get_room(roomId)
-
+        if not room:
+            return 
         if (room['state'] == TournamentState.DEMI_FINALS1.name):
             players.append(room['aliases'][0])
             players.append(room['aliases'][1])
