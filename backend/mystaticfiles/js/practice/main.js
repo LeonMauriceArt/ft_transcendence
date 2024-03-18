@@ -239,7 +239,6 @@ function farestPointFromOpponent(oppenentPosition){
 function newVelToReachPoint(farestPointFromOpponent, projectedPosition) {
 	let time = constants.GAME_AREA_WIDTH / constants.BALL_SPEED
 	let new_y_vel = (farestPointFromOpponent - projectedPosition.y) / time
-	console.log("new_y_vel", new_y_vel)
 	return new_y_vel
 }
 
@@ -294,7 +293,6 @@ function AIplayer1(player_two, projectedPosition)
     } else {
         lastAImove = 1;
     }
-	predictedPaddlePosition = null
 }
 
 let predictedPaddlePosition = null

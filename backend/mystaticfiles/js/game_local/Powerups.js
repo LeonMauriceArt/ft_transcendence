@@ -98,13 +98,11 @@ function handle_power_collision(power, player_one, player_two, ball)
 	{
 		if (ball.color == constants.PLAYER_1_COLOR && player_one.powerups.length != 1)
 		{
-			console.log("adding power to player one")
 			player_one.add_power(power.type)
 			return 1;
 		}
 		else if (ball.color == constants.PLAYER_2_COLOR && player_two.powerups.length != 1)
 		{
-			console.log("adding power to player two")
 			player_two.add_power(power.type)
 			return 1;
 		}

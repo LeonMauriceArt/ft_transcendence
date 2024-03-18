@@ -49,7 +49,6 @@ export function startTournamentOnline()
 	if (firstLaunch)
 	{
 		firstLaunch = false
-		console.log('Initiating game for first time.')
 		initDisplay()
 		initArena()
 	}
@@ -94,7 +93,6 @@ export function start()
 	}
 	else
 	{
-		console.log('Looking for game after ending of previous match.')
 		wss.close()
 		resetArena()
 		newSocket()
@@ -117,14 +115,11 @@ function newSocket()
 		if (data.type === 'set_position')
 		{
 			position = data.value;
-			console.log('I am at position', position);
 		}
 		if (data.type === 'game_start')
 		{
-			console.log(searchButton);
 			searchButton.disabled = true;
 			searchButton.style.display = 'none';
-			console.log('Starting game . . .');
 			infoElement.innerHTML = '<span style="color: cyan;">' + data.player_one_name + '</span> VS <span style="color: red;">' + data.player_two_name + '</span>';
 			game_running = true;
 			ball.get_update(0, 0, 1, 0, 0xffffff)
@@ -136,7 +131,6 @@ function newSocket()
 		}
 		if (data.type === 'game_end')
 		{
-			console.log('someone won !')
 			searchButton.disabled = false;
 			searchButton.style.display = 'inline-block';
 			game_running = false;
@@ -461,14 +455,12 @@ function display_t_winner(winner, state)
 
 const on_set_position = (arg) => {
 	resetArena()
-	console.log('on_set_position', arg)
 	position = null
 	if (arg.players[0] === g_alias)
 		position = 'player_one'
 	if (arg.players[1] === g_alias)
 		position = 'player_two'
 
-	console.log("MY POSITION : " + position)
 
     infoElement.innerHTML = 'BE READY, ' + arg.state + ' WILL START IN 5'
 	playerField.innerHTML = '<span style="color: cyan;">' + arg.players[0] + '</span> VS <span style="color: red;">' + arg.players[1] + '</span>';
@@ -489,7 +481,6 @@ const on_set_position = (arg) => {
 }
 
 const on_game_start = () => {
-	console.log('on_game_start')
 	game_running = true;
 	ball.get_update(0, 0, 1, 0, 0xffffff)
 	if (position)
@@ -504,7 +495,6 @@ const on_game_state = (arg) => {
 }
 
 const on_game_end = (arg) => {
-	console.log('on_game_end', arg)
 	display_t_winner(arg.winner, arg.state)
 	if (position)
 	{

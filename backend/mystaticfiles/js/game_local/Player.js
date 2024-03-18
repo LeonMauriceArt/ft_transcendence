@@ -46,16 +46,12 @@ export class Player
 	}
 	add_power(powertype)
 	{
-		console.log("Adding powerup", powertype)
 		this.powerups.push(powertype);
-		console.log(this.powerups.length)
 	}
 	use_power(player_one, player_two, ball, scene, powermanager)
 	{
-		console.log("Cannot use power, dont have any...")
 		if (this.powerups.length != 0)
 		{
-			console.log("Using power !")
 			powermanager.handle_usage(this.powerups[0].type, player_one, player_two, this, ball, scene)
 			this.powerups.pop()
 		}

@@ -61,7 +61,6 @@ const on_message = (message) => {
 }
 
 const on_players_update = (arg) => {
-    console.log('on_players_update', arg)
     update_lobby_ui(arg)
 }
 
@@ -70,7 +69,6 @@ const on_load_lobby = (arg) => {
 }
 
 const on_load_playground = (arg) => {
-    console.log('on_load_playground')
 
     load_playground().then(() => {
         g_socket.send(JSON.stringify({ event: 'tournament_start' }))
@@ -78,12 +76,10 @@ const on_load_playground = (arg) => {
 }
 
 const on_tournament_start = (arg) => {
-    console.log('on_tournament_start')
     window.startTournamentOnline()
 }
 
 const on_tournament_end = (arg) => {
-    console.log('on tournament end')
     alert(arg)
     g_socket.close()
 }
@@ -137,7 +133,6 @@ const set_g_username = () => {
         }
     }).then(response => response.json())
     .then((data) => {
-        console.log('set_user', data)
         g_username = data.username
         g_alias = data.alias
     }).catch(console.error)
@@ -231,6 +226,5 @@ const deny_tournament_request = (tournament_id) => {
 }
 
 const start_online_tournament = () => {
-    console.log('START TOURNAMENT...')
     g_socket.send(JSON.stringify({ event: 'load_playground' }))
 }

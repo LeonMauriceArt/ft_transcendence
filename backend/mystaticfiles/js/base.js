@@ -152,16 +152,13 @@ function updateNavbar()
 }
 
 window.addEventListener('load', function() {
-    console.log('SETTING PAGERELOAD');
     sessionStorage.setItem('pageReload', 'true');
 });
 
 window.addEventListener('unload', function(event) {
     if (sessionStorage.getItem('pageReload') === 'true') {
-        console.log('Page is being refreshed');
         sessionStorage.removeItem('pageReload');
     } else {
-        console.log('Browser is being closed');
         logoutUser();
         updateNavbar();
     }

@@ -38,15 +38,12 @@ function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        console.log('All Cookies:', cookies); // Log all cookies
 
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            console.log('Current Cookie:', cookie); // Log current cookie
 
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                console.log('Found Cookie Value:', cookieValue); // Log found cookie value
                 break;
             }
         }
